@@ -5,11 +5,221 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "@whop/react/styles.css" layer(frosted_ui);
 
-/* biome-ignore lint/suspicious/noUnknownAtRules: this rule is imported from whop */
-@config '../tailwind.config.ts';
+@layer base {
+	:root {
+		color-scheme: light;
+		--white: 255 255 255;
+		--black: 0 0 0;
+		--sage-50: 246 248 245;
+		--sage-100: 233 237 229;
+		--sage-200: 212 220 203;
+		--sage-300: 181 195 164;
+		--sage-400: 151 168 125;
+		--sage-500: 139 158 125;
+		--sage-600: 109 126 95;
+		--sage-700: 85 100 73;
+		--sage-800: 68 80 58;
+		--sage-900: 57 67 49;
+		--gold-50: 253 251 243;
+		--gold-100: 250 245 225;
+		--gold-200: 245 234 194;
+		--gold-300: 237 216 151;
+		--gold-400: 212 184 106;
+		--gold-500: 196 167 71;
+		--gold-600: 184 146 56;
+		--gold-700: 153 119 48;
+		--gold-800: 125 95 45;
+		--gold-900: 104 79 40;
+		--cream-50: 254 253 251;
+		--cream-100: 245 243 237;
+		--cream-200: 235 231 221;
+		--cream-300: 221 215 200;
+		--cream-400: 203 194 172;
+		--cream-500: 181 168 144;
+		--earth-50: 250 250 249;
+		--earth-100: 245 245 244;
+		--earth-200: 231 229 228;
+		--earth-300: 214 211 209;
+		--earth-500: 120 113 108;
+		--earth-700: 68 64 60;
+		--earth-900: 58 58 58;
+	}
 
-body {
-	background: var(--background);
-	color: var(--foreground);
-	font-family: Arial, Helvetica, sans-serif;
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
+		min-height: 100vh;
+		background-color: rgb(var(--cream-50));
+		background-image:
+			radial-gradient(circle at 15% 20%, rgb(var(--sage-500) / 0.15), transparent 45%),
+			radial-gradient(circle at 80% 0%, rgb(var(--gold-500) / 0.12), transparent 40%);
+		color: rgb(var(--earth-900));
+		font-family: var(--font-geist-sans), "Playfair Display", "Inter", sans-serif;
+		letter-spacing: 0.01em;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	::selection {
+		background: rgb(var(--gold-500) / 0.35);
+		color: rgb(var(--earth-900));
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			color-scheme: dark;
+			--sage-50: 17 23 20;
+			--sage-100: 23 33 29;
+			--sage-200: 33 48 41;
+			--sage-300: 45 64 54;
+			--sage-400: 63 86 72;
+			--sage-500: 83 109 92;
+			--sage-600: 104 134 114;
+			--sage-700: 125 156 135;
+			--sage-800: 160 183 165;
+			--sage-900: 196 211 198;
+			--gold-50: 31 24 12;
+			--gold-100: 49 38 18;
+			--gold-200: 74 57 23;
+			--gold-300: 110 84 28;
+			--gold-400: 155 119 36;
+			--gold-500: 198 152 57;
+			--gold-600: 220 177 90;
+			--gold-700: 233 198 122;
+			--gold-800: 241 218 160;
+			--gold-900: 248 235 200;
+			--cream-50: 14 16 18;
+			--cream-100: 20 23 27;
+			--cream-200: 28 32 38;
+			--cream-300: 38 44 52;
+			--cream-400: 52 59 68;
+			--cream-500: 70 78 90;
+			--earth-50: 28 26 23;
+			--earth-100: 49 46 41;
+			--earth-200: 74 70 63;
+			--earth-300: 108 102 92;
+			--earth-500: 170 161 147;
+			--earth-700: 214 209 199;
+			--earth-900: 244 242 236;
+		}
+
+		body {
+			background-color: rgb(var(--cream-50));
+			background-image:
+				radial-gradient(circle at 18% 12%, rgb(var(--sage-500) / 0.25), transparent 45%),
+				radial-gradient(circle at 85% 0%, rgb(var(--gold-500) / 0.2), transparent 40%);
+			color: rgb(var(--earth-900));
+		}
+
+		::selection {
+			background: rgb(var(--gold-600) / 0.5);
+			color: rgb(var(--earth-50));
+		}
+	}
+
+	:root.dark,
+	:root[data-theme="dark"],
+	.dark,
+	[data-theme="dark"] {
+		color-scheme: dark;
+		--sage-50: 17 23 20;
+		--sage-100: 23 33 29;
+		--sage-200: 33 48 41;
+		--sage-300: 45 64 54;
+		--sage-400: 63 86 72;
+		--sage-500: 83 109 92;
+		--sage-600: 104 134 114;
+		--sage-700: 125 156 135;
+		--sage-800: 160 183 165;
+		--sage-900: 196 211 198;
+		--gold-50: 31 24 12;
+		--gold-100: 49 38 18;
+		--gold-200: 74 57 23;
+		--gold-300: 110 84 28;
+		--gold-400: 155 119 36;
+		--gold-500: 198 152 57;
+		--gold-600: 220 177 90;
+		--gold-700: 233 198 122;
+		--gold-800: 241 218 160;
+		--gold-900: 248 235 200;
+		--cream-50: 14 16 18;
+		--cream-100: 20 23 27;
+		--cream-200: 28 32 38;
+		--cream-300: 38 44 52;
+		--cream-400: 52 59 68;
+		--cream-500: 70 78 90;
+		--earth-50: 28 26 23;
+		--earth-100: 49 46 41;
+		--earth-200: 74 70 63;
+		--earth-300: 108 102 92;
+		--earth-500: 170 161 147;
+		--earth-700: 214 209 199;
+		--earth-900: 244 242 236;
+	}
+
+	body.dark,
+	.dark body,
+	[data-theme="dark"] body,
+	:root.dark body,
+	:root[data-theme="dark"] body {
+		background-color: rgb(var(--cream-50));
+		background-image:
+			radial-gradient(circle at 18% 12%, rgb(var(--sage-500) / 0.25), transparent 45%),
+			radial-gradient(circle at 85% 0%, rgb(var(--gold-500) / 0.2), transparent 40%);
+		color: rgb(var(--earth-900));
+	}
+
+	.dark ::selection,
+	[data-theme="dark"] ::selection,
+	:root.dark ::selection,
+	:root[data-theme="dark"] ::selection {
+		background: rgb(var(--gold-600) / 0.5);
+		color: rgb(var(--earth-50));
+	}
+}
+
+@layer utilities {
+	/* Hide scrollbar but keep functionality */
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Safe area for mobile devices with notches */
+	.safe-area-inset-bottom {
+		padding-bottom: env(safe-area-inset-bottom, 0px);
+	}
+
+	.safe-area-inset-top {
+		padding-top: env(safe-area-inset-top, 0px);
+	}
+
+	/* Smooth scrolling for better UX */
+	.smooth-scroll {
+		scroll-behavior: smooth;
+	}
+
+	/* Touch-friendly tap highlight */
+	.tap-highlight-none {
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Backdrop blur for glassmorphism */
+	.backdrop-glass {
+		backdrop-filter: blur(12px) saturate(180%);
+		background-color: rgba(255, 255, 255, 0.7);
+	}
+
+	.dark .backdrop-glass {
+		background-color: rgba(20, 23, 27, 0.7);
+	}
 }
