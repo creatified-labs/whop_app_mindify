@@ -4,7 +4,13 @@ import { useEffect, useMemo } from "react";
 import { useAppStore, type NavSection } from "@/lib/stores/appStore";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import type { UserProgress } from "@/lib/types";
+import { Flame } from "lucide-react";
 import { NoFavorites, NoActivity, NoPrograms } from "@/components/ui/EmptyState";
+import { MeditationGrid } from "@/components/meditation/MeditationGrid";
+import { HypnosisStack } from "@/components/hypnosis/HypnosisStack";
+import { ProgramsLibrary } from "@/components/programs/ProgramsLibrary";
+import { QuickResetsList } from "@/components/quick-resets/QuickResetsList";
+import { KnowledgeHub } from "@/components/knowledge/KnowledgeHub";
 
 type SessionType = "meditation" | "hypnosis" | "program" | "reset";
 
@@ -71,23 +77,19 @@ export function ExperienceContent(props: DashboardViewProps) {
 		return <DashboardView {...props} />;
 	}
 
+	if (navSelection === "meditations") return <MeditationGrid />;
+	if (navSelection === "hypnosis") return <HypnosisStack />;
+	if (navSelection === "programs") return <ProgramsLibrary />;
+	if (navSelection === "quick-resets") return <QuickResetsList />;
+	if (navSelection === "knowledge-hub") return <KnowledgeHub />;
+
 	return (
 		<div className={`${glassCard} min-h-[420px]`}>
 			<p className="text-xs uppercase tracking-[0.4em] text-earth-500">
 				{navSelection.replace("-", " ")}
 			</p>
 			<h2 className="mt-6 text-4xl font-serif font-semibold text-earth-900">
-				{navSelection === "meditations"
-					? "Mindful sound libraries"
-					: navSelection === "hypnosis"
-						? "Somatic reprogramming"
-						: navSelection === "programs"
-							? "Immersive residencies"
-							: navSelection === "quick-resets"
-								? "Rapid nervous system resets"
-								: navSelection === "knowledge-hub"
-									? "Knowledge hub soon"
-									: "Community drops coming soon"}
+				Community drops coming soon
 			</h2>
 			<p className="mt-4 max-w-2xl text-base leading-relaxed text-earth-600">
 				This section unlocks deeper once your team starts a ritual. Stay tuned—Mindify is
@@ -188,7 +190,7 @@ export function DashboardView({
 				</div>
 				<div className="space-y-4 rounded-3xl border border-sage-100 bg-cream-50 p-6 dark:border-white/10 dark:bg-[#111318]">
 					<p className="text-xs uppercase tracking-[0.4em] text-earth-500 dark:text-[#AFA79B]">Daily streak</p>
-					<p className="text-5xl font-semibold text-earth-900 dark:text-[#F4EFE6]">🔥 {streakDays}</p>
+					<p className="flex items-center gap-2 text-5xl font-semibold text-earth-900 dark:text-[#F4EFE6]"><Flame className="h-6 w-6" /> {streakDays}</p>
 					<p className="text-sm text-earth-600 dark:text-[#CFC7BB]">
 						Keep the chain going to unlock deeper labs and real-time biofeedback rituals.
 					</p>

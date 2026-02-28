@@ -34,7 +34,7 @@ function StatCard({
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.4, delay: index * 0.1 }}
-			className="group relative overflow-hidden rounded-2xl border border-sage-200/50 bg-gradient-to-br from-cream-50 to-cream-100 p-6 shadow-sm transition-all hover:shadow-md dark:border-white/10 dark:from-[#1A1D23] dark:to-[#14171C]"
+			className="group relative overflow-hidden rounded-2xl border border-sage-200/50 bg-gradient-to-br from-white to-cream-100 p-6 shadow-soft transition-all hover:shadow-medium dark:border-white/10 dark:from-[#1A1D23] dark:to-[#14171C]"
 		>
 			<div className="absolute inset-0 bg-gradient-to-br from-sage-400/0 via-sage-400/0 to-sage-400/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-sage-300/0 dark:via-sage-300/0 dark:to-sage-300/5" />
 

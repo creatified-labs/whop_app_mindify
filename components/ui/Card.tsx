@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Sparkles, Calendar, Target } from "lucide-react";
 
 type Session = {
 	id: string;
@@ -37,7 +38,7 @@ export function SessionCard({ session }: { session: Session }) {
 				</div>
 				{session.isPremium && (
 					<div className="absolute left-3 top-3 rounded-full bg-gold-500 px-3 py-1 text-xs font-semibold text-white">
-						✨ Premium
+						<Sparkles className="h-3 w-3 inline" /> Premium
 					</div>
 				)}
 				<div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
@@ -64,7 +65,7 @@ export function SessionCard({ session }: { session: Session }) {
 }
 
 type StatCardProps = {
-	icon: string;
+	icon: React.ReactNode;
 	label: string;
 	value: string | number;
 	trend?: string;
@@ -74,7 +75,7 @@ export function StatCard({ icon, label, value, trend }: StatCardProps) {
 	return (
 		<div className="rounded-2xl bg-cream-50 p-6 shadow-card transition-shadow hover:shadow-hover dark:bg-[#13151A]">
 			<div className="mb-4 flex items-start justify-between">
-				<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-card text-2xl">
+				<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-card">
 					{icon}
 				</div>
 				{trend && (
@@ -98,8 +99,8 @@ export function ProgramCard({ program }: { program: Program }) {
 						<h3 className="mb-2 text-2xl font-bold">{program.title}</h3>
 						<p className="mb-3 text-sm text-white/90">{program.description}</p>
 						<div className="flex items-center gap-4 text-sm">
-							<span>📅 {program.duration}</span>
-							<span>🎯 {program.days.length} sessions</span>
+							<span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {program.duration}</span>
+							<span className="flex items-center gap-1"><Target className="h-4 w-4" /> {program.days.length} sessions</span>
 						</div>
 					</div>
 				</div>

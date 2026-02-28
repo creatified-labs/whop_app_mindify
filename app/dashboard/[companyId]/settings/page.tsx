@@ -1,0 +1,401 @@
+"use client";
+
+import { useState } from "react";
+import { ArrowLeft, Save, Globe, DollarSign, Bell, Shield } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+
+interface SettingsSection {
+	id: string;
+	label: string;
+	icon: typeof Globe;
+}
+
+const sections: SettingsSection[] = [
+	{ id: "general", label: "General", icon: Globe },
+	{ id: "pricing", label: "Pricing & Access", icon: DollarSign },
+	{ id: "notifications", label: "Notifications", icon: Bell },
+	{ id: "advanced", label: "Advanced", icon: Shield },
+];
+
+function SectionCard({
+	title,
+	description,
+	children,
+}: {
+	title: string;
+	description?: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<div className="rounded-2xl border border-[rgb(var(--sage-200)/0.5)] bg-white p-6 shadow-soft dark:border-white/10 dark:bg-[#1A1D23]">
+			<h3 className="text-lg font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+				{title}
+			</h3>
+			{description && (
+				<p className="mt-1 text-sm text-[rgb(var(--earth-500))] dark:text-[#B5AFA3]">
+					{description}
+				</p>
+			)}
+			<div className="mt-5 space-y-4">{children}</div>
+		</div>
+	);
+}
+
+function SettingsInput({
+	label,
+	value,
+	onChange,
+	type = "text",
+	placeholder,
+	helpText,
+}: {
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+	type?: string;
+	placeholder?: string;
+	helpText?: string;
+}) {
+	return (
+		<div>
+			<label className="mb-1.5 block text-sm font-medium text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
+				{label}
+			</label>
+			<input
+				type={type}
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				placeholder={placeholder}
+				className="w-full rounded-lg border border-[rgb(var(--sage-200))] bg-[rgb(var(--cream-50))] px-3 py-2 text-sm text-[rgb(var(--earth-900))] placeholder-[rgb(var(--earth-400))] focus:border-[rgb(var(--sage-400))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--sage-400)/0.2)] dark:border-white/10 dark:bg-[#14171C] dark:text-[#F4EFE6] dark:placeholder-[#B5AFA3]"
+			/>
+			{helpText && (
+				<p className="mt-1 text-xs text-[rgb(var(--earth-500))] dark:text-[#B5AFA3]">
+					{helpText}
+				</p>
+			)}
+		</div>
+	);
+}
+
+function SettingsToggle({
+	label,
+	description,
+	checked,
+	onChange,
+}: {
+	label: string;
+	description?: string;
+	checked: boolean;
+	onChange: (checked: boolean) => void;
+}) {
+	return (
+		<div className="flex items-center justify-between gap-4">
+			<div>
+				<p className="text-sm font-medium text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+					{label}
+				</p>
+				{description && (
+					<p className="text-xs text-[rgb(var(--earth-500))] dark:text-[#B5AFA3]">
+						{description}
+					</p>
+				)}
+			</div>
+			<button
+				type="button"
+				onClick={() => onChange(!checked)}
+				className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[rgb(var(--sage-400))] focus:ring-offset-2 ${
+					checked
+						? "bg-[rgb(var(--sage-600))]"
+						: "bg-[rgb(var(--earth-200))] dark:bg-[#2A2F37]"
+				}`}
+			>
+				<span
+					className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+						checked ? "translate-x-5" : "translate-x-0"
+					}`}
+				/>
+			</button>
+		</div>
+	);
+}
+
+export default function SettingsPage() {
+	const params = useParams();
+	const companyId = params.companyId as string;
+	const [activeSection, setActiveSection] = useState("general");
+	const [isSaving, setIsSaving] = useState(false);
+	const [saved, setSaved] = useState(false);
+
+	// General settings
+	const [appName, setAppName] = useState("Mindify");
+	const [appTagline, setAppTagline] = useState(
+		"Transform your mind, one session at a time"
+	);
+	const [supportEmail, setSupportEmail] = useState("");
+	const [welcomeMessage, setWelcomeMessage] = useState(
+		"Welcome to your mindfulness journey"
+	);
+
+	// Pricing settings
+	const [monthlyPrice, setMonthlyPrice] = useState("14.99");
+	const [annualPrice, setAnnualPrice] = useState("149.99");
+	const [freeMeditationLimit, setFreeMeditationLimit] = useState("5");
+	const [freeHypnosisLimit, setFreeHypnosisLimit] = useState("2");
+	const [freeProgramLimit, setFreeProgramLimit] = useState("1");
+
+	// Notification settings
+	const [emailNotifications, setEmailNotifications] = useState(true);
+	const [streakReminders, setStreakReminders] = useState(true);
+	const [weeklyDigest, setWeeklyDigest] = useState(false);
+	const [newContentAlerts, setNewContentAlerts] = useState(true);
+
+	// Advanced settings
+	const [maintenanceMode, setMaintenanceMode] = useState(false);
+	const [analyticsTracking, setAnalyticsTracking] = useState(true);
+	const [debugMode, setDebugMode] = useState(false);
+
+	const handleSave = async () => {
+		setIsSaving(true);
+		// Simulate save — in production this would call an API
+		await new Promise((resolve) => setTimeout(resolve, 800));
+		setIsSaving(false);
+		setSaved(true);
+		setTimeout(() => setSaved(false), 2000);
+	};
+
+	return (
+		<div className="min-h-screen bg-[rgb(var(--cream-50))] dark:bg-[#0E1012]">
+			<div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+				{/* Header */}
+				<div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+					<div className="flex items-center gap-4">
+						<Link
+							href={`/dashboard/${companyId}`}
+							className="flex h-10 w-10 items-center justify-center rounded-xl border border-[rgb(var(--sage-200))] bg-white text-[rgb(var(--earth-600))] transition-colors hover:bg-[rgb(var(--cream-100))] dark:border-white/10 dark:bg-[#14171C] dark:text-[#CFC7BB] dark:hover:bg-[#1E2228]"
+						>
+							<ArrowLeft className="h-5 w-5" />
+						</Link>
+						<div>
+							<h1 className="text-2xl font-bold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+								Settings
+							</h1>
+							<p className="text-sm text-[rgb(var(--earth-500))] dark:text-[#B5AFA3]">
+								Configure your Mindify app
+							</p>
+						</div>
+					</div>
+					<button
+						onClick={handleSave}
+						disabled={isSaving}
+						className="flex items-center gap-2 rounded-xl bg-[rgb(var(--sage-600))] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[rgb(var(--sage-700))] disabled:opacity-50"
+					>
+						<Save className="h-4 w-4" />
+						{isSaving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
+					</button>
+				</div>
+
+				<div className="flex flex-col gap-6 lg:flex-row">
+					{/* Sidebar nav */}
+					<nav className="flex gap-2 lg:w-56 lg:shrink-0 lg:flex-col">
+						{sections.map((section) => {
+							const Icon = section.icon;
+							const isActive = activeSection === section.id;
+							return (
+								<button
+									key={section.id}
+									type="button"
+									onClick={() => setActiveSection(section.id)}
+									className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
+										isActive
+											? "bg-[rgb(var(--sage-600))] text-white shadow-sm"
+											: "text-[rgb(var(--earth-700))] hover:bg-white hover:shadow-soft dark:text-[#D9D3C8] dark:hover:bg-[#1A1D23]"
+									}`}
+								>
+									<Icon className="h-4 w-4" />
+									{section.label}
+								</button>
+							);
+						})}
+					</nav>
+
+					{/* Content */}
+					<div className="flex-1 space-y-6">
+						{activeSection === "general" && (
+							<>
+								<SectionCard
+									title="App Identity"
+									description="Customize how your app appears to users"
+								>
+									<SettingsInput
+										label="App Name"
+										value={appName}
+										onChange={setAppName}
+										placeholder="Mindify"
+									/>
+									<SettingsInput
+										label="Tagline"
+										value={appTagline}
+										onChange={setAppTagline}
+										placeholder="Your mindfulness journey starts here"
+									/>
+									<SettingsInput
+										label="Welcome Message"
+										value={welcomeMessage}
+										onChange={setWelcomeMessage}
+										placeholder="Shown on the user dashboard"
+									/>
+								</SectionCard>
+								<SectionCard
+									title="Contact"
+									description="Support and communication settings"
+								>
+									<SettingsInput
+										label="Support Email"
+										value={supportEmail}
+										onChange={setSupportEmail}
+										type="email"
+										placeholder="support@example.com"
+										helpText="Users will see this for support inquiries"
+									/>
+								</SectionCard>
+							</>
+						)}
+
+						{activeSection === "pricing" && (
+							<>
+								<SectionCard
+									title="Pricing Tiers"
+									description="Configure pricing for premium access. Changes here are for display only — update actual billing in Whop."
+								>
+									<div className="grid grid-cols-2 gap-4">
+										<SettingsInput
+											label="Monthly Price ($)"
+											value={monthlyPrice}
+											onChange={setMonthlyPrice}
+											type="number"
+											placeholder="14.99"
+										/>
+										<SettingsInput
+											label="Annual Price ($)"
+											value={annualPrice}
+											onChange={setAnnualPrice}
+											type="number"
+											placeholder="149.99"
+										/>
+									</div>
+								</SectionCard>
+								<SectionCard
+									title="Free Tier Limits"
+									description="How much content free users can access"
+								>
+									<div className="grid grid-cols-3 gap-4">
+										<SettingsInput
+											label="Meditations"
+											value={freeMeditationLimit}
+											onChange={setFreeMeditationLimit}
+											type="number"
+										/>
+										<SettingsInput
+											label="Hypnosis"
+											value={freeHypnosisLimit}
+											onChange={setFreeHypnosisLimit}
+											type="number"
+										/>
+										<SettingsInput
+											label="Programs"
+											value={freeProgramLimit}
+											onChange={setFreeProgramLimit}
+											type="number"
+										/>
+									</div>
+								</SectionCard>
+							</>
+						)}
+
+						{activeSection === "notifications" && (
+							<SectionCard
+								title="User Notifications"
+								description="Control what notifications are sent to your users"
+							>
+								<SettingsToggle
+									label="Email Notifications"
+									description="Send transactional emails (welcome, password reset, etc.)"
+									checked={emailNotifications}
+									onChange={setEmailNotifications}
+								/>
+								<SettingsToggle
+									label="Streak Reminders"
+									description="Nudge users when they're about to lose their streak"
+									checked={streakReminders}
+									onChange={setStreakReminders}
+								/>
+								<SettingsToggle
+									label="Weekly Digest"
+									description="Send a weekly summary of activity and recommendations"
+									checked={weeklyDigest}
+									onChange={setWeeklyDigest}
+								/>
+								<SettingsToggle
+									label="New Content Alerts"
+									description="Notify users when new content is published"
+									checked={newContentAlerts}
+									onChange={setNewContentAlerts}
+								/>
+							</SectionCard>
+						)}
+
+						{activeSection === "advanced" && (
+							<>
+								<SectionCard
+									title="App Behavior"
+									description="Advanced settings for your app"
+								>
+									<SettingsToggle
+										label="Maintenance Mode"
+										description="Show a maintenance page to all users. Admins can still access the dashboard."
+										checked={maintenanceMode}
+										onChange={setMaintenanceMode}
+									/>
+									<SettingsToggle
+										label="Analytics Tracking"
+										description="Track user activity and session metrics"
+										checked={analyticsTracking}
+										onChange={setAnalyticsTracking}
+									/>
+									<SettingsToggle
+										label="Debug Mode"
+										description="Show additional logging in the browser console"
+										checked={debugMode}
+										onChange={setDebugMode}
+									/>
+								</SectionCard>
+								<SectionCard
+									title="Danger Zone"
+									description="Irreversible actions"
+								>
+									<div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/30 dark:bg-red-900/10">
+										<div>
+											<p className="text-sm font-medium text-red-800 dark:text-red-300">
+												Reset All Content
+											</p>
+											<p className="text-xs text-red-600 dark:text-red-400">
+												This will delete all custom content and restore defaults.
+											</p>
+										</div>
+										<button
+											type="button"
+											className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+										>
+											Reset
+										</button>
+									</div>
+								</SectionCard>
+							</>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}

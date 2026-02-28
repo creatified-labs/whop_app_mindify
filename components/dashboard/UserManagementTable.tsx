@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Download, ChevronDown } from "lucide-react";
+import { Search, Filter, Download, ChevronDown, Flame } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface UserData {
@@ -52,7 +52,7 @@ export default function UserManagementTable({ users }: UserManagementTableProps)
 		});
 
 	return (
-		<div className="rounded-2xl border border-sage-200/50 bg-cream-50 p-6 dark:border-white/10 dark:bg-[#1A1D23]">
+		<div className="rounded-2xl border border-sage-200/50 bg-white p-6 shadow-soft dark:border-white/10 dark:bg-[#1A1D23]">
 			{/* Header */}
 			<div className="mb-6 flex flex-wrap items-center justify-between gap-4">
 				<h2 className="text-xl font-semibold text-earth-900 dark:text-[#F4EFE6]">
@@ -168,7 +168,7 @@ export default function UserManagementTable({ users }: UserManagementTableProps)
 								</td>
 								<td className="py-4 text-right">
 									<span className="inline-flex items-center gap-1 text-earth-900 dark:text-[#F4EFE6]">
-										{user.streak > 0 && "🔥"}
+										{user.streak > 0 && <Flame className="h-4 w-4 inline" />}
 										{user.streak}
 									</span>
 								</td>

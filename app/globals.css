@@ -3,7 +3,7 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
-@import "@whop/react/styles.css" layer(frosted_ui);
+/* @import "@whop/react/styles.css" layer(frosted_ui); — uncomment when @whop/react ships styles.css */
 
 @layer base {
 	:root {
@@ -40,7 +40,9 @@
 		--earth-100: 245 245 244;
 		--earth-200: 231 229 228;
 		--earth-300: 214 211 209;
+		--earth-400: 168 162 158;
 		--earth-500: 120 113 108;
+		--earth-600: 94 89 84;
 		--earth-700: 68 64 60;
 		--earth-900: 58 58 58;
 	}
@@ -103,7 +105,9 @@
 			--earth-100: 49 46 41;
 			--earth-200: 74 70 63;
 			--earth-300: 108 102 92;
+			--earth-400: 139 132 120;
 			--earth-500: 170 161 147;
+			--earth-600: 192 185 173;
 			--earth-700: 214 209 199;
 			--earth-900: 244 242 236;
 		}
@@ -157,7 +161,9 @@
 		--earth-100: 49 46 41;
 		--earth-200: 74 70 63;
 		--earth-300: 108 102 92;
+		--earth-400: 139 132 120;
 		--earth-500: 170 161 147;
+		--earth-600: 192 185 173;
 		--earth-700: 214 209 199;
 		--earth-900: 244 242 236;
 	}

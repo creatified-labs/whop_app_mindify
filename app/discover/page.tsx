@@ -1,3 +1,5 @@
+import { Lightbulb } from "lucide-react";
+
 export default function DiscoverPage() {
 	return (
 		<div className="min-h-screen bg-gradient-zen text-earth-900 dark:bg-[#0E1012] dark:text-[#F4EFE6]">
@@ -18,7 +20,7 @@ export default function DiscoverPage() {
 						when people install your app.
 					</p>
 					<p className="text-sm text-earth-500 max-w-2xl mx-auto dark:text-[#AFA79B]">
-						💡 <strong>Tip:</strong> Clearly explain your app's value
+						<Lightbulb className="h-4 w-4 inline" /> <strong>Tip:</strong> Clearly explain your app's value
 						proposition and how it helps creators make money or grow their
 						communities.
 					</p>

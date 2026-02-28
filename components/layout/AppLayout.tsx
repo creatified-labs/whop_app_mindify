@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Leaf, Sparkles } from "lucide-react";
 import { MindifyLogo } from "@/components/branding/MindifyLogo";
 import { Navigation } from "@/components/ui/Navigation";
 
@@ -37,15 +38,24 @@ export function AppLayout({
 				onMouseLeave={() => setIsSidebarExpanded(false)}
 				className="hidden border-r border-sage-100 bg-cream-50 dark:border-white/10 dark:bg-[#12141A] lg:flex lg:flex-col"
 			>
-				<div className="border-b border-sage-100 p-6 flex items-center justify-center">
-					{isSidebarExpanded ? (
-						<MindifyLogo size="sm" />
-					) : (
-						<span className="text-2xl">🧘</span>
-					)}
+				<div className={`py-6 flex items-center overflow-hidden ${isSidebarExpanded ? "px-4" : "justify-center"}`}>
+					<Leaf className="h-6 w-6 text-sage-600 flex-shrink-0" />
+					<AnimatePresence>
+						{isSidebarExpanded && (
+							<motion.span
+								initial={{ opacity: 0, width: 0, marginLeft: 0 }}
+								animate={{ opacity: 1, width: "auto", marginLeft: 12 }}
+								exit={{ opacity: 0, width: 0, marginLeft: 0 }}
+								transition={{ duration: 0.2 }}
+								className="overflow-hidden whitespace-nowrap text-lg font-semibold text-earth-900 dark:text-[#F4EFE6]"
+							>
+								Mindify
+							</motion.span>
+						)}
+					</AnimatePresence>
 				</div>
-				<div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
-					<Navigation streakDays={streakDays} membershipTier={membershipTier} />
+				<div className="flex-1 overflow-y-auto overflow-x-hidden py-6">
+					<Navigation streakDays={streakDays} membershipTier={membershipTier} isExpanded={isSidebarExpanded} />
 				</div>
 				<AnimatePresence>
 					{isSidebarExpanded && (
@@ -58,7 +68,7 @@ export function AppLayout({
 						>
 							<div className="rounded-2xl bg-gradient-sage p-5 text-white shadow-soft">
 								<div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-									<span>✨</span>
+									<Sparkles className="h-4 w-4" />
 									<span>Premium</span>
 								</div>
 								<p className="text-sm text-white/90">Unlock all meditations & programs.</p>
@@ -72,27 +82,13 @@ export function AppLayout({
 			</motion.aside>
 
 			<div className="flex-1">
-				<header className="sticky top-0 z-40 border-b border-sage-100 bg-cream-50/90 backdrop-blur-md dark:border-white/10 dark:bg-[#12141A]/80">
-					<div className="flex items-center justify-between px-4 py-4 md:px-8">
-						<div className="flex items-center gap-3 lg:hidden">
-							<MindifyLogo size="sm" />
-						</div>
-						<div className="flex items-center gap-6 text-sm text-earth-600 dark:text-[#D9D3C8]">
-							<div className="flex items-center gap-2">
-								<span>🔥</span>
-								<span className="font-medium">{streakDays} day streak</span>
-							</div>
-							<div className="rounded-full border border-sage-100 bg-gradient-sage px-4 py-1 text-white uppercase tracking-[0.3em] dark:border-white/10">
-								{membershipTier}
-							</div>
-							<div className="h-11 w-11 rounded-full bg-gradient-sage text-center font-semibold text-white leading-[44px]">
-								{initial}
-							</div>
-						</div>
+				<header className="sticky top-0 z-40 bg-cream-50/90 backdrop-blur-md lg:hidden dark:bg-[#12141A]/80">
+					<div className="px-4 py-3 md:px-8">
+						<MindifyLogo size="sm" />
 					</div>
 				</header>
 
-				<main className="min-h-screen bg-cream-50 px-4 py-6 pb-24 md:px-8 md:py-8 lg:px-12 dark:bg-[#0E1012]">{children}</main>
+				<main className="min-h-screen bg-cream-50 px-4 py-4 pb-24 md:px-8 md:py-6 lg:px-12 dark:bg-[#0E1012]">{children}</main>
 			</div>
 		</div>
 	);

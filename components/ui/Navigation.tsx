@@ -1,26 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useAppStore } from "@/lib/stores/appStore";
+import { useMemo } from "react";
+import { useAppStore, type NavSection } from "@/lib/stores/appStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { Home, Leaf, Sparkles, BarChart3, Zap, BookOpen, Users, Flame, type LucideIcon } from "lucide-react";
 
-const NAV_ITEMS = [
-	{ icon: "🏠", label: "Dashboard", section: "dashboard", href: "/dashboard" },
-	{ icon: "🧘", label: "Meditations", section: "meditations", href: "/meditations" },
-	{ icon: "💫", label: "Hypnosis", section: "hypnosis", href: "/hypnosis" },
-	{ icon: "📊", label: "Programs", section: "programs", href: "/programs" },
-	{ icon: "⚡", label: "Quick Resets", section: "quick-resets", href: "/quick-resets" },
-	{ icon: "📚", label: "Knowledge", section: "knowledge-hub", href: "/knowledge" },
-	{ icon: "👥", label: "Community", section: "community", href: "/community" },
-] as const;
+const NAV_ITEMS: { icon: LucideIcon; label: string; section: NavSection; href: string }[] = [
+	{ icon: Home, label: "Home", section: "dashboard", href: "/dashboard" },
+	{ icon: Leaf, label: "Meditations", section: "meditations", href: "/meditations" },
+	{ icon: Sparkles, label: "Hypnosis", section: "hypnosis", href: "/hypnosis" },
+	{ icon: BarChart3, label: "Programs", section: "programs", href: "/programs" },
+	{ icon: Zap, label: "Quick Resets", section: "quick-resets", href: "/quick-resets" },
+	{ icon: BookOpen, label: "Knowledge", section: "knowledge-hub", href: "/knowledge" },
+	{ icon: Users, label: "Community", section: "community", href: "/community" },
+];
 
 interface NavigationProps {
 	streakDays: number;
 	membershipTier: "premium" | "free";
+	isExpanded: boolean;
 }
 
-export function Navigation({ streakDays, membershipTier }: NavigationProps) {
-	const [isExpanded, setIsExpanded] = useState(false);
+export function Navigation({ streakDays, membershipTier, isExpanded }: NavigationProps) {
 	const navSelection = useAppStore((state) => state.navSelection);
 	const setNavSelection = useAppStore((state) => state.setNavSelection);
 
@@ -33,26 +34,27 @@ export function Navigation({ streakDays, membershipTier }: NavigationProps) {
 	);
 
 	return (
-		<div
-			className="space-y-6 text-earth-700 dark:text-[#D9D3C8]"
-			onMouseEnter={() => setIsExpanded(true)}
-			onMouseLeave={() => setIsExpanded(false)}
-		>
+		<div className="space-y-6 text-earth-700 dark:text-[#D9D3C8]">
 			<nav className="space-y-2">
 				{NAV_ITEMS.map((item) => {
 					const isActive = navSelection === item.section;
 					return (
-						<button
+						<motion.button
 							type="button"
 							key={item.section}
 							onClick={() => setNavSelection(item.section)}
-							className={`w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition-all duration-200 flex items-center ${
+							whileHover={{ scale: 1.04 }}
+							whileTap={{ scale: 0.97 }}
+							transition={{ type: "spring", stiffness: 400, damping: 20 }}
+							className={`w-full rounded-xl py-3 text-sm font-medium transition-colors duration-200 flex items-center ${
+							isExpanded ? "px-4" : "justify-center"
+						} ${
 								isActive
 									? "bg-gradient-card text-sage-700 shadow-soft dark:text-[#F4EFE6]"
 									: "text-earth-600 hover:bg-cream-100 dark:text-[#BFB6A8] dark:hover:bg-white/5"
 							}`}
 						>
-							<span className="text-xl flex-shrink-0">{item.icon}</span>
+							<item.icon className="h-5 w-5 flex-shrink-0" />
 							<AnimatePresence>
 								{isExpanded && (
 									<motion.span
@@ -66,7 +68,7 @@ export function Navigation({ streakDays, membershipTier }: NavigationProps) {
 									</motion.span>
 								)}
 							</AnimatePresence>
-						</button>
+						</motion.button>
 					);
 				})}
 			</nav>
@@ -81,7 +83,7 @@ export function Navigation({ streakDays, membershipTier }: NavigationProps) {
 						className="rounded-2xl border border-sage-100 bg-cream-50 p-4 shadow-card dark:border-white/10 dark:bg-[#111317] overflow-hidden"
 					>
 						<div className="flex items-center justify-between text-sm text-earth-600 dark:text-[#CFC7BB]">
-							<span>🔥 Streak</span>
+							<span className="flex items-center gap-1.5"><Flame className="h-4 w-4" /> Streak</span>
 							<span className="font-semibold text-earth-900 dark:text-[#F4EFE6]">{streakDays} days</span>
 						</div>
 						<p className="mt-3 text-xs leading-relaxed text-earth-500 dark:text-[#AFA79B]">{tiersCopy}</p>

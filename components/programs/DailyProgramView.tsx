@@ -54,7 +54,7 @@ export function DailyProgramView({ program, dayNumber, onCompleteDay, onNextDay 
 
 	const handleCompleteDay = async () => {
 		if (!canMarkComplete) return;
-		queueCelebration(`Day ${dayNumber} complete! 🎉`);
+		queueCelebration(`Day ${dayNumber} complete!`);
 		await onCompleteDay?.(dayNumber);
 		onNextDay?.(Math.min(dayNumber + 1, program.duration));
 	};

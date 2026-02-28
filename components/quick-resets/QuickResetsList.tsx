@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { QUICK_RESETS } from "@/lib/mockData/quickResets";
 import type { QuickReset } from "@/lib/types";
@@ -17,7 +17,18 @@ function toAudioTrack(reset: QuickReset) {
 }
 
 export function QuickResetsList() {
+	const [resets, setResets] = useState<QuickReset[]>(QUICK_RESETS);
 	const [selectedReset, setSelectedReset] = useState<QuickReset | null>(null);
+
+	useEffect(() => {
+		fetch("/api/quick-resets")
+			.then((res) => res.json())
+			.then((json) => {
+				if (json.items?.length > 0) setResets(json.items);
+			})
+			.catch(() => {});
+	}, []);
+
 	const { playTrack, currentTrack, isPlaying } = useAudioStore((state) => ({
 		playTrack: state.playTrack,
 		currentTrack: state.currentTrack,
@@ -44,7 +55,7 @@ export function QuickResetsList() {
 				<p className="text-sm text-white/60">Tap a protocol to play instantly • no modal, just action.</p>
 			</header>
 			<div className="grid gap-4 lg:grid-cols-2">
-				{QUICK_RESETS.map((reset, index) => {
+				{resets.map((reset, index) => {
 					const isActive = playingResetId === reset.id;
 					return (
 						<motion.button

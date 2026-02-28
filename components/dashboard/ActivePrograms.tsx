@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Calendar, CheckCircle2, Flame } from "lucide-react";
 import type { Program, ProgramProgress } from "@/lib/types";
 
 interface ActiveProgramCardProps {
@@ -75,7 +75,7 @@ function ActiveProgramCard({ program, progress, index }: ActiveProgramCardProps)
 						{/* Streak badge */}
 						{progress.streak >= 3 && (
 							<div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-sage-100 px-3 py-1 text-xs font-medium text-sage-700 dark:bg-sage-900/30 dark:text-sage-400">
-								🔥 {progress.streak} day streak!
+								<Flame className="h-3.5 w-3.5" /> {progress.streak} day streak!
 							</div>
 						)}
 					</div>

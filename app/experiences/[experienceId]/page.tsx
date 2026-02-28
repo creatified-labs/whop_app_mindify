@@ -8,6 +8,7 @@ import {
 	type RecommendedSession,
 	ExperienceContent,
 } from "@/components/ui/DashboardView";
+import { Flame } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { whopsdk } from "@/lib/whop-sdk";
 import type { UserProgress } from "@/lib/types";
@@ -204,7 +205,7 @@ export default async function ExperiencePage({
 						</div>
 						<div className="flex items-center gap-4 text-sm text-earth-600 dark:text-[#CFC7BB]">
 							<div className="rounded-2xl border border-sage-100 bg-cream-50 px-4 py-2 text-earth-700 dark:border-white/10 dark:bg-[#111318] dark:text-[#E2DBCF]">
-								🔥 {streakDays} day streak
+								<Flame className="h-4 w-4 inline" /> {streakDays} day streak
 							</div>
 							<div className="rounded-2xl border border-sage-100 bg-cream-50 px-4 py-2 text-earth-700 dark:border-white/10 dark:bg-[#111318] dark:text-[#E2DBCF]">
 								{favorites.length} favorites

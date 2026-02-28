@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PROGRAMS_LIBRARY } from "@/lib/mockData/programs";
@@ -20,6 +21,17 @@ function getEnrollmentLabel(program: Program, enrolledIds: Record<string, boolea
 }
 
 export function ProgramsLibrary() {
+	const [programs, setPrograms] = useState<Program[]>(PROGRAMS_LIBRARY);
+
+	useEffect(() => {
+		fetch("/api/programs/content")
+			.then((res) => res.json())
+			.then((json) => {
+				if (json.items?.length > 0) setPrograms(json.items);
+			})
+			.catch(() => {});
+	}, []);
+
 	const { enrolledPrograms, enrollInProgram, setCurrentProgram } = useProgramStore((state) => ({
 		enrolledPrograms: state.enrolledPrograms,
 		enrollInProgram: state.enrollInProgram,
@@ -54,7 +66,7 @@ export function ProgramsLibrary() {
 				</p>
 			</header>
 			<div className="grid gap-6 lg:grid-cols-2">
-				{PROGRAMS_LIBRARY.map((program, index) => {
+				{programs.map((program, index) => {
 					const progress = enrolledPrograms[program.id];
 					const completionPct =
 						progress && program.duration > 0 ? (progress.completedDays.length / program.duration) * 100 : 0;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SearchIcon, ClockIcon } from "lucide-react";
 import { KNOWLEDGE_ARTICLES, type KnowledgeArticle, type KnowledgeCategory } from "@/lib/mockData/articles";
@@ -18,12 +18,22 @@ const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
 ];
 
 export function KnowledgeHub() {
+	const [articles, setArticles] = useState<KnowledgeArticle[]>(KNOWLEDGE_ARTICLES);
 	const [query, setQuery] = useState("");
 	const [category, setCategory] = useState<(typeof categories)[number]["value"]>("all");
 	const [activeArticle, setActiveArticle] = useState<KnowledgeArticle | null>(null);
 
+	useEffect(() => {
+		fetch("/api/articles")
+			.then((res) => res.json())
+			.then((json) => {
+				if (json.items?.length > 0) setArticles(json.items);
+			})
+			.catch(() => {});
+	}, []);
+
 	const filteredArticles = useMemo(() => {
-		return KNOWLEDGE_ARTICLES.filter((article) => {
+		return articles.filter((article) => {
 			const matchesCategory = category === "all" || article.category === category;
 			const matchesQuery =
 				article.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -34,7 +44,7 @@ export function KnowledgeHub() {
 
 	const relatedArticles = useMemo(() => {
 		if (!activeArticle) return [];
-		return KNOWLEDGE_ARTICLES.filter(
+		return articles.filter(
 			(article) => article.category === activeArticle.category && article.slug !== activeArticle.slug,
 		).slice(0, 2);
 	}, [activeArticle]);
@@ -128,7 +138,7 @@ export function KnowledgeHub() {
 					onClose={() => setActiveArticle(null)}
 					relatedArticles={relatedArticles}
 					onNavigate={(slug) => {
-						const next = KNOWLEDGE_ARTICLES.find((article) => article.slug === slug);
+						const next = articles.find((article) => article.slug === slug);
 						if (next) {
 							setActiveArticle(next);
 						}

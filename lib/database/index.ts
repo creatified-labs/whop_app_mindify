@@ -18,3 +18,6 @@ export * from './activityService';
 
 // Favorites service
 export * from './favoritesService';
+
+// Content service
+export * from './contentService';
