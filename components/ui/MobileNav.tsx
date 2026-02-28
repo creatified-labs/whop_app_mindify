@@ -28,7 +28,7 @@ export function MobileNav() {
 					initial={{ y: 100, opacity: 0 }}
 					animate={{ y: 0, opacity: 1 }}
 					transition={{ duration: 0.3 }}
-					className="pointer-events-auto rounded-full border border-sage-200/50 bg-cream-50/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-[#13151A]/95"
+					className="pointer-events-auto rounded-full border border-[rgb(var(--sage-200)/0.5)] bg-white/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-[#13151A]/95"
 				>
 					<div className="flex items-center justify-around px-3 py-3 gap-2">
 						{navItems.map((item) => {
@@ -52,23 +52,23 @@ export function MobileNav() {
 										<Icon
 											className={`h-5 w-5 transition-colors ${
 												isActive
-													? "text-sage-600 dark:text-sage-400"
-													: "text-earth-500 dark:text-[#AFA79B]"
+													? "text-[rgb(var(--sage-600))] dark:text-sage-400"
+													: "text-[rgb(var(--earth-500))] dark:text-[#AFA79B]"
 											}`}
 										/>
 										{isActive && (
 											<motion.div
 												initial={{ scale: 0 }}
 												animate={{ scale: 1 }}
-												className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-sage-600 dark:bg-sage-400"
+												className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[rgb(var(--sage-600))] dark:bg-sage-400"
 											/>
 										)}
 									</div>
 									<span
 										className={`text-[10px] font-medium tracking-wide transition-colors ${
 											isActive
-												? "text-sage-700 dark:text-sage-300"
-												: "text-earth-600 dark:text-[#CFC7BB]"
+												? "text-[rgb(var(--sage-700))] dark:text-sage-300"
+												: "text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]"
 										}`}
 									>
 										{item.label}

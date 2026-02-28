@@ -33,7 +33,7 @@ export function WelcomeSection({ userName, timeOfDay }: WelcomeSectionProps) {
 				</div>
 				<p className="mb-6 text-lg text-white/90">Take a moment to center yourself and set your intention for today.</p>
 				<div className="flex flex-wrap gap-4">
-					<button className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-sage-700 shadow-soft transition hover:shadow-hover">
+					<button className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-[rgb(var(--sage-700))] shadow-soft transition hover:shadow-hover">
 						<Target className="h-4 w-4" /> Start Daily Practice
 					</button>
 					<button className="flex items-center gap-2 rounded-xl bg-white/20 px-6 py-3 font-semibold text-white backdrop-blur-sm transition hover:bg-white/30">

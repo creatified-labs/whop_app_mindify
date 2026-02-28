@@ -34,7 +34,7 @@ export function Navigation({ streakDays, membershipTier, isExpanded }: Navigatio
 	);
 
 	return (
-		<div className="space-y-6 text-earth-700 dark:text-[#D9D3C8]">
+		<div className="space-y-6 text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
 			<nav className="space-y-2">
 				{NAV_ITEMS.map((item) => {
 					const isActive = navSelection === item.section;
@@ -50,8 +50,8 @@ export function Navigation({ streakDays, membershipTier, isExpanded }: Navigatio
 							isExpanded ? "px-4" : "justify-center"
 						} ${
 								isActive
-									? "bg-gradient-card text-sage-700 shadow-soft dark:text-[#F4EFE6]"
-									: "text-earth-600 hover:bg-cream-100 dark:text-[#BFB6A8] dark:hover:bg-white/5"
+									? "bg-[rgb(var(--sage-600))] text-white shadow-soft"
+									: "text-[rgb(var(--earth-600))] hover:bg-[rgb(var(--cream-100))] dark:text-[#BFB6A8] dark:hover:bg-white/5"
 							}`}
 						>
 							<item.icon className="h-5 w-5 flex-shrink-0" />
@@ -80,13 +80,13 @@ export function Navigation({ streakDays, membershipTier, isExpanded }: Navigatio
 						animate={{ opacity: 1, height: "auto" }}
 						exit={{ opacity: 0, height: 0 }}
 						transition={{ duration: 0.2 }}
-						className="rounded-2xl border border-sage-100 bg-cream-50 p-4 shadow-card dark:border-white/10 dark:bg-[#111317] overflow-hidden"
+						className="rounded-2xl border border-[rgb(var(--sage-100))] bg-white p-4 shadow-card dark:border-white/10 dark:bg-[#111317] overflow-hidden"
 					>
-						<div className="flex items-center justify-between text-sm text-earth-600 dark:text-[#CFC7BB]">
+						<div className="flex items-center justify-between text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
 							<span className="flex items-center gap-1.5"><Flame className="h-4 w-4" /> Streak</span>
-							<span className="font-semibold text-earth-900 dark:text-[#F4EFE6]">{streakDays} days</span>
+							<span className="font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">{streakDays} days</span>
 						</div>
-						<p className="mt-3 text-xs leading-relaxed text-earth-500 dark:text-[#AFA79B]">{tiersCopy}</p>
+						<p className="mt-3 text-xs leading-relaxed text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">{tiersCopy}</p>
 					</motion.div>
 				)}
 			</AnimatePresence>
