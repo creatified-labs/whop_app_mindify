@@ -1,16 +1,41 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { Component, useEffect, useMemo, type ReactNode } from "react";
 import { useAppStore, type NavSection } from "@/lib/stores/appStore";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import type { UserProgress } from "@/lib/types";
 import { Flame } from "lucide-react";
 import { NoFavorites, NoActivity, NoPrograms } from "@/components/ui/EmptyState";
+import { InlineErrorBoundaryFallback } from "@/components/ui/ErrorState";
 import { MeditationGrid } from "@/components/meditation/MeditationGrid";
 import { HypnosisStack } from "@/components/hypnosis/HypnosisStack";
 import { ProgramsLibrary } from "@/components/programs/ProgramsLibrary";
 import { QuickResetsList } from "@/components/quick-resets/QuickResetsList";
 import { KnowledgeHub } from "@/components/knowledge/KnowledgeHub";
+
+class SectionErrorBoundary extends Component<
+	{ children: ReactNode },
+	{ error: Error | null }
+> {
+	state: { error: Error | null } = { error: null };
+	static getDerivedStateFromError(error: Error) {
+		return { error };
+	}
+	componentDidCatch(error: Error) {
+		console.error("[Mindify] Section render error:", error);
+	}
+	render() {
+		if (this.state.error) {
+			return (
+				<InlineErrorBoundaryFallback
+					error={this.state.error}
+					reset={() => this.setState({ error: null })}
+				/>
+			);
+		}
+		return this.props.children;
+	}
+}
 
 type SessionType = "meditation" | "hypnosis" | "program" | "reset";
 
@@ -77,11 +102,11 @@ export function ExperienceContent(props: DashboardViewProps) {
 		return <DashboardView {...props} />;
 	}
 
-	if (navSelection === "meditations") return <MeditationGrid />;
-	if (navSelection === "hypnosis") return <HypnosisStack />;
-	if (navSelection === "programs") return <ProgramsLibrary />;
-	if (navSelection === "quick-resets") return <QuickResetsList />;
-	if (navSelection === "knowledge-hub") return <KnowledgeHub />;
+	if (navSelection === "meditations") return <SectionErrorBoundary><MeditationGrid /></SectionErrorBoundary>;
+	if (navSelection === "hypnosis") return <SectionErrorBoundary><HypnosisStack /></SectionErrorBoundary>;
+	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary /></SectionErrorBoundary>;
+	if (navSelection === "quick-resets") return <SectionErrorBoundary><QuickResetsList /></SectionErrorBoundary>;
+	if (navSelection === "knowledge-hub") return <SectionErrorBoundary><KnowledgeHub /></SectionErrorBoundary>;
 
 	return (
 		<div className={`${glassCard} min-h-[420px]`}>

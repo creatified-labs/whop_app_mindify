@@ -116,14 +116,37 @@ export function PageError({
     <div className="flex min-h-[60vh] items-center justify-center p-8">
       <ErrorState
         title="Oops! Something went wrong"
-        message={
-          process.env.NODE_ENV === "development"
-            ? error.message
-            : "We encountered an unexpected error. Our team has been notified."
-        }
+        message={error.message || "We encountered an unexpected error."}
         onRetry={reset}
         type="error"
       />
+    </div>
+  );
+}
+
+export function InlineErrorBoundaryFallback({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset?: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900 dark:bg-red-950/20">
+      <p className="text-sm font-medium text-red-700 dark:text-red-400">
+        This section failed to load
+      </p>
+      <p className="mt-1 text-xs text-red-600 dark:text-red-500">
+        {error.message}
+      </p>
+      {reset && (
+        <button
+          onClick={reset}
+          className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+        >
+          Retry
+        </button>
+      )}
     </div>
   );
 }
