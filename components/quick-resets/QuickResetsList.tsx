@@ -1,49 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
 import { QUICK_RESETS } from "@/lib/mockData/quickResets";
 import type { QuickReset } from "@/lib/types";
 import { useAudioStore } from "@/lib/stores/audioStore";
-import { QuickResetPlayer } from "@/components/quick-resets/QuickResetPlayer";
-
-function toAudioTrack(reset: QuickReset) {
-	return {
-		...reset,
-		trackType: "reset" as const,
-		thumbnail: "/images/quick-resets/waveform.jpg",
-		subtitle: reset.instructions,
-	};
-}
 
 export function QuickResetsList() {
-	const [resets, setResets] = useState<QuickReset[]>(QUICK_RESETS);
-	const [selectedReset, setSelectedReset] = useState<QuickReset | null>(null);
-
-	useEffect(() => {
-		fetch("/api/quick-resets")
-			.then((res) => res.json())
-			.then((json) => {
-				if (json.items?.length > 0) setResets(json.items);
-			})
-			.catch(() => {});
-	}, []);
-
-	const { playTrack, currentTrack, isPlaying } = useAudioStore((state) => ({
-		playTrack: state.playTrack,
-		currentTrack: state.currentTrack,
-		isPlaying: state.isPlaying,
-	}));
+	const [activeId, setActiveId] = useState<string | null>(null);
+	const playTrack = useAudioStore((state) => state.playTrack);
 
 	const handlePlay = (reset: QuickReset) => {
-		setSelectedReset(reset);
-		playTrack(toAudioTrack(reset));
+		setActiveId(reset.id);
+		playTrack({
+			id: reset.id,
+			title: reset.title,
+			audioUrl: reset.audioUrl,
+			duration: reset.duration * 60,
+			trackType: "reset",
+			subtitle: reset.instructions,
+		});
 	};
-
-	const playingResetId = useMemo(
-		() => (currentTrack?.trackType === "reset" ? currentTrack.id : null),
-		[currentTrack],
-	);
 
 	return (
 		<section className="space-y-6">
@@ -52,48 +28,33 @@ export function QuickResetsList() {
 					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Quick Resets</p>
 					<h2 className="text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Rapid Nervous System Tools</h2>
 				</div>
-				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">Tap a protocol to play instantly • no modal, just action.</p>
+				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">Tap a protocol to play instantly.</p>
 			</header>
 			<div className="grid gap-4 lg:grid-cols-2">
-				{resets.map((reset, index) => {
-					const isActive = playingResetId === reset.id;
-					return (
-						<motion.button
-							key={reset.id}
-							onClick={() => handlePlay(reset)}
-							whileTap={{ scale: 0.98 }}
-							className={`flex flex-col rounded-3xl border px-5 py-4 text-left transition ${
-								isActive
-									? "border-mindify-lagoon/60 bg-mindify-lagoon/10 text-[rgb(var(--earth-900))] dark:text-white"
-									: "border-[rgb(var(--sage-200))] bg-[rgb(var(--cream-50))] text-[rgb(var(--earth-700))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/30"
-							}`}
-							initial={{ opacity: 0, translateY: 20 }}
-							animate={{ opacity: 1, translateY: 0 }}
-							transition={{ delay: index * 0.05 }}
-						>
-							<div className="flex items-center justify-between text-xs uppercase tracking-[0.3em]">
-								<span>{reset.type.replace("-", " ")}</span>
-								<span>{reset.duration} min</span>
-							</div>
-							<h3 className="mt-2 text-xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{reset.title}</h3>
-							<p className="mt-1 text-sm text-[rgb(var(--earth-600))] dark:text-white/70">{reset.instructions}</p>
-							<div className="mt-4 flex items-center gap-3 text-xs text-[rgb(var(--earth-500))] dark:text-white/50">
-								<span className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 dark:border-white/15">Instant play</span>
-								{isActive && isPlaying && <span className="text-mindify-lagoon">Now playing</span>}
-							</div>
-						</motion.button>
-					);
-				})}
+				{QUICK_RESETS.map((reset) => (
+					<button
+						key={reset.id}
+						type="button"
+						onClick={() => handlePlay(reset)}
+						className={`flex flex-col rounded-3xl border px-5 py-4 text-left transition ${
+							activeId === reset.id
+								? "border-mindify-lagoon/60 bg-mindify-lagoon/10 text-[rgb(var(--earth-900))] dark:text-white"
+								: "border-[rgb(var(--sage-200))] bg-[rgb(var(--cream-50))] text-[rgb(var(--earth-700))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/30"
+						}`}
+					>
+						<div className="flex items-center justify-between text-xs uppercase tracking-[0.3em]">
+							<span>{String(reset.type).replace("-", " ")}</span>
+							<span>{String(reset.duration)} min</span>
+						</div>
+						<h3 className="mt-2 text-xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{String(reset.title)}</h3>
+						<p className="mt-1 text-sm text-[rgb(var(--earth-600))] dark:text-white/70">{String(reset.instructions)}</p>
+						<div className="mt-4 flex items-center gap-3 text-xs text-[rgb(var(--earth-500))] dark:text-white/50">
+							<span className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 dark:border-white/15">Instant play</span>
+							{activeId === reset.id && <span className="text-mindify-lagoon">Now playing</span>}
+						</div>
+					</button>
+				))}
 			</div>
-
-			{selectedReset && (
-				<QuickResetPlayer
-					key={selectedReset.id}
-					track={toAudioTrack(selectedReset)}
-					totalDurationSeconds={selectedReset.duration * 60}
-					onAutoNextLabel="Next reset queued"
-				/>
-			)}
 		</section>
 	);
 }

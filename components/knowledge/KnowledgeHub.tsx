@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { SearchIcon, ClockIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { SearchIcon, ClockIcon, XIcon } from "lucide-react";
 import { KNOWLEDGE_ARTICLES, type KnowledgeArticle, type KnowledgeCategory } from "@/lib/mockData/articles";
-import { ArticleView } from "@/components/knowledge/ArticleView";
-import { SearchEmpty } from "@/components/ui/EmptyState";
 
 const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
 	{ label: "All", value: "all" },
@@ -18,36 +15,20 @@ const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
 ];
 
 export function KnowledgeHub() {
-	const [articles, setArticles] = useState<KnowledgeArticle[]>(KNOWLEDGE_ARTICLES);
 	const [query, setQuery] = useState("");
 	const [category, setCategory] = useState<(typeof categories)[number]["value"]>("all");
 	const [activeArticle, setActiveArticle] = useState<KnowledgeArticle | null>(null);
 
-	useEffect(() => {
-		fetch("/api/articles")
-			.then((res) => res.json())
-			.then((json) => {
-				if (json.items?.length > 0) setArticles(json.items);
-			})
-			.catch(() => {});
-	}, []);
-
 	const filteredArticles = useMemo(() => {
-		return articles.filter((article) => {
+		return KNOWLEDGE_ARTICLES.filter((article) => {
 			const matchesCategory = category === "all" || article.category === category;
 			const matchesQuery =
+				query === "" ||
 				article.title.toLowerCase().includes(query.toLowerCase()) ||
 				article.keyTakeaways.some((takeaway) => takeaway.toLowerCase().includes(query.toLowerCase()));
 			return matchesCategory && matchesQuery;
 		});
-	}, [articles, category, query]);
-
-	const relatedArticles = useMemo(() => {
-		if (!activeArticle) return [];
-		return articles.filter(
-			(article) => article.category === activeArticle.category && article.slug !== activeArticle.slug,
-		).slice(0, 2);
-	}, [articles, activeArticle]);
+	}, [category, query]);
 
 	return (
 		<section className="space-y-6">
@@ -83,67 +64,106 @@ export function KnowledgeHub() {
 								: "border-[rgb(var(--sage-200))] text-[rgb(var(--earth-600))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:text-white/70 dark:hover:border-white/40"
 						}`}
 					>
-						{cat.label}
+						{String(cat.label)}
 					</button>
 				))}
 			</div>
 
 			{filteredArticles.length > 0 ? (
 				<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-					{filteredArticles.map((article, index) => (
-						<motion.button
+					{filteredArticles.map((article) => (
+						<button
 							type="button"
 							key={article.slug}
 							onClick={() => setActiveArticle(article)}
-							initial={{ opacity: 0, translateY: 30 }}
-							whileInView={{ opacity: 1, translateY: 0 }}
-							viewport={{ once: true }}
-							transition={{ delay: index * 0.05 }}
 							className="group overflow-hidden rounded-[28px] border border-[rgb(var(--sage-100))] bg-white p-5 text-left shadow-card dark:border-white/15 dark:bg-gradient-to-br dark:from-white/10 dark:to-white/0 dark:shadow-[0_20px_60px_rgba(3,4,12,0.4)]"
 						>
-							<div className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/50">{article.category}</div>
-							<h3 className="mt-3 text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{article.title}</h3>
+							<div className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/50">{String(article.category)}</div>
+							<h3 className="mt-3 text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{String(article.title)}</h3>
 							<p className="mt-2 text-sm text-[rgb(var(--earth-600))] line-clamp-3 dark:text-white/70">
-								{article.keyTakeaways[0] ?? "Applied nervous system science for modern operators."}
+								{String(article.keyTakeaways[0] ?? "Applied nervous system science for modern operators.")}
 							</p>
 							<div className="mt-4 flex items-center gap-3 text-xs text-[rgb(var(--earth-500))] dark:text-white/50">
 								<span className="inline-flex items-center gap-1">
 									<ClockIcon className="h-4 w-4" />
-									{article.readTimeMinutes} min read
+									{String(article.readTimeMinutes)} min read
 								</span>
-								<span>{article.author}</span>
+								<span>{String(article.author)}</span>
 							</div>
 							<div className="mt-4 flex gap-2 text-xs text-[rgb(var(--earth-500))] dark:text-white/50">
 								{article.keyTakeaways.slice(0, 2).map((takeaway) => (
 									<span
-										key={takeaway}
+										key={String(takeaway)}
 										className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 line-clamp-1 group-hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:group-hover:border-white/40"
 									>
-										{takeaway}
+										{String(takeaway)}
 									</span>
 								))}
 							</div>
-						</motion.button>
+						</button>
 					))}
 				</div>
 			) : (
-				<div className="py-8">
-					<SearchEmpty query={query} />
+				<div className="py-8 text-center text-sm text-[rgb(var(--earth-500))] dark:text-white/60">
+					No articles found for &quot;{query}&quot;
 				</div>
 			)}
 
 			{activeArticle && (
-				<ArticleView
-					article={activeArticle}
-					onClose={() => setActiveArticle(null)}
-					relatedArticles={relatedArticles}
-					onNavigate={(slug) => {
-						const next = articles.find((article) => article.slug === slug);
-						if (next) {
-							setActiveArticle(next);
-						}
-					}}
-				/>
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-xl">
+					<div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[36px] border border-[rgb(var(--sage-100))] bg-white text-[rgb(var(--earth-900))] shadow-card dark:border-white/10 dark:bg-gradient-to-br dark:from-[#050711] dark:via-[#0B1022] dark:to-[#05060C] dark:text-white dark:shadow-[0_40px_120px_rgba(4,6,22,0.8)]">
+						<button
+							type="button"
+							onClick={() => setActiveArticle(null)}
+							className="absolute right-6 top-6 z-10 rounded-full border border-[rgb(var(--sage-200))] bg-white/80 p-2 text-[rgb(var(--earth-600))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:bg-black/40 dark:text-white/70 dark:hover:border-white/50"
+							aria-label="Close article"
+						>
+							<XIcon className="h-5 w-5" />
+						</button>
+						<div className="flex h-full max-h-[90vh] flex-col overflow-y-auto p-8">
+							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">{String(activeArticle.category)}</p>
+							<h1 className="mt-2 text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{String(activeArticle.title)}</h1>
+							<p className="mt-2 text-sm text-[rgb(var(--earth-600))] dark:text-white/70">
+								By {String(activeArticle.author)} • Updated {String(activeArticle.updatedAt)} • {String(activeArticle.readTimeMinutes)}-min read
+							</p>
+
+							<div className="mt-6 prose max-w-none prose-headings:font-semibold prose-headings:text-[rgb(var(--earth-900))] prose-p:text-[rgb(var(--earth-700))] dark:prose-invert dark:prose-headings:text-white dark:prose-p:text-white/80">
+								{/* eslint-disable-next-line react/no-danger */}
+								<div dangerouslySetInnerHTML={{ __html: String(activeArticle.content).replace(/\n/g, "<br/>") }} />
+							</div>
+
+							<div className="mt-6 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
+								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Key Takeaways</p>
+								<ul className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-700))] dark:text-white/80">
+									{activeArticle.keyTakeaways.map((item) => (
+										<li key={String(item)} className="flex items-start gap-3">
+											<span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-mindify-lagoon" />
+											{String(item)}
+										</li>
+									))}
+								</ul>
+							</div>
+
+							<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
+								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Actionable Steps</p>
+								<ol className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-700))] list-decimal pl-5 dark:text-white/80">
+									{activeArticle.actionSteps.map((item) => (
+										<li key={String(item)}>{String(item)}</li>
+									))}
+								</ol>
+							</div>
+
+							<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
+								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">References</p>
+								<ul className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-600))] list-disc pl-5 dark:text-white/70">
+									{activeArticle.references.map((ref) => (
+										<li key={String(ref)}>{String(ref)}</li>
+									))}
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
 			)}
 		</section>
 	);
