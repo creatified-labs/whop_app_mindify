@@ -63,6 +63,7 @@ export interface ProgramDay {
 	dayNumber: number;
 	title: string;
 	audioSession?: string; // meditation or hypnosis ID
+	audioUrl?: string; // direct URL for program-specific uploaded audio
 	videoUrl?: string;
 	tasks: string[];
 	journalPrompts: string[];

@@ -5,6 +5,7 @@ import type { Meditation, MeditationCategory, Mood } from "@/lib/types";
 import { ContentTable, type ContentColumn } from "./ContentTable";
 import { ContentFormModal, FormInput, FormSelect, FormTextarea, FormCheckbox } from "./ContentFormModal";
 import { ArrayFieldEditor } from "./ArrayFieldEditor";
+import { AudioUploadButton } from "./AudioUploadButton";
 
 const categoryOptions = [
 	{ value: "focus", label: "Focus" },
@@ -171,6 +172,7 @@ export function MeditationManager() {
 					<FormSelect label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v as MeditationCategory })} options={categoryOptions} />
 				</div>
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/..." />
+				<AudioUploadButton contentType="meditations" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormInput label="Image URL" value={form.imageUrl} onChange={(v) => setForm({ ...form, imageUrl: v })} placeholder="/images/..." />
 
 				<div>

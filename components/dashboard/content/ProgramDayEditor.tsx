@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
 import type { ProgramDay } from "@/lib/types";
 import { FormInput, FormTextarea } from "./ContentFormModal";
 import { ArrayFieldEditor } from "./ArrayFieldEditor";
+import { AudioUploadButton } from "./AudioUploadButton";
 
 interface ProgramDayEditorProps {
 	days: ProgramDay[];
@@ -101,6 +102,16 @@ export function ProgramDayEditor({ days, onChange }: ProgramDayEditorProps) {
 										value={day.audioSession ?? ""}
 										onChange={(v) => updateDay(index, { audioSession: v || undefined })}
 										placeholder="e.g. focus-activation"
+									/>
+									<FormInput
+										label="Audio URL"
+										value={day.audioUrl ?? ""}
+										onChange={(v) => updateDay(index, { audioUrl: v || undefined })}
+										placeholder="Upload or paste audio URL"
+									/>
+									<AudioUploadButton
+										contentType="programs"
+										onUploadComplete={(url) => updateDay(index, { audioUrl: url })}
 									/>
 									<FormInput
 										label="Video URL"

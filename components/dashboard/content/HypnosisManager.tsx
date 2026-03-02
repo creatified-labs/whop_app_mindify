@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { HypnosisSession, HypnosisTheme } from "@/lib/types";
 import { ContentTable, type ContentColumn } from "./ContentTable";
 import { ContentFormModal, FormInput, FormSelect, FormTextarea, FormCheckbox } from "./ContentFormModal";
+import { AudioUploadButton } from "./AudioUploadButton";
 
 const themeOptions: { value: HypnosisTheme; label: string }[] = [
 	{ value: "procrastination", label: "Procrastination" },
@@ -167,8 +168,11 @@ export function HypnosisManager() {
 					<FormSelect label="Theme" value={form.theme} onChange={(v) => setForm({ ...form, theme: v as HypnosisTheme })} options={themeOptions} />
 				</div>
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/..." />
+				<AudioUploadButton contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormInput label="Daytime Version URL" value={form.daytimeVersion} onChange={(v) => setForm({ ...form, daytimeVersion: v })} placeholder="/audio/..." />
+				<AudioUploadButton contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, daytimeVersion: url }))} />
 				<FormInput label="Nighttime Version URL" value={form.nighttimeVersion} onChange={(v) => setForm({ ...form, nighttimeVersion: v })} placeholder="/audio/..." />
+				<AudioUploadButton contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, nighttimeVersion: url }))} />
 				<div className="flex gap-4">
 					<FormCheckbox label="Has Binaural Beats" checked={form.hasBinaural} onChange={(v) => setForm({ ...form, hasBinaural: v })} />
 					<FormCheckbox label="Premium" checked={form.isPremium} onChange={(v) => setForm({ ...form, isPremium: v })} />

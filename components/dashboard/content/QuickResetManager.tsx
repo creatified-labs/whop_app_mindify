@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { QuickReset, QuickResetType } from "@/lib/types";
 import { ContentTable, type ContentColumn } from "./ContentTable";
 import { ContentFormModal, FormInput, FormSelect, FormTextarea } from "./ContentFormModal";
+import { AudioUploadButton } from "./AudioUploadButton";
 
 const typeOptions: { value: QuickResetType; label: string }[] = [
 	{ value: "breath", label: "Breath" },
@@ -139,6 +140,7 @@ export function QuickResetManager() {
 					<FormSelect label="Type" value={form.type} onChange={(v) => setForm({ ...form, type: v as QuickResetType })} options={typeOptions} />
 				</div>
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/quick-resets/..." />
+				<AudioUploadButton contentType="quick-resets" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormTextarea label="Instructions" value={form.instructions} onChange={(v) => setForm({ ...form, instructions: v })} rows={3} />
 			</ContentFormModal>
 		</>
