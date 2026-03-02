@@ -50,7 +50,7 @@ export async function getCommunityPosts(filters?: {
   try {
     let query = supabaseAdmin
       .from('community_posts')
-      .select('*, users_metadata!inner(display_name)')
+      .select('*, users_metadata(display_name)')
       .order('created_at', { ascending: false });
 
     if (filters?.postType) {
@@ -109,7 +109,7 @@ export async function createCommunityPost(
         program_id: input.programId || null,
         visibility: input.visibility || 'members_only',
       })
-      .select('*, users_metadata!inner(display_name)')
+      .select('*, users_metadata(display_name)')
       .single();
 
     if (error) {

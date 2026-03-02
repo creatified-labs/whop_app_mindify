@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkIcon, Share2Icon, XIcon, HeadphonesIcon, CheckIcon } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
@@ -26,6 +26,7 @@ type ArticleViewProps = {
 
 export function ArticleView({ article, onClose, onNavigate, relatedArticles = [], isBookmarked = false, onToggleBookmark }: ArticleViewProps) {
 	const [bookmarked, setBookmarked] = useState(isBookmarked);
+	useEffect(() => { setBookmarked(isBookmarked); }, [isBookmarked]);
 	const [copied, setCopied] = useState(false);
 	const { playTrack } = useAudioStore((state) => ({ playTrack: state.playTrack }));
 

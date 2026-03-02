@@ -130,7 +130,7 @@ export default async function ExperiencePage({
 				title: content.title,
 				type: typeMap[lastItem.activity_type] || "meditation",
 				progressPercent: 100, // completed sessions
-				durationMinutes: Math.round(content.duration / 60) || lastItem.duration_minutes || 10,
+				durationMinutes: content.duration || lastItem.duration_minutes || 10,
 			};
 		}
 	}
@@ -168,7 +168,7 @@ export default async function ExperiencePage({
 				id: fav.content_id,
 				title: content.title,
 				type: content.type,
-				durationMinutes: Math.round(content.duration / 60) || 10,
+				durationMinutes: content.duration || 10,
 			};
 		})
 		.filter((f): f is FavoriteSession => f !== null)
@@ -204,7 +204,7 @@ export default async function ExperiencePage({
 		id: c.id,
 		title: c.title,
 		type: c.type,
-		durationMinutes: Math.round(c.duration / 60) || 10,
+		durationMinutes: c.duration || 10,
 		timeOfDay: "anytime",
 		isPremium: c.isPremium && membershipTier === "free" ? true : undefined,
 	}));
