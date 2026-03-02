@@ -20,10 +20,12 @@ type ArticleViewProps = {
 	onClose: () => void;
 	onNavigate?: (slug: string) => void;
 	relatedArticles?: KnowledgeArticle[];
+	isBookmarked?: boolean;
+	onToggleBookmark?: (slug: string) => void;
 };
 
-export function ArticleView({ article, onClose, onNavigate, relatedArticles = [] }: ArticleViewProps) {
-	const [bookmarked, setBookmarked] = useState(false);
+export function ArticleView({ article, onClose, onNavigate, relatedArticles = [], isBookmarked = false, onToggleBookmark }: ArticleViewProps) {
+	const [bookmarked, setBookmarked] = useState(isBookmarked);
 	const [copied, setCopied] = useState(false);
 	const { playTrack } = useAudioStore((state) => ({ playTrack: state.playTrack }));
 
@@ -51,6 +53,7 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 
 	const handleBookmark = () => {
 		setBookmarked((prev) => !prev);
+		onToggleBookmark?.(article.slug);
 	};
 
 	const handlePlayAudio = () => {

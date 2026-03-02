@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { SearchIcon, ClockIcon, XIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { SearchIcon, ClockIcon } from "lucide-react";
 import { KNOWLEDGE_ARTICLES, type KnowledgeArticle, type KnowledgeCategory } from "@/lib/mockData/articles";
+import { ArticleView } from "@/components/knowledge/ArticleView";
 
 const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
 	{ label: "All", value: "all" },
@@ -18,6 +19,53 @@ export function KnowledgeHub() {
 	const [query, setQuery] = useState("");
 	const [category, setCategory] = useState<(typeof categories)[number]["value"]>("all");
 	const [activeArticle, setActiveArticle] = useState<KnowledgeArticle | null>(null);
+	const [bookmarkedSlugs, setBookmarkedSlugs] = useState<Set<string>>(new Set());
+
+	// Fetch bookmarked article slugs on mount
+	useEffect(() => {
+		fetch("/api/user/favorites?content_type=article")
+			.then((res) => res.json())
+			.then((data) => {
+				const slugs = (data.favorites || []).map((f: any) => f.content_id);
+				setBookmarkedSlugs(new Set(slugs));
+			})
+			.catch(() => {});
+	}, []);
+
+	const handleToggleBookmark = useCallback((slug: string) => {
+		// Optimistic update
+		setBookmarkedSlugs((prev) => {
+			const next = new Set(prev);
+			if (next.has(slug)) {
+				next.delete(slug);
+			} else {
+				next.add(slug);
+			}
+			return next;
+		});
+
+		// Persist via API
+		fetch("/api/user/favorites", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				content_type: "article",
+				content_id: slug,
+				toggle: true,
+			}),
+		}).catch(() => {
+			// Revert on failure
+			setBookmarkedSlugs((prev) => {
+				const next = new Set(prev);
+				if (next.has(slug)) {
+					next.delete(slug);
+				} else {
+					next.add(slug);
+				}
+				return next;
+			});
+		});
+	}, []);
 
 	const filteredArticles = useMemo(() => {
 		return KNOWLEDGE_ARTICLES.filter((article) => {
@@ -110,60 +158,16 @@ export function KnowledgeHub() {
 			)}
 
 			{activeArticle && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-xl">
-					<div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[36px] border border-[rgb(var(--sage-100))] bg-white text-[rgb(var(--earth-900))] shadow-card dark:border-white/10 dark:bg-gradient-to-br dark:from-[#050711] dark:via-[#0B1022] dark:to-[#05060C] dark:text-white dark:shadow-[0_40px_120px_rgba(4,6,22,0.8)]">
-						<button
-							type="button"
-							onClick={() => setActiveArticle(null)}
-							className="absolute right-6 top-6 z-10 rounded-full border border-[rgb(var(--sage-200))] bg-white/80 p-2 text-[rgb(var(--earth-600))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:bg-black/40 dark:text-white/70 dark:hover:border-white/50"
-							aria-label="Close article"
-						>
-							<XIcon className="h-5 w-5" />
-						</button>
-						<div className="flex h-full max-h-[90vh] flex-col overflow-y-auto p-8">
-							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">{String(activeArticle.category)}</p>
-							<h1 className="mt-2 text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{String(activeArticle.title)}</h1>
-							<p className="mt-2 text-sm text-[rgb(var(--earth-600))] dark:text-white/70">
-								By {String(activeArticle.author)} • Updated {String(activeArticle.updatedAt)} • {String(activeArticle.readTimeMinutes)}-min read
-							</p>
-
-							<div className="mt-6 prose max-w-none prose-headings:font-semibold prose-headings:text-[rgb(var(--earth-900))] prose-p:text-[rgb(var(--earth-700))] dark:prose-invert dark:prose-headings:text-white dark:prose-p:text-white/80">
-								{/* eslint-disable-next-line react/no-danger */}
-								<div dangerouslySetInnerHTML={{ __html: String(activeArticle.content).replace(/\n/g, "<br/>") }} />
-							</div>
-
-							<div className="mt-6 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
-								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Key Takeaways</p>
-								<ul className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-700))] dark:text-white/80">
-									{activeArticle.keyTakeaways.map((item) => (
-										<li key={String(item)} className="flex items-start gap-3">
-											<span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-mindify-lagoon" />
-											{String(item)}
-										</li>
-									))}
-								</ul>
-							</div>
-
-							<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
-								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Actionable Steps</p>
-								<ol className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-700))] list-decimal pl-5 dark:text-white/80">
-									{activeArticle.actionSteps.map((item) => (
-										<li key={String(item)}>{String(item)}</li>
-									))}
-								</ol>
-							</div>
-
-							<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
-								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">References</p>
-								<ul className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-600))] list-disc pl-5 dark:text-white/70">
-									{activeArticle.references.map((ref) => (
-										<li key={String(ref)}>{String(ref)}</li>
-									))}
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
+				<ArticleView
+					article={activeArticle}
+					onClose={() => setActiveArticle(null)}
+					onNavigate={(slug) => {
+						const article = KNOWLEDGE_ARTICLES.find((a) => a.slug === slug);
+						if (article) setActiveArticle(article);
+					}}
+					isBookmarked={bookmarkedSlugs.has(activeArticle.slug)}
+					onToggleBookmark={handleToggleBookmark}
+				/>
 			)}
 		</section>
 	);

@@ -12,6 +12,18 @@ import { Flame } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { whopsdk } from "@/lib/whop-sdk";
 import type { UserProgress } from "@/lib/types";
+import {
+	getActivityStats,
+	getRecentActivity,
+	getUserActivity,
+	getFavorites,
+	getAllProgramProgress,
+	getMeditations,
+	getHypnosisSessions,
+	getQuickResets,
+	getPrograms,
+	getProgramById,
+} from "@/lib/database";
 
 export default async function ExperiencePage({
 	params,
@@ -36,18 +48,6 @@ export default async function ExperiencePage({
 	const userInitial = displayName.trim().charAt(0).toUpperCase();
 	const accessMeta = access as {
 		products?: { tier?: string; name?: string }[];
-		metrics?: {
-			streakDays?: number;
-			totalMinutes?: number;
-			lastActivity?: string;
-		};
-		recentActivity?: { id: string; type?: string }[];
-		programs?: {
-			id: string;
-			currentDay?: number;
-			startedAt?: string;
-			completedDays?: number[];
-		}[];
 	};
 
 	const membershipTier: "premium" | "free" = accessMeta.products?.some((product) => {
@@ -57,131 +57,157 @@ export default async function ExperiencePage({
 		? "premium"
 		: "free";
 
-	const streakDays =
-		typeof accessMeta.metrics?.streakDays === "number"
-			? Math.max(1, accessMeta.metrics.streakDays)
-			: 6;
+	// Fetch all real data in parallel
+	const [
+		{ data: activityStats },
+		{ data: recentActivityRows },
+		{ data: allActivity },
+		{ data: favoritesRows },
+		{ data: programProgressRows },
+		{ data: meditations },
+		{ data: hypnosisSessions },
+		{ data: quickResets },
+		{ data: allPrograms },
+	] = await Promise.all([
+		getActivityStats(userId),
+		getRecentActivity(userId, 5),
+		getUserActivity(userId),
+		getFavorites(userId),
+		getAllProgramProgress(userId),
+		getMeditations(),
+		getHypnosisSessions(),
+		getQuickResets(),
+		getPrograms(),
+	]);
+
+	const streakDays = activityStats?.streakDays ?? 0;
+
+	// --- Build userProgress ---
+	const completedMeditationIds = (allActivity || [])
+		.filter((a) => a.activity_type === "meditation")
+		.map((a) => a.content_id);
+	const completedHypnosisIds = (allActivity || [])
+		.filter((a) => a.activity_type === "hypnosis")
+		.map((a) => a.content_id);
 
 	const userProgress: UserProgress = {
 		userId,
-		completedMeditations: accessMeta.recentActivity
-			?.filter((item: any) => item?.type === "meditation")
-			.map((item: any) => item.id) ?? ["alpha-entrain"],
-		completedHypnosis: accessMeta.recentActivity
-			?.filter((item: any) => item?.type === "hypnosis")
-			.map((item: any) => item.id) ?? ["soma-glow"],
-		currentPrograms:
-			accessMeta.programs?.map((program) => ({
-				programId: program.id,
-				currentDay: program.currentDay ?? 1,
-				startDate: program.startedAt ?? new Date().toISOString(),
-				completedDays: program.completedDays ?? [],
-			})) ?? [
-				{
-					programId: "neuro-leadership",
-					currentDay: 5,
-					startDate: new Date(Date.now() - 5 * 86400000).toISOString(),
-					completedDays: [1, 2, 3, 4],
-				},
-			],
-		totalMinutesMeditated: accessMeta.metrics?.totalMinutes ?? 128,
+		completedMeditations: [...new Set(completedMeditationIds)],
+		completedHypnosis: [...new Set(completedHypnosisIds)],
+		currentPrograms: (programProgressRows || [])
+			.filter((p) => !p.completedAt)
+			.map((p) => ({
+				programId: p.programId,
+				currentDay: p.currentDay,
+				startDate: p.enrolledAt,
+				completedDays: p.completedDays,
+			})),
+		totalMinutesMeditated: activityStats?.totalMinutesMeditated ?? 0,
 		streakDays,
-		lastActivityDate: accessMeta.metrics?.lastActivity ?? new Date().toISOString(),
+		lastActivityDate: activityStats?.lastActivityDate ?? new Date().toISOString(),
 	};
 
-	const continueSession: ContinueSession = {
-		id: "limbic-release",
-		title: "Limbic Release Reset",
-		type: "meditation",
-		progressPercent: 64,
-		durationMinutes: 18,
-		moodTag: "overwhelmed",
-	};
+	// --- Build continueSession (most recent incomplete activity or null) ---
+	let continueSession: ContinueSession | null = null;
+	if (recentActivityRows && recentActivityRows.length > 0) {
+		const lastItem = recentActivityRows[0];
+		const typeMap: Record<string, "meditation" | "hypnosis" | "reset" | "program"> = {
+			meditation: "meditation",
+			hypnosis: "hypnosis",
+			reset: "reset",
+			program_day: "program",
+		};
+		// Build a content lookup for titles
+		const contentMap = new Map<string, { title: string; duration: number }>();
+		for (const m of meditations || []) contentMap.set(m.id, { title: m.title, duration: m.duration });
+		for (const h of hypnosisSessions || []) contentMap.set(h.id, { title: h.title, duration: h.duration });
+		for (const r of quickResets || []) contentMap.set(r.id, { title: r.title, duration: r.duration });
 
-	const currentProgram: ProgramSnapshot | null =
-		membershipTier === "premium"
-			? {
-					programId: "neuro-leadership",
-					title: "NeuroLeadership Reset",
-					progressPercent: 48,
-					nextMilestone: "Polyvagal mapping practice",
-					isPremium: true,
-				}
-			: null;
+		const content = contentMap.get(lastItem.content_id);
+		if (content) {
+			continueSession = {
+				id: lastItem.content_id,
+				title: content.title,
+				type: typeMap[lastItem.activity_type] || "meditation",
+				progressPercent: 100, // completed sessions
+				durationMinutes: Math.round(content.duration / 60) || lastItem.duration_minutes || 10,
+			};
+		}
+	}
 
-	const favorites: FavoriteSession[] = [
-		{
-			id: "alpha-entrain",
-			title: "Alpha Wave Entrainment",
-			type: "meditation",
-			durationMinutes: 14,
-		},
-		{
-			id: "soma-glow",
-			title: "Soma Glow",
-			type: "hypnosis",
-			durationMinutes: 22,
-			isPremium: true,
-		},
-		{
-			id: "team-atrium",
-			title: "Team Atrium Ritual",
-			type: "program",
-			durationMinutes: 30,
-		},
-		{
-			id: "breath-reset",
-			title: "Tri-Phase Breath Reset",
-			type: "reset",
-			durationMinutes: 5,
-		},
+	// --- Build currentProgram ---
+	let currentProgram: ProgramSnapshot | null = null;
+	const activeProgram = (programProgressRows || []).find((p) => !p.completedAt);
+	if (activeProgram) {
+		const { data: programData } = await getProgramById(activeProgram.programId);
+		if (programData) {
+			const totalDays = programData.days?.length || programData.duration || 1;
+			const completedCount = activeProgram.completedDays.length;
+			currentProgram = {
+				programId: activeProgram.programId,
+				title: programData.title,
+				progressPercent: Math.round((completedCount / totalDays) * 100),
+				nextMilestone: `Day ${activeProgram.currentDay}`,
+				isPremium: programData.isPremium ?? false,
+			};
+		}
+	}
+
+	// --- Build favorites ---
+	const contentMap = new Map<string, { title: string; duration: number; type: "meditation" | "hypnosis" | "program" | "reset" }>();
+	for (const m of meditations || []) contentMap.set(m.id, { title: m.title, duration: m.duration, type: "meditation" });
+	for (const h of hypnosisSessions || []) contentMap.set(h.id, { title: h.title, duration: h.duration, type: "hypnosis" });
+	for (const r of quickResets || []) contentMap.set(r.id, { title: r.title, duration: r.duration, type: "reset" });
+	for (const p of allPrograms || []) contentMap.set(p.id, { title: p.title, duration: p.duration, type: "program" });
+
+	const favorites: FavoriteSession[] = (favoritesRows || [])
+		.map((fav) => {
+			const content = contentMap.get(fav.content_id);
+			if (!content) return null;
+			return {
+				id: fav.content_id,
+				title: content.title,
+				type: content.type,
+				durationMinutes: Math.round(content.duration / 60) || 10,
+			};
+		})
+		.filter((f): f is FavoriteSession => f !== null)
+		.slice(0, 6);
+
+	// --- Build recentActivity ---
+	const recentActivity: ActivityItem[] = (recentActivityRows || []).map((row, i) => {
+		const typeMap: Record<string, "meditation" | "hypnosis" | "reset" | "program"> = {
+			meditation: "meditation",
+			hypnosis: "hypnosis",
+			reset: "reset",
+			program_day: "program",
+		};
+		const content = contentMap.get(row.content_id);
+		const typeLabel = row.activity_type === "program_day" ? "program day" : row.activity_type;
+		return {
+			id: `activity-${i}`,
+			label: content ? `Completed ${content.title} ${typeLabel}` : `Completed ${typeLabel} session`,
+			timestamp: row.completed_at,
+			type: typeMap[row.activity_type] || "meditation",
+		};
+	});
+
+	// --- Build recommendedSessions (content not yet completed) ---
+	const completedIds = new Set((allActivity || []).map((a) => a.content_id));
+	const allContent = [
+		...(meditations || []).map((m) => ({ id: m.id, title: m.title, type: "meditation" as const, duration: m.duration, isPremium: m.isPremium })),
+		...(hypnosisSessions || []).map((h) => ({ id: h.id, title: h.title, type: "hypnosis" as const, duration: h.duration, isPremium: h.isPremium })),
+		...(quickResets || []).map((r) => ({ id: r.id, title: r.title, type: "reset" as const, duration: r.duration, isPremium: false })),
 	];
-
-	const recentActivity: ActivityItem[] = [
-		{
-			id: "activity-1",
-			label: "Completed Chronos Soften meditation",
-			timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-			type: "meditation",
-		},
-		{
-			id: "activity-2",
-			label: "Logged hypnosis session Soma Glow",
-			timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-			type: "hypnosis",
-		},
-		{
-			id: "activity-3",
-			label: "Checked in to NeuroLeadership Reset",
-			timestamp: new Date(Date.now() - 16 * 60 * 60 * 1000).toISOString(),
-			type: "program",
-		},
-	];
-
-	const recommendedSessions: RecommendedSession[] = [
-		{
-			id: "aurora-briefing",
-			title: "Aurora Briefing",
-			type: "hypnosis",
-			durationMinutes: 16,
-			timeOfDay: "afternoon",
-			isPremium: membershipTier === "free",
-		},
-		{
-			id: "oceanic-sync",
-			title: "Oceanic Sync",
-			type: "meditation",
-			durationMinutes: 28,
-			timeOfDay: "night",
-		},
-		{
-			id: "focus-spike",
-			title: "Focus Spike Pattern Interrupt",
-			type: "reset",
-			durationMinutes: 4,
-			timeOfDay: "anytime",
-		},
-	];
+	const notCompleted = allContent.filter((c) => !completedIds.has(c.id));
+	const recommendedSessions: RecommendedSession[] = notCompleted.slice(0, 3).map((c) => ({
+		id: c.id,
+		title: c.title,
+		type: c.type,
+		durationMinutes: Math.round(c.duration / 60) || 10,
+		timeOfDay: "anytime",
+		isPremium: c.isPremium && membershipTier === "free" ? true : undefined,
+	}));
 
 	return (
 		<AppLayout
@@ -200,7 +226,7 @@ export default async function ExperiencePage({
 								{(experience as { slug?: string }).slug ?? experience.name}
 							</h1>
 							<p className="mt-2 text-sm text-earth-600 dark:text-[#CFC7BB]">
-								Personalized nervous system rituals guided by Nicola Smith’s methodology.
+								Personalized nervous system rituals guided by Nicola Smith's methodology.
 							</p>
 						</div>
 						<div className="flex items-center gap-4 text-sm text-earth-600 dark:text-[#CFC7BB]">

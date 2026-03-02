@@ -21,3 +21,6 @@ export * from './favoritesService';
 
 // Content service
 export * from './contentService';
+
+// Community service
+export * from './communityService';
