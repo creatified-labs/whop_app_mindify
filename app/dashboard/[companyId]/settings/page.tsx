@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Save, Globe, DollarSign, Bell, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Save, Globe, DollarSign, Bell, Shield, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -124,8 +124,10 @@ export default function SettingsPage() {
 	const params = useParams();
 	const companyId = params.companyId as string;
 	const [activeSection, setActiveSection] = useState("general");
+	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const [saved, setSaved] = useState(false);
+	const [saveError, setSaveError] = useState<string | null>(null);
 
 	// General settings
 	const [appName, setAppName] = useState("Mindify");
@@ -155,18 +157,93 @@ export default function SettingsPage() {
 	const [analyticsTracking, setAnalyticsTracking] = useState(true);
 	const [debugMode, setDebugMode] = useState(false);
 
+	// Load settings from API on mount
+	useEffect(() => {
+		async function loadSettings() {
+			try {
+				const res = await fetch("/api/admin/settings");
+				if (!res.ok) throw new Error("Failed to load settings");
+				const data = await res.json();
+				setAppName(data.appName);
+				setAppTagline(data.appTagline);
+				setWelcomeMessage(data.welcomeMessage);
+				setSupportEmail(data.supportEmail);
+				setMonthlyPrice(String(data.monthlyPrice));
+				setAnnualPrice(String(data.annualPrice));
+				setFreeMeditationLimit(String(data.freeMeditationLimit));
+				setFreeHypnosisLimit(String(data.freeHypnosisLimit));
+				setFreeProgramLimit(String(data.freeProgramLimit));
+				setEmailNotifications(data.emailNotifications);
+				setStreakReminders(data.streakReminders);
+				setWeeklyDigest(data.weeklyDigest);
+				setNewContentAlerts(data.newContentAlerts);
+				setMaintenanceMode(data.maintenanceMode);
+				setAnalyticsTracking(data.analyticsTracking);
+				setDebugMode(data.debugMode);
+			} catch (err) {
+				console.error("Failed to load settings:", err);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+		loadSettings();
+	}, []);
+
 	const handleSave = async () => {
 		setIsSaving(true);
-		// Simulate save — in production this would call an API
-		await new Promise((resolve) => setTimeout(resolve, 800));
-		setIsSaving(false);
-		setSaved(true);
-		setTimeout(() => setSaved(false), 2000);
+		setSaveError(null);
+		try {
+			const res = await fetch("/api/admin/settings", {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					appName,
+					appTagline,
+					welcomeMessage,
+					supportEmail,
+					monthlyPrice: parseFloat(monthlyPrice),
+					annualPrice: parseFloat(annualPrice),
+					freeMeditationLimit: parseInt(freeMeditationLimit, 10),
+					freeHypnosisLimit: parseInt(freeHypnosisLimit, 10),
+					freeProgramLimit: parseInt(freeProgramLimit, 10),
+					emailNotifications,
+					streakReminders,
+					weeklyDigest,
+					newContentAlerts,
+					maintenanceMode,
+					analyticsTracking,
+					debugMode,
+				}),
+			});
+			if (!res.ok) {
+				const err = await res.json();
+				throw new Error(err.error || "Failed to save");
+			}
+			setSaved(true);
+			setTimeout(() => setSaved(false), 2000);
+		} catch (err) {
+			setSaveError(err instanceof Error ? err.message : "Failed to save settings");
+		} finally {
+			setIsSaving(false);
+		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-[rgb(var(--cream-50))] dark:bg-[#0E1012]">
+				<Loader2 className="h-8 w-8 animate-spin text-[rgb(var(--sage-600))]" />
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-[rgb(var(--cream-50))] dark:bg-[#0E1012]">
 			<div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+				{saveError && (
+					<div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400">
+						{saveError}
+					</div>
+				)}
 				{/* Header */}
 				<div className="mb-8 flex flex-wrap items-center justify-between gap-4">
 					<div className="flex items-center gap-4">

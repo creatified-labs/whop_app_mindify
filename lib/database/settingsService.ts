@@ -1,0 +1,119 @@
+/**
+ * Settings Service - Database operations for admin app settings
+ *
+ * Single-row table approach: one row holds all configurable settings.
+ */
+
+import { supabaseAdmin } from '@/lib/supabase/admin';
+
+export interface AppSettings {
+  id: string;
+  appName: string;
+  appTagline: string;
+  welcomeMessage: string;
+  supportEmail: string;
+  monthlyPrice: number;
+  annualPrice: number;
+  freeMeditationLimit: number;
+  freeHypnosisLimit: number;
+  freeProgramLimit: number;
+  emailNotifications: boolean;
+  streakReminders: boolean;
+  weeklyDigest: boolean;
+  newContentAlerts: boolean;
+  maintenanceMode: boolean;
+  analyticsTracking: boolean;
+  debugMode: boolean;
+  updatedAt: string;
+}
+
+function rowToSettings(row: Record<string, unknown>): AppSettings {
+  return {
+    id: row.id as string,
+    appName: row.app_name as string,
+    appTagline: row.app_tagline as string,
+    welcomeMessage: row.welcome_message as string,
+    supportEmail: row.support_email as string,
+    monthlyPrice: Number(row.monthly_price),
+    annualPrice: Number(row.annual_price),
+    freeMeditationLimit: row.free_meditation_limit as number,
+    freeHypnosisLimit: row.free_hypnosis_limit as number,
+    freeProgramLimit: row.free_program_limit as number,
+    emailNotifications: row.email_notifications as boolean,
+    streakReminders: row.streak_reminders as boolean,
+    weeklyDigest: row.weekly_digest as boolean,
+    newContentAlerts: row.new_content_alerts as boolean,
+    maintenanceMode: row.maintenance_mode as boolean,
+    analyticsTracking: row.analytics_tracking as boolean,
+    debugMode: row.debug_mode as boolean,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+export async function getSettings(): Promise<{ data: AppSettings | null; error: Error | null }> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('app_settings')
+      .select('*')
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('[SettingsService] Error fetching settings:', error);
+      return { data: null, error: new Error(error.message) };
+    }
+
+    return { data: rowToSettings(data), error: null };
+  } catch (err) {
+    console.error('[SettingsService] Error in getSettings:', err);
+    return { data: null, error: err as Error };
+  }
+}
+
+export async function updateSettings(
+  updates: Partial<Omit<AppSettings, 'id' | 'updatedAt'>>
+): Promise<{ data: AppSettings | null; error: Error | null }> {
+  try {
+    const dbUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (updates.appName !== undefined) dbUpdates.app_name = updates.appName;
+    if (updates.appTagline !== undefined) dbUpdates.app_tagline = updates.appTagline;
+    if (updates.welcomeMessage !== undefined) dbUpdates.welcome_message = updates.welcomeMessage;
+    if (updates.supportEmail !== undefined) dbUpdates.support_email = updates.supportEmail;
+    if (updates.monthlyPrice !== undefined) dbUpdates.monthly_price = updates.monthlyPrice;
+    if (updates.annualPrice !== undefined) dbUpdates.annual_price = updates.annualPrice;
+    if (updates.freeMeditationLimit !== undefined) dbUpdates.free_meditation_limit = updates.freeMeditationLimit;
+    if (updates.freeHypnosisLimit !== undefined) dbUpdates.free_hypnosis_limit = updates.freeHypnosisLimit;
+    if (updates.freeProgramLimit !== undefined) dbUpdates.free_program_limit = updates.freeProgramLimit;
+    if (updates.emailNotifications !== undefined) dbUpdates.email_notifications = updates.emailNotifications;
+    if (updates.streakReminders !== undefined) dbUpdates.streak_reminders = updates.streakReminders;
+    if (updates.weeklyDigest !== undefined) dbUpdates.weekly_digest = updates.weeklyDigest;
+    if (updates.newContentAlerts !== undefined) dbUpdates.new_content_alerts = updates.newContentAlerts;
+    if (updates.maintenanceMode !== undefined) dbUpdates.maintenance_mode = updates.maintenanceMode;
+    if (updates.analyticsTracking !== undefined) dbUpdates.analytics_tracking = updates.analyticsTracking;
+    if (updates.debugMode !== undefined) dbUpdates.debug_mode = updates.debugMode;
+
+    // Update the first (only) row
+    const { data: rows } = await supabaseAdmin
+      .from('app_settings')
+      .select('id')
+      .limit(1)
+      .single();
+
+    if (!rows) {
+      return { data: null, error: new Error('No settings row found') };
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('app_settings')
+      .update(dbUpdates)
+      .eq('id', rows.id)
+      .select()
+      .single();
+
+    if (error) return { data: null, error: new Error(error.message) };
+    return { data: rowToSettings(data), error: null };
+  } catch (err) {
+    console.error('[SettingsService] Error in updateSettings:', err);
+    return { data: null, error: err as Error };
+  }
+}
