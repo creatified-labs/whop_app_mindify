@@ -5,6 +5,7 @@ import { Sunrise, Sun, Moon, Target, BarChart3, type LucideIcon } from "lucide-r
 type WelcomeSectionProps = {
 	userName: string;
 	timeOfDay: "morning" | "afternoon" | "evening";
+	welcomeMessage?: string;
 };
 
 const greetings: Record<string, { icon: LucideIcon; text: string }> = {
@@ -13,7 +14,7 @@ const greetings: Record<string, { icon: LucideIcon; text: string }> = {
 	evening: { icon: Moon, text: "Good evening" },
 };
 
-export function WelcomeSection({ userName, timeOfDay }: WelcomeSectionProps) {
+export function WelcomeSection({ userName, timeOfDay, welcomeMessage }: WelcomeSectionProps) {
 	const greeting = greetings[timeOfDay];
 
 	return (
@@ -31,7 +32,7 @@ export function WelcomeSection({ userName, timeOfDay }: WelcomeSectionProps) {
 						{greeting.text}, {userName}
 					</h1>
 				</div>
-				<p className="mb-6 text-lg text-white/90">Take a moment to center yourself and set your intention for today.</p>
+				<p className="mb-6 text-lg text-white/90">{welcomeMessage || "Take a moment to center yourself and set your intention for today."}</p>
 				<div className="flex flex-wrap gap-4">
 					<button className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-[rgb(var(--sage-700))] shadow-soft transition hover:shadow-hover">
 						<Target className="h-4 w-4" /> Start Daily Practice

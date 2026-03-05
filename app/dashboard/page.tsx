@@ -9,6 +9,7 @@ import ActivePrograms from "@/components/dashboard/ActivePrograms";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import QuickActions from "@/components/dashboard/QuickActions";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
+import { getSettings } from "@/lib/database/settingsService";
 
 export default async function UserDashboardPage() {
 	// Get authenticated user
@@ -24,10 +25,11 @@ export default async function UserDashboardPage() {
 	const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
 
 	// Fetch user stats and activity from database
-	const [statsResult, programsResult, activityResult] = await Promise.all([
+	const [statsResult, programsResult, activityResult, settingsResult] = await Promise.all([
 		getActivityStats(userId),
 		getAllProgramProgress(userId),
 		getUserActivity(userId, { limit: 10 }),
+		getSettings(),
 	]);
 
 	// Calculate stats
@@ -61,7 +63,7 @@ export default async function UserDashboardPage() {
 			<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 				{/* Welcome Section */}
 				<div className="mb-8">
-					<WelcomeSection userName={displayName} timeOfDay={timeOfDay} />
+					<WelcomeSection userName={displayName} timeOfDay={timeOfDay} welcomeMessage={settingsResult.data?.welcomeMessage} />
 				</div>
 
 				{/* Stats Cards */}

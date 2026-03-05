@@ -6,6 +6,7 @@ import {
 	MEDITATION_SESSIONS,
 	PROGRESS_METRICS,
 } from "@/constants";
+import { getSettings } from "@/lib/database/settingsService";
 import { AppLayout } from "@/components/layout/AppLayout";
 import {
 	ExperienceContent,
@@ -62,7 +63,8 @@ const userProgress: UserProgress = {
 	lastActivityDate: new Date().toISOString(),
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+	const { data: settings } = await getSettings();
 	return (
 		<AppLayout userName="Creatified" streakDays={streakDays} membershipTier="free">
 			<main className="space-y-16">
@@ -77,7 +79,7 @@ export default function HomePage() {
 					</div>
 					<div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 						<div className="space-y-6">
-							<p className="text-xs uppercase tracking-[0.5em] text-sage-600 dark:text-[#BFAF96]">{HERO_COPY.tagline}</p>
+							<p className="text-xs uppercase tracking-[0.5em] text-sage-600 dark:text-[#BFAF96]">{settings?.appTagline || HERO_COPY.tagline}</p>
 							<h1 className="font-serif text-4xl lg:text-5xl text-earth-900 dark:text-[#F4EFE6]">{HERO_COPY.title}</h1>
 							<p className="text-earth-600 dark:text-[#CFC7BB]">{HERO_COPY.description}</p>
 							<div className="flex flex-wrap gap-3">
