@@ -156,6 +156,19 @@ export interface UserProgress {
 	lastActivityDate: string;
 }
 
+export interface MediaLibraryItem {
+	id: string;
+	name: string;
+	mediaType: "audio" | "link";
+	url: string;
+	storagePath?: string | null;
+	mimeType?: string | null;
+	fileSizeBytes?: number | null;
+	tags: string[];
+	createdAt: string;
+	updatedAt: string;
+}
+
 export type MoodFilter = "all" | Mood;
 export type DurationFilter = "all" | "1-5" | "6-10" | "11-20" | "20+";
 

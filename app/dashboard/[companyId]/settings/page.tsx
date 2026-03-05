@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, Globe, DollarSign, Bell, Shield, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Globe, DollarSign, Bell, Shield, Library, Loader2 } from "lucide-react";
+import MediaLibrarySection from "@/components/dashboard/settings/MediaLibrarySection";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -16,6 +17,7 @@ const sections: SettingsSection[] = [
 	{ id: "pricing", label: "Pricing & Access", icon: DollarSign },
 	{ id: "notifications", label: "Notifications", icon: Bell },
 	{ id: "advanced", label: "Advanced", icon: Shield },
+	{ id: "media", label: "Media Library", icon: Library },
 ];
 
 function SectionCard({
@@ -130,7 +132,6 @@ export default function SettingsPage() {
 	const [saveError, setSaveError] = useState<string | null>(null);
 
 	// General settings
-	const [appName, setAppName] = useState("Mindify");
 	const [appTagline, setAppTagline] = useState(
 		"Transform your mind, one session at a time"
 	);
@@ -164,7 +165,6 @@ export default function SettingsPage() {
 				const res = await fetch("/api/admin/settings");
 				if (!res.ok) throw new Error("Failed to load settings");
 				const data = await res.json();
-				setAppName(data.appName);
 				setAppTagline(data.appTagline);
 				setWelcomeMessage(data.welcomeMessage);
 				setSupportEmail(data.supportEmail);
@@ -197,7 +197,6 @@ export default function SettingsPage() {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					appName,
 					appTagline,
 					welcomeMessage,
 					supportEmail,
@@ -304,12 +303,14 @@ export default function SettingsPage() {
 									title="App Identity"
 									description="Customize how your app appears to users"
 								>
-									<SettingsInput
-										label="App Name"
-										value={appName}
-										onChange={setAppName}
-										placeholder="Mindify"
-									/>
+									<div>
+										<label className="mb-1.5 block text-sm font-medium text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
+											App Name
+										</label>
+										<p className="text-sm text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+											Mindify
+										</p>
+									</div>
 									<SettingsInput
 										label="Tagline"
 										value={appTagline}
@@ -421,6 +422,8 @@ export default function SettingsPage() {
 								/>
 							</SectionCard>
 						)}
+
+						{activeSection === "media" && <MediaLibrarySection />}
 
 						{activeSection === "advanced" && (
 							<>
