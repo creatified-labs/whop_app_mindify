@@ -1,7 +1,7 @@
 /**
  * Settings Service - Database operations for admin app settings
  *
- * Single-row table approach: one row holds all configurable settings.
+ * Per-company settings: each company has its own row.
  */
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
@@ -50,12 +50,12 @@ function rowToSettings(row: Record<string, unknown>): AppSettings {
   };
 }
 
-export async function getSettings(): Promise<{ data: AppSettings | null; error: Error | null }> {
+export async function getSettings(companyId: string): Promise<{ data: AppSettings | null; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('app_settings')
       .select('*')
-      .limit(1)
+      .eq('company_id', companyId)
       .single();
 
     if (error) {
@@ -71,6 +71,7 @@ export async function getSettings(): Promise<{ data: AppSettings | null; error: 
 }
 
 export async function updateSettings(
+  companyId: string,
   updates: Partial<Omit<AppSettings, 'id' | 'updatedAt'>>
 ): Promise<{ data: AppSettings | null; error: Error | null }> {
   try {
@@ -92,21 +93,33 @@ export async function updateSettings(
     if (updates.analyticsTracking !== undefined) dbUpdates.analytics_tracking = updates.analyticsTracking;
     if (updates.debugMode !== undefined) dbUpdates.debug_mode = updates.debugMode;
 
-    // Update the first (only) row
-    const { data: rows } = await supabaseAdmin
+    // Try to find existing settings row for this company
+    const { data: existingRow } = await supabaseAdmin
       .from('app_settings')
       .select('id')
-      .limit(1)
+      .eq('company_id', companyId)
       .single();
 
-    if (!rows) {
-      return { data: null, error: new Error('No settings row found') };
+    if (!existingRow) {
+      // No settings row for this company yet - upsert with defaults
+      const { data, error } = await supabaseAdmin
+        .from('app_settings')
+        .upsert({
+          company_id: companyId,
+          ...dbUpdates,
+        })
+        .select()
+        .single();
+
+      if (error) return { data: null, error: new Error(error.message) };
+      return { data: rowToSettings(data), error: null };
     }
 
     const { data, error } = await supabaseAdmin
       .from('app_settings')
       .update(dbUpdates)
-      .eq('id', rows.id)
+      .eq('company_id', companyId)
+      .eq('id', existingRow.id)
       .select()
       .single();
 

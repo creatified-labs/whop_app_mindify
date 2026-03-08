@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import {
   recordActivity,
   getUserActivity,
@@ -14,6 +14,7 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get activity from database
-    const { data: activities, error } = await getUserActivity(userId, filters);
+    const { data: activities, error } = await getUserActivity(companyId, userId, filters);
 
     if (error) {
       return NextResponse.json(
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Record activity in database
-    const { success, error } = await recordActivity(userId, body);
+    const { success, error } = await recordActivity(companyId, userId, body);
 
     if (!success || error) {
       return NextResponse.json(

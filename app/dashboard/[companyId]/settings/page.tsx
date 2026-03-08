@@ -154,7 +154,7 @@ export default function SettingsPage() {
 	useEffect(() => {
 		async function loadSettings() {
 			try {
-				const res = await fetch("/api/admin/settings");
+				const res = await fetch(`/api/admin/settings?company_id=${encodeURIComponent(companyId)}`);
 				if (!res.ok) throw new Error("Failed to load settings");
 				const data = await res.json();
 				setAppTagline(data.appTagline);
@@ -180,7 +180,7 @@ export default function SettingsPage() {
 		setIsSaving(true);
 		setSaveError(null);
 		try {
-			const res = await fetch("/api/admin/settings", {
+			const res = await fetch(`/api/admin/settings?company_id=${encodeURIComponent(companyId)}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -354,7 +354,7 @@ export default function SettingsPage() {
 							</SectionCard>
 						)}
 
-						{activeSection === "media" && <MediaLibrarySection />}
+						{activeSection === "media" && <MediaLibrarySection companyId={companyId} />}
 
 						{activeSection === "advanced" && (
 							<>

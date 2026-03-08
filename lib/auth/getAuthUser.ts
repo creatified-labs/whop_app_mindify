@@ -1,40 +1,22 @@
 /**
  * Authentication Utility
  *
- * Extracts and verifies the Whop user ID from request headers
- * This replaces all instances of the fallback "demo-user" throughout the app
+ * Extracts and verifies the Whop user ID from request headers.
+ * Provides company-scoped auth context for multi-tenancy.
  */
 
 import { whopsdk } from '@/lib/whop-sdk';
 
 /**
+ * Auth context with both user and company information
+ */
+export interface AuthContext {
+  userId: string;
+  companyId: string;
+}
+
+/**
  * Get authenticated user ID from request headers
- *
- * @param headers - Request headers (from Next.js headers() or request.headers)
- * @returns Whop user ID
- * @throws Error if authentication fails
- *
- * Usage in API Routes:
- * ```ts
- * import { headers } from 'next/headers';
- * import { getAuthUser } from '@/lib/auth/getAuthUser';
- *
- * export async function GET(request: NextRequest) {
- *   const userId = await getAuthUser(await headers());
- *   // ... use userId
- * }
- * ```
- *
- * Usage in Server Components:
- * ```ts
- * import { headers } from 'next/headers';
- * import { getAuthUser } from '@/lib/auth/getAuthUser';
- *
- * export default async function Page() {
- *   const userId = await getAuthUser(await headers());
- *   // ... use userId
- * }
- * ```
  */
 export async function getAuthUser(headers: Headers): Promise<string> {
   try {
@@ -52,12 +34,44 @@ export async function getAuthUser(headers: Headers): Promise<string> {
 }
 
 /**
- * Get authenticated user ID with fallback for development
- * Use this ONLY in development/testing when you need a fallback user
+ * Get full auth context including company ID.
+ * Use this for all multi-tenant operations.
  *
  * @param headers - Request headers
- * @param fallbackUserId - Fallback user ID for development (optional)
- * @returns Whop user ID or fallback
+ * @param companyId - Company ID from route params, query params, or request header
+ */
+export async function getAuthContext(
+  headers: Headers,
+  companyId: string
+): Promise<AuthContext> {
+  const userId = await getAuthUser(headers);
+
+  if (!companyId || companyId === 'undefined') {
+    throw new Error('Company ID is required');
+  }
+
+  return { userId, companyId };
+}
+
+/**
+ * Extract company ID from a request.
+ * Checks x-company-id header, then ?company_id query param.
+ */
+export function extractCompanyId(request: Request): string {
+  // Check custom header first
+  const headerCompanyId = request.headers.get('x-company-id');
+  if (headerCompanyId) return headerCompanyId;
+
+  // Check query param
+  const { searchParams } = new URL(request.url);
+  const paramCompanyId = searchParams.get('company_id');
+  if (paramCompanyId) return paramCompanyId;
+
+  throw new Error('Company ID is required (x-company-id header or company_id query param)');
+}
+
+/**
+ * Get authenticated user ID with fallback for development
  */
 export async function getAuthUserWithFallback(
   headers: Headers,
@@ -78,9 +92,6 @@ export async function getAuthUserWithFallback(
 
 /**
  * Check if user is authenticated (returns boolean instead of throwing)
- *
- * @param headers - Request headers
- * @returns true if user is authenticated, false otherwise
  */
 export async function isAuthenticated(headers: Headers): Promise<boolean> {
   try {
@@ -93,9 +104,6 @@ export async function isAuthenticated(headers: Headers): Promise<boolean> {
 
 /**
  * Get auth user or return null (no throwing)
- *
- * @param headers - Request headers
- * @returns Whop user ID or null
  */
 export async function getAuthUserOrNull(
   headers: Headers

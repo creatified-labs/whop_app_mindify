@@ -9,9 +9,10 @@ type UploadState = "idle" | "uploading" | "success" | "error";
 interface AudioUploadButtonProps {
 	onUploadComplete: (publicUrl: string) => void;
 	contentType?: AudioContentType;
+	companyId: string;
 }
 
-export function AudioUploadButton({ onUploadComplete, contentType = "general" }: AudioUploadButtonProps) {
+export function AudioUploadButton({ onUploadComplete, contentType = "general", companyId }: AudioUploadButtonProps) {
 	const [state, setState] = useState<UploadState>("idle");
 	const [error, setError] = useState<string | null>(null);
 	const [progress, setProgress] = useState<string>("");
@@ -31,7 +32,7 @@ export function AudioUploadButton({ onUploadComplete, contentType = "general" }:
 
 		try {
 			// Step 1: Get signed upload URL from our API
-			const res = await fetch("/api/admin/upload/audio", {
+			const res = await fetch(`/api/admin/upload/audio?company_id=${encodeURIComponent(companyId)}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({

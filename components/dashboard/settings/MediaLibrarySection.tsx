@@ -63,7 +63,7 @@ function formatDate(dateStr: string): string {
 	});
 }
 
-export default function MediaLibrarySection() {
+export default function MediaLibrarySection({ companyId }: { companyId: string }) {
 	const [items, setItems] = useState<MediaLibraryItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [filterTab, setFilterTab] = useState<FilterTab>("all");
@@ -81,8 +81,9 @@ export default function MediaLibrarySection() {
 
 	const fetchItems = useCallback(async () => {
 		try {
-			const params = filterTab !== "all" ? `?type=${filterTab}` : "";
-			const res = await fetch(`/api/admin/media-library${params}`);
+			const params = new URLSearchParams({ company_id: companyId });
+			if (filterTab !== "all") params.set("type", filterTab);
+			const res = await fetch(`/api/admin/media-library?${params}`);
 			if (!res.ok) throw new Error("Failed to fetch");
 			const data = await res.json();
 			setItems(data.items || []);
@@ -91,7 +92,7 @@ export default function MediaLibrarySection() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [filterTab]);
+	}, [filterTab, companyId]);
 
 	useEffect(() => {
 		setIsLoading(true);
@@ -126,7 +127,7 @@ export default function MediaLibrarySection() {
 				const fileContentType = item.file.type || "audio/mpeg";
 				const isVideo = fileContentType.startsWith("video/");
 
-				const uploadRes = await fetch("/api/admin/media-library", {
+				const uploadRes = await fetch(`/api/admin/media-library?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
@@ -161,7 +162,7 @@ export default function MediaLibrarySection() {
 
 				// Step 3: Register in DB
 				const id = crypto.randomUUID();
-				const registerRes = await fetch("/api/admin/media-library", {
+				const registerRes = await fetch(`/api/admin/media-library?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
@@ -253,7 +254,7 @@ export default function MediaLibrarySection() {
 				};
 			});
 
-			const res = await fetch("/api/admin/media-library", {
+			const res = await fetch(`/api/admin/media-library?company_id=${encodeURIComponent(companyId)}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ action: "register", items }),
@@ -277,7 +278,7 @@ export default function MediaLibrarySection() {
 	const handleDelete = async (id: string) => {
 		try {
 			const res = await fetch(
-				`/api/admin/media-library?id=${encodeURIComponent(id)}`,
+				`/api/admin/media-library?id=${encodeURIComponent(id)}&company_id=${encodeURIComponent(companyId)}`,
 				{ method: "DELETE" }
 			);
 			if (!res.ok) throw new Error("Failed to delete");

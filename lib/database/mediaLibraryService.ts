@@ -18,12 +18,14 @@ function rowToMediaItem(row: Record<string, unknown>): MediaLibraryItem {
 }
 
 export async function getMediaItems(
+  companyId: string,
   filter?: 'audio' | 'video' | 'link'
 ): Promise<{ data: MediaLibraryItem[]; error: Error | null }> {
   try {
     let query = supabaseAdmin
       .from('media_library')
       .select('*')
+      .eq('company_id', companyId)
       .order('created_at', { ascending: false });
 
     if (filter) {
@@ -40,6 +42,7 @@ export async function getMediaItems(
 }
 
 export async function createMediaItem(
+  companyId: string,
   item: Omit<MediaLibraryItem, 'createdAt' | 'updatedAt'>
 ): Promise<{ data: MediaLibraryItem | null; error: Error | null }> {
   try {
@@ -47,6 +50,7 @@ export async function createMediaItem(
       .from('media_library')
       .insert({
         id: item.id,
+        company_id: companyId,
         name: item.name,
         media_type: item.mediaType,
         url: item.url,
@@ -66,11 +70,13 @@ export async function createMediaItem(
 }
 
 export async function createMediaItems(
+  companyId: string,
   items: Omit<MediaLibraryItem, 'createdAt' | 'updatedAt'>[]
 ): Promise<{ data: MediaLibraryItem[]; error: Error | null }> {
   try {
     const rows = items.map((item) => ({
       id: item.id,
+      company_id: companyId,
       name: item.name,
       media_type: item.mediaType,
       url: item.url,
@@ -93,6 +99,7 @@ export async function createMediaItems(
 }
 
 export async function deleteMediaItem(
+  companyId: string,
   id: string
 ): Promise<{ success: boolean; error: Error | null }> {
   try {
@@ -100,6 +107,7 @@ export async function deleteMediaItem(
     const { data: item, error: fetchError } = await supabaseAdmin
       .from('media_library')
       .select('storage_path')
+      .eq('company_id', companyId)
       .eq('id', id)
       .single();
 
@@ -113,6 +121,7 @@ export async function deleteMediaItem(
     const { error } = await supabaseAdmin
       .from('media_library')
       .delete()
+      .eq('company_id', companyId)
       .eq('id', id);
 
     if (error) return { success: false, error: new Error(error.message) };
@@ -123,6 +132,7 @@ export async function deleteMediaItem(
 }
 
 export async function updateMediaItemTags(
+  companyId: string,
   id: string,
   tags: string[]
 ): Promise<{ data: MediaLibraryItem | null; error: Error | null }> {
@@ -130,6 +140,7 @@ export async function updateMediaItemTags(
     const { data, error } = await supabaseAdmin
       .from('media_library')
       .update({ tags })
+      .eq('company_id', companyId)
       .eq('id', id)
       .select()
       .single();

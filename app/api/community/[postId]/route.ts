@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import { deleteCommunityPost } from '@/lib/database/communityService';
 
 /**
@@ -8,10 +8,11 @@ import { deleteCommunityPost } from '@/lib/database/communityService';
  * Delete a community post (own posts only)
  */
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const companyId = extractCompanyId(request);
     const userId = await getAuthUser(await headers());
     const { postId } = await params;
 
@@ -19,7 +20,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'postId is required' }, { status: 400 });
     }
 
-    const { success, error } = await deleteCommunityPost(userId, postId);
+    const { success, error } = await deleteCommunityPost(companyId, userId, postId);
 
     if (error) {
       return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });

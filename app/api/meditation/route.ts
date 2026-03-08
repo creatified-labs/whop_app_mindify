@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { getMeditations } from "@/lib/database/contentService";
+import { extractCompanyId } from "@/lib/auth/getAuthUser";
 
 export async function GET(request: Request) {
+	const companyId = extractCompanyId(request);
 	const { searchParams } = new URL(request.url);
 	const mood = searchParams.get("mood") ?? undefined;
 	const duration = searchParams.get("duration") ?? undefined;
 	const category = searchParams.get("category") ?? undefined;
 
-	const { data: dbMeditations, error } = await getMeditations();
+	const { data: dbMeditations, error } = await getMeditations(companyId);
 
 	if (error) {
 		return NextResponse.json({ error: error.message }, { status: 500 });

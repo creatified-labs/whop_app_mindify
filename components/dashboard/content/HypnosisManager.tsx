@@ -64,7 +64,7 @@ const columns: ContentColumn<HypnosisSession>[] = [
 	},
 ];
 
-export function HypnosisManager() {
+export function HypnosisManager({ companyId }: { companyId: string }) {
 	const [items, setItems] = useState<HypnosisSession[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -75,7 +75,7 @@ export function HypnosisManager() {
 	const fetchItems = useCallback(async () => {
 		setIsLoading(true);
 		try {
-			const res = await fetch("/api/admin/hypnosis");
+			const res = await fetch(`/api/admin/hypnosis?company_id=${encodeURIComponent(companyId)}`);
 			const json = await res.json();
 			setItems(json.items || []);
 		} catch (err) {
@@ -113,7 +113,7 @@ export function HypnosisManager() {
 
 	const handleDelete = async (item: HypnosisSession) => {
 		if (!confirm(`Delete "${item.title}"?`)) return;
-		await fetch(`/api/admin/hypnosis/${item.id}`, { method: "DELETE" });
+		await fetch(`/api/admin/hypnosis/${item.id}?company_id=${encodeURIComponent(companyId)}`, { method: "DELETE" });
 		fetchItems();
 	};
 
@@ -121,13 +121,13 @@ export function HypnosisManager() {
 		setIsSubmitting(true);
 		try {
 			if (editingItem) {
-				await fetch(`/api/admin/hypnosis/${editingItem.id}`, {
+				await fetch(`/api/admin/hypnosis/${editingItem.id}?company_id=${encodeURIComponent(companyId)}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
 				});
 			} else {
-				await fetch("/api/admin/hypnosis", {
+				await fetch(`/api/admin/hypnosis?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
@@ -168,11 +168,11 @@ export function HypnosisManager() {
 					<FormSelect label="Theme" value={form.theme} onChange={(v) => setForm({ ...form, theme: v as HypnosisTheme })} options={themeOptions} />
 				</div>
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/..." />
-				<AudioUploadButton contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
+				<AudioUploadButton companyId={companyId} contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormInput label="Daytime Version URL" value={form.daytimeVersion} onChange={(v) => setForm({ ...form, daytimeVersion: v })} placeholder="/audio/..." />
-				<AudioUploadButton contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, daytimeVersion: url }))} />
+				<AudioUploadButton companyId={companyId} contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, daytimeVersion: url }))} />
 				<FormInput label="Nighttime Version URL" value={form.nighttimeVersion} onChange={(v) => setForm({ ...form, nighttimeVersion: v })} placeholder="/audio/..." />
-				<AudioUploadButton contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, nighttimeVersion: url }))} />
+				<AudioUploadButton companyId={companyId} contentType="hypnosis" onUploadComplete={(url) => setForm((prev) => ({ ...prev, nighttimeVersion: url }))} />
 				<div className="flex gap-4">
 					<FormCheckbox label="Has Binaural Beats" checked={form.hasBinaural} onChange={(v) => setForm({ ...form, hasBinaural: v })} />
 					<FormCheckbox label="Premium" checked={form.isPremium} onChange={(v) => setForm({ ...form, isPremium: v })} />

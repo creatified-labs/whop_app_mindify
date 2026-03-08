@@ -42,7 +42,7 @@ const columns: ContentColumn<KnowledgeArticle>[] = [
 	{ key: "readTime", label: "Read Time", render: (item) => `${item.readTimeMinutes}m`, className: "text-right" },
 ];
 
-export function ArticleManager() {
+export function ArticleManager({ companyId }: { companyId: string }) {
 	const [items, setItems] = useState<KnowledgeArticle[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,7 +53,7 @@ export function ArticleManager() {
 	const fetchItems = useCallback(async () => {
 		setIsLoading(true);
 		try {
-			const res = await fetch("/api/admin/articles");
+			const res = await fetch(`/api/admin/articles?company_id=${encodeURIComponent(companyId)}`);
 			const json = await res.json();
 			setItems(json.items || []);
 		} catch (err) {
@@ -90,7 +90,7 @@ export function ArticleManager() {
 
 	const handleDelete = async (item: KnowledgeArticle) => {
 		if (!confirm(`Delete "${item.title}"?`)) return;
-		await fetch(`/api/admin/articles/${item.slug}`, { method: "DELETE" });
+		await fetch(`/api/admin/articles/${item.slug}?company_id=${encodeURIComponent(companyId)}`, { method: "DELETE" });
 		fetchItems();
 	};
 
@@ -98,13 +98,13 @@ export function ArticleManager() {
 		setIsSubmitting(true);
 		try {
 			if (editingItem) {
-				await fetch(`/api/admin/articles/${editingItem.slug}`, {
+				await fetch(`/api/admin/articles/${editingItem.slug}?company_id=${encodeURIComponent(companyId)}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
 				});
 			} else {
-				await fetch("/api/admin/articles", {
+				await fetch(`/api/admin/articles?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),

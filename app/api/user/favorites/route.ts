@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import {
   getFavorites,
   addFavorite,
@@ -15,6 +15,7 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Get favorites from database
     const { data: favorites, error } = await getFavorites(
+      companyId,
       userId,
       contentType || undefined
     );
@@ -57,6 +59,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
@@ -83,6 +86,7 @@ export async function POST(request: NextRequest) {
     // Check if this is a toggle request
     if (body.toggle === true) {
       const { isFavorited, error } = await toggleFavorite(
+        companyId,
         userId,
         body.content_type,
         body.content_id
@@ -104,6 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Add favorite
     const { data, error } = await addFavorite(
+      companyId,
       userId,
       body.content_type,
       body.content_id
@@ -142,6 +147,7 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
@@ -159,7 +165,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Remove favorite from database
-    const { success, error } = await removeFavorite(userId, contentType, contentId);
+    const { success, error } = await removeFavorite(companyId, userId, contentType, contentId);
 
     if (!success || error) {
       return NextResponse.json(

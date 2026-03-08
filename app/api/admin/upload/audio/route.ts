@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import {
   validateMediaFile,
   createSignedUploadUrl,
@@ -22,6 +22,7 @@ const VALID_CONTENT_TYPES: AudioContentType[] = [
  */
 export async function POST(request: Request) {
   try {
+    extractCompanyId(request); // validate company context
     await getAuthUser(await headers());
 
     const body = await request.json();
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
  */
 export async function GET(request: Request) {
   try {
+    extractCompanyId(request); // validate company context
     await getAuthUser(await headers());
 
     const { searchParams } = new URL(request.url);
@@ -90,6 +92,7 @@ export async function GET(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
+    extractCompanyId(request); // validate company context
     await getAuthUser(await headers());
 
     const { searchParams } = new URL(request.url);

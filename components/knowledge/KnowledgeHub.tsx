@@ -15,7 +15,7 @@ const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
 	{ label: "Productivity", value: "productivity" },
 ];
 
-export function KnowledgeHub() {
+export function KnowledgeHub({ companyId }: { companyId: string }) {
 	const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
 	const [query, setQuery] = useState("");
 	const [category, setCategory] = useState<(typeof categories)[number]["value"]>("all");
@@ -24,15 +24,15 @@ export function KnowledgeHub() {
 
 	// Fetch articles from API
 	useEffect(() => {
-		fetch("/api/articles")
+		fetch(`/api/articles?company_id=${encodeURIComponent(companyId)}`)
 			.then((res) => res.json())
 			.then((data) => setArticles(data.items || []))
 			.catch(() => {});
-	}, []);
+	}, [companyId]);
 
 	// Fetch bookmarked article slugs on mount
 	useEffect(() => {
-		fetch("/api/user/favorites?content_type=article")
+		fetch(`/api/user/favorites?content_type=article&company_id=${encodeURIComponent(companyId)}`)
 			.then((res) => res.json())
 			.then((data) => {
 				const slugs = (data.favorites || []).map((f: any) => f.content_id);
@@ -54,7 +54,7 @@ export function KnowledgeHub() {
 		});
 
 		// Persist via API
-		fetch("/api/user/favorites", {
+		fetch(`/api/user/favorites?company_id=${encodeURIComponent(companyId)}`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({

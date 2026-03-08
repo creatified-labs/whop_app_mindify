@@ -20,10 +20,10 @@ const FREE_CONTENT_ALLOWLIST = new Set<string>([
  * Check user access tier
  * First checks database cache, falls back to Whop API if needed
  */
-export async function checkUserAccess(userId: string): Promise<"free" | "premium"> {
+export async function checkUserAccess(companyId: string, userId: string): Promise<"free" | "premium"> {
 	try {
 		// Try to get tier from database (fast, cached)
-		const tier = await getUserTier(userId);
+		const tier = await getUserTier(companyId, userId);
 
 		if (tier) {
 			return tier;

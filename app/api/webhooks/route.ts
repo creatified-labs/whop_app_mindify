@@ -3,9 +3,19 @@ import type { Payment, Membership } from "@whop/sdk/resources.js";
 import type { NextRequest } from "next/server";
 import { whopsdk } from "@/lib/whop-sdk";
 import { syncUserTier, getOrCreateUser } from "@/lib/database/userService";
+import { extractCompanyId } from "@/lib/auth/getAuthUser";
 
 export async function POST(request: NextRequest): Promise<Response> {
 	try {
+		// Extract company ID from request if available
+		let companyId: string | undefined;
+		try {
+			companyId = extractCompanyId(request);
+		} catch {
+			// Webhooks may not always have company_id; fall back gracefully
+			companyId = undefined;
+		}
+
 		// Validate the webhook to ensure it's from Whop
 		const requestBodyText = await request.text();
 		const headers = Object.fromEntries(request.headers);
@@ -14,15 +24,15 @@ export async function POST(request: NextRequest): Promise<Response> {
 		// Handle different webhook events
 		switch (webhookData.type) {
 			case "payment.succeeded":
-				waitUntil(handlePaymentSucceeded(webhookData.data));
+				waitUntil(handlePaymentSucceeded(webhookData.data, companyId));
 				break;
 
 			case "membership.activated":
-				waitUntil(handleMembershipActivated(webhookData.data));
+				waitUntil(handleMembershipActivated(webhookData.data, companyId));
 				break;
 
 			case "membership.deactivated":
-				waitUntil(handleMembershipDeactivated(webhookData.data));
+				waitUntil(handleMembershipDeactivated(webhookData.data, companyId));
 				break;
 
 			default:
@@ -42,7 +52,7 @@ export async function POST(request: NextRequest): Promise<Response> {
  * Handle payment.succeeded event
  * Syncs user tier to database when payment is successful
  */
-async function handlePaymentSucceeded(payment: Payment) {
+async function handlePaymentSucceeded(payment: Payment, companyId?: string) {
 	try {
 		console.log("[Webhook] Payment succeeded:", payment.id);
 
@@ -53,15 +63,20 @@ async function handlePaymentSucceeded(payment: Payment) {
 			return;
 		}
 
+		if (!companyId) {
+			console.warn("[Webhook] No company_id available for payment webhook, skipping DB sync");
+			return;
+		}
+
 		const userId = user.id;
 
 		// Ensure user exists in database
-		await getOrCreateUser(userId, {
+		await getOrCreateUser(companyId, userId, {
 			whop_user_id: userId,
 		});
 
 		// Sync user tier based on their current memberships
-		await syncUserTier(userId, "premium");
+		await syncUserTier(companyId, userId, "premium");
 
 		console.log(`[Webhook] Successfully synced tier for user ${userId}`);
 	} catch (error) {
@@ -73,7 +88,7 @@ async function handlePaymentSucceeded(payment: Payment) {
  * Handle membership.activated event
  * Grants access and updates tier when membership is activated
  */
-async function handleMembershipActivated(membership: Membership) {
+async function handleMembershipActivated(membership: Membership, companyId?: string) {
 	try {
 		console.log("[Webhook] Membership activated:", membership.id);
 
@@ -83,15 +98,20 @@ async function handleMembershipActivated(membership: Membership) {
 			return;
 		}
 
+		if (!companyId) {
+			console.warn("[Webhook] No company_id available for membership webhook, skipping DB sync");
+			return;
+		}
+
 		const userId = user.id;
 
 		// Ensure user exists in database
-		await getOrCreateUser(userId, {
+		await getOrCreateUser(companyId, userId, {
 			whop_user_id: userId,
 		});
 
 		// Grant premium access
-		await syncUserTier(userId, "premium");
+		await syncUserTier(companyId, userId, "premium");
 
 		console.log(`[Webhook] Granted premium access to user ${userId}`);
 	} catch (error) {
@@ -103,7 +123,7 @@ async function handleMembershipActivated(membership: Membership) {
  * Handle membership.deactivated event
  * Revokes access and downgrades tier when membership is deactivated
  */
-async function handleMembershipDeactivated(membership: Membership) {
+async function handleMembershipDeactivated(membership: Membership, companyId?: string) {
 	try {
 		console.log("[Webhook] Membership deactivated:", membership.id);
 
@@ -113,10 +133,15 @@ async function handleMembershipDeactivated(membership: Membership) {
 			return;
 		}
 
+		if (!companyId) {
+			console.warn("[Webhook] No company_id available for membership webhook, skipping DB sync");
+			return;
+		}
+
 		const userId = user.id;
 
 		// Downgrade to free tier
-		await syncUserTier(userId, "free");
+		await syncUserTier(companyId, userId, "free");
 
 		console.log(`[Webhook] Revoked premium access for user ${userId}`);
 	} catch (error) {

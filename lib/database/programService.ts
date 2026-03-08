@@ -11,6 +11,7 @@ import type { ProgramProgress } from '@/lib/types';
  * Get program progress for a specific user and program
  */
 export async function getProgramProgress(
+  companyId: string,
   userId: string,
   programId: string
 ): Promise<{ data: ProgramProgress | null; error: Error | null }> {
@@ -18,6 +19,7 @@ export async function getProgramProgress(
     const { data, error } = await supabaseAdmin
       .from('program_progress')
       .select('*')
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('program_id', programId)
       .single();
@@ -53,12 +55,14 @@ export async function getProgramProgress(
  * Get all program progress for a user
  */
 export async function getAllProgramProgress(
+  companyId: string,
   userId: string
 ): Promise<{ data: ProgramProgress[]; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('program_progress')
       .select('*')
+      .eq('company_id', companyId)
       .eq('user_id', userId);
 
     if (error) {
@@ -88,6 +92,7 @@ export async function getAllProgramProgress(
  * Enroll a user in a program
  */
 export async function enrollInProgram(
+  companyId: string,
   userId: string,
   programId: string
 ): Promise<{ data: ProgramProgress | null; error: Error | null }> {
@@ -97,6 +102,7 @@ export async function enrollInProgram(
     const { data, error } = await supabaseAdmin
       .from('program_progress')
       .insert({
+        company_id: companyId,
         user_id: userId,
         program_id: programId,
         current_day: 1,
@@ -134,6 +140,7 @@ export async function enrollInProgram(
  * Update program progress
  */
 export async function updateProgramProgress(
+  companyId: string,
   userId: string,
   progress: ProgramProgress
 ): Promise<{ data: ProgramProgress | null; error: Error | null }> {
@@ -147,6 +154,7 @@ export async function updateProgramProgress(
         streak: progress.streak,
         completed_at: progress.completedAt,
       })
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('program_id', progress.programId)
       .select()
@@ -178,6 +186,7 @@ export async function updateProgramProgress(
  * Complete a program day
  */
 export async function completeProgramDay(
+  companyId: string,
   userId: string,
   programId: string,
   dayNumber: number
@@ -185,6 +194,7 @@ export async function completeProgramDay(
   try {
     // Get current progress
     const { data: currentProgress, error: fetchError } = await getProgramProgress(
+      companyId,
       userId,
       programId
     );
@@ -207,7 +217,7 @@ export async function completeProgramDay(
       streak: currentProgress.streak + 1,
     };
 
-    return updateProgramProgress(userId, updated);
+    return updateProgramProgress(companyId, userId, updated);
   } catch (err) {
     console.error('[ProgramService] Error in completeProgramDay:', err);
     return { data: null, error: err as Error };
@@ -218,6 +228,7 @@ export async function completeProgramDay(
  * Reset program progress
  */
 export async function resetProgramProgress(
+  companyId: string,
   userId: string,
   programId: string
 ): Promise<{ success: boolean; error: Error | null }> {
@@ -231,6 +242,7 @@ export async function resetProgramProgress(
         last_updated: new Date().toISOString(),
         completed_at: null,
       })
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('program_id', programId);
 

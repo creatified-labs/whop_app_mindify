@@ -41,7 +41,7 @@ const columns: ContentColumn<QuickReset>[] = [
 	{ key: "duration", label: "Duration", render: (item) => `${item.duration}m`, className: "text-right" },
 ];
 
-export function QuickResetManager() {
+export function QuickResetManager({ companyId }: { companyId: string }) {
 	const [items, setItems] = useState<QuickReset[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,7 +52,7 @@ export function QuickResetManager() {
 	const fetchItems = useCallback(async () => {
 		setIsLoading(true);
 		try {
-			const res = await fetch("/api/admin/quick-resets");
+			const res = await fetch(`/api/admin/quick-resets?company_id=${encodeURIComponent(companyId)}`);
 			const json = await res.json();
 			setItems(json.items || []);
 		} catch (err) {
@@ -86,7 +86,7 @@ export function QuickResetManager() {
 
 	const handleDelete = async (item: QuickReset) => {
 		if (!confirm(`Delete "${item.title}"?`)) return;
-		await fetch(`/api/admin/quick-resets/${item.id}`, { method: "DELETE" });
+		await fetch(`/api/admin/quick-resets/${item.id}?company_id=${encodeURIComponent(companyId)}`, { method: "DELETE" });
 		fetchItems();
 	};
 
@@ -94,13 +94,13 @@ export function QuickResetManager() {
 		setIsSubmitting(true);
 		try {
 			if (editingItem) {
-				await fetch(`/api/admin/quick-resets/${editingItem.id}`, {
+				await fetch(`/api/admin/quick-resets/${editingItem.id}?company_id=${encodeURIComponent(companyId)}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
 				});
 			} else {
-				await fetch("/api/admin/quick-resets", {
+				await fetch(`/api/admin/quick-resets?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
@@ -140,7 +140,7 @@ export function QuickResetManager() {
 					<FormSelect label="Type" value={form.type} onChange={(v) => setForm({ ...form, type: v as QuickResetType })} options={typeOptions} />
 				</div>
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/quick-resets/..." />
-				<AudioUploadButton contentType="quick-resets" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
+				<AudioUploadButton companyId={companyId} contentType="quick-resets" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormTextarea label="Instructions" value={form.instructions} onChange={(v) => setForm({ ...form, instructions: v })} rows={3} />
 			</ContentFormModal>
 		</>

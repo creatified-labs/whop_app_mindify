@@ -11,15 +11,15 @@ const categoryGradients: Record<ProgramCategory, string> = {
 	clarity: "from-emerald-600/40 via-teal-500/30 to-cyan-500/20",
 };
 
-export function ProgramsLibrary() {
+export function ProgramsLibrary({ companyId }: { companyId: string }) {
 	const [programs, setPrograms] = useState<Program[]>([]);
 
 	useEffect(() => {
-		fetch("/api/programs/content")
+		fetch(`/api/programs/content?company_id=${encodeURIComponent(companyId)}`)
 			.then((res) => res.json())
 			.then((data) => setPrograms(data.items || []))
 			.catch(() => {});
-	}, []);
+	}, [companyId]);
 
 	if (programs.length === 0) {
 		return (

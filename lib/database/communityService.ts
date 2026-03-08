@@ -43,7 +43,7 @@ export interface CommunityPostRow {
 /**
  * Get community posts with optional filters
  */
-export async function getCommunityPosts(filters?: {
+export async function getCommunityPosts(companyId: string, filters?: {
   postType?: UiPostType;
   limit?: number;
 }): Promise<{ data: CommunityPostRow[]; error: Error | null }> {
@@ -51,6 +51,7 @@ export async function getCommunityPosts(filters?: {
     let query = supabaseAdmin
       .from('community_posts')
       .select('*, users_metadata(display_name)')
+      .eq('company_id', companyId)
       .order('created_at', { ascending: false });
 
     if (filters?.postType) {
@@ -91,6 +92,7 @@ export async function getCommunityPosts(filters?: {
  * Create a community post
  */
 export async function createCommunityPost(
+  companyId: string,
   userId: string,
   input: {
     content: string;
@@ -103,6 +105,7 @@ export async function createCommunityPost(
     const { data, error } = await supabaseAdmin
       .from('community_posts')
       .insert({
+        company_id: companyId,
         user_id: userId,
         post_type: uiToDbPostType(input.postType),
         content: input.content,
@@ -140,6 +143,7 @@ export async function createCommunityPost(
  * Delete a community post (only if owned by user)
  */
 export async function deleteCommunityPost(
+  companyId: string,
   userId: string,
   postId: string
 ): Promise<{ success: boolean; error: Error | null }> {
@@ -147,6 +151,7 @@ export async function deleteCommunityPost(
     const { error } = await supabaseAdmin
       .from('community_posts')
       .delete()
+      .eq('company_id', companyId)
       .eq('id', postId)
       .eq('user_id', userId);
 

@@ -18,11 +18,12 @@ import type {
 // MEDITATIONS
 // =============================================================================
 
-export async function getMeditations(): Promise<{ data: Meditation[]; error: Error | null }> {
+export async function getMeditations(companyId: string): Promise<{ data: Meditation[]; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('meditations')
       .select('*')
+      .eq('company_id', companyId)
       .order('sort_order', { ascending: true });
 
     if (error) {
@@ -51,11 +52,12 @@ export async function getMeditations(): Promise<{ data: Meditation[]; error: Err
   }
 }
 
-export async function getMeditationById(id: string): Promise<{ data: Meditation | null; error: Error | null }> {
+export async function getMeditationById(companyId: string, id: string): Promise<{ data: Meditation | null; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('meditations')
       .select('*')
+      .eq('company_id', companyId)
       .eq('id', id)
       .single();
 
@@ -85,13 +87,14 @@ export async function getMeditationById(id: string): Promise<{ data: Meditation 
   }
 }
 
-export async function createMeditation(meditation: Omit<Meditation, 'id'> & { id?: string }): Promise<{ data: Meditation | null; error: Error | null }> {
+export async function createMeditation(companyId: string, meditation: Omit<Meditation, 'id'> & { id?: string }): Promise<{ data: Meditation | null; error: Error | null }> {
   try {
     const id = meditation.id || meditation.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const { data, error } = await supabaseAdmin
       .from('meditations')
       .insert({
         id,
+        company_id: companyId,
         title: meditation.title,
         description: meditation.description,
         duration: meditation.duration,
@@ -122,7 +125,7 @@ export async function createMeditation(meditation: Omit<Meditation, 'id'> & { id
   }
 }
 
-export async function updateMeditation(id: string, updates: Partial<Meditation>): Promise<{ data: Meditation | null; error: Error | null }> {
+export async function updateMeditation(companyId: string, id: string, updates: Partial<Meditation>): Promise<{ data: Meditation | null; error: Error | null }> {
   try {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;
@@ -139,6 +142,7 @@ export async function updateMeditation(id: string, updates: Partial<Meditation>)
     const { data, error } = await supabaseAdmin
       .from('meditations')
       .update(dbUpdates)
+      .eq('company_id', companyId)
       .eq('id', id)
       .select()
       .single();
@@ -159,9 +163,9 @@ export async function updateMeditation(id: string, updates: Partial<Meditation>)
   }
 }
 
-export async function deleteMeditation(id: string): Promise<{ success: boolean; error: Error | null }> {
+export async function deleteMeditation(companyId: string, id: string): Promise<{ success: boolean; error: Error | null }> {
   try {
-    const { error } = await supabaseAdmin.from('meditations').delete().eq('id', id);
+    const { error } = await supabaseAdmin.from('meditations').delete().eq('company_id', companyId).eq('id', id);
     if (error) return { success: false, error: new Error(error.message) };
     return { success: true, error: null };
   } catch (err) {
@@ -188,11 +192,12 @@ function rowToHypnosis(row: Record<string, unknown>): HypnosisSession {
   };
 }
 
-export async function getHypnosisSessions(): Promise<{ data: HypnosisSession[]; error: Error | null }> {
+export async function getHypnosisSessions(companyId: string): Promise<{ data: HypnosisSession[]; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('hypnosis_sessions')
       .select('*')
+      .eq('company_id', companyId)
       .order('sort_order', { ascending: true });
 
     if (error) return { data: [], error: new Error(error.message) };
@@ -202,11 +207,12 @@ export async function getHypnosisSessions(): Promise<{ data: HypnosisSession[]; 
   }
 }
 
-export async function getHypnosisSessionById(id: string): Promise<{ data: HypnosisSession | null; error: Error | null }> {
+export async function getHypnosisSessionById(companyId: string, id: string): Promise<{ data: HypnosisSession | null; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('hypnosis_sessions')
       .select('*')
+      .eq('company_id', companyId)
       .eq('id', id)
       .single();
 
@@ -220,13 +226,14 @@ export async function getHypnosisSessionById(id: string): Promise<{ data: Hypnos
   }
 }
 
-export async function createHypnosisSession(session: Omit<HypnosisSession, 'id'> & { id?: string }): Promise<{ data: HypnosisSession | null; error: Error | null }> {
+export async function createHypnosisSession(companyId: string, session: Omit<HypnosisSession, 'id'> & { id?: string }): Promise<{ data: HypnosisSession | null; error: Error | null }> {
   try {
     const id = session.id || session.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const { data, error } = await supabaseAdmin
       .from('hypnosis_sessions')
       .insert({
         id,
+        company_id: companyId,
         title: session.title,
         description: session.description,
         duration: session.duration,
@@ -247,7 +254,7 @@ export async function createHypnosisSession(session: Omit<HypnosisSession, 'id'>
   }
 }
 
-export async function updateHypnosisSession(id: string, updates: Partial<HypnosisSession>): Promise<{ data: HypnosisSession | null; error: Error | null }> {
+export async function updateHypnosisSession(companyId: string, id: string, updates: Partial<HypnosisSession>): Promise<{ data: HypnosisSession | null; error: Error | null }> {
   try {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;
@@ -263,6 +270,7 @@ export async function updateHypnosisSession(id: string, updates: Partial<Hypnosi
     const { data, error } = await supabaseAdmin
       .from('hypnosis_sessions')
       .update(dbUpdates)
+      .eq('company_id', companyId)
       .eq('id', id)
       .select()
       .single();
@@ -274,9 +282,9 @@ export async function updateHypnosisSession(id: string, updates: Partial<Hypnosi
   }
 }
 
-export async function deleteHypnosisSession(id: string): Promise<{ success: boolean; error: Error | null }> {
+export async function deleteHypnosisSession(companyId: string, id: string): Promise<{ success: boolean; error: Error | null }> {
   try {
-    const { error } = await supabaseAdmin.from('hypnosis_sessions').delete().eq('id', id);
+    const { error } = await supabaseAdmin.from('hypnosis_sessions').delete().eq('company_id', companyId).eq('id', id);
     if (error) return { success: false, error: new Error(error.message) };
     return { success: true, error: null };
   } catch (err) {
@@ -309,11 +317,12 @@ function rowToProgram(row: Record<string, unknown>): Program {
   };
 }
 
-export async function getPrograms(): Promise<{ data: Program[]; error: Error | null }> {
+export async function getPrograms(companyId: string): Promise<{ data: Program[]; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('programs')
       .select('*')
+      .eq('company_id', companyId)
       .order('sort_order', { ascending: true });
 
     if (error) return { data: [], error: new Error(error.message) };
@@ -323,11 +332,12 @@ export async function getPrograms(): Promise<{ data: Program[]; error: Error | n
   }
 }
 
-export async function getProgramById(id: string): Promise<{ data: Program | null; error: Error | null }> {
+export async function getProgramById(companyId: string, id: string): Promise<{ data: Program | null; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('programs')
       .select('*')
+      .eq('company_id', companyId)
       .eq('id', id)
       .single();
 
@@ -341,13 +351,14 @@ export async function getProgramById(id: string): Promise<{ data: Program | null
   }
 }
 
-export async function createProgram(program: Omit<Program, 'id'> & { id?: string }): Promise<{ data: Program | null; error: Error | null }> {
+export async function createProgram(companyId: string, program: Omit<Program, 'id'> & { id?: string }): Promise<{ data: Program | null; error: Error | null }> {
   try {
     const id = program.id || program.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const { data, error } = await supabaseAdmin
       .from('programs')
       .insert({
         id,
+        company_id: companyId,
         title: program.title,
         tagline: program.tagline,
         description: program.description,
@@ -373,7 +384,7 @@ export async function createProgram(program: Omit<Program, 'id'> & { id?: string
   }
 }
 
-export async function updateProgram(id: string, updates: Partial<Program>): Promise<{ data: Program | null; error: Error | null }> {
+export async function updateProgram(companyId: string, id: string, updates: Partial<Program>): Promise<{ data: Program | null; error: Error | null }> {
   try {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;
@@ -394,6 +405,7 @@ export async function updateProgram(id: string, updates: Partial<Program>): Prom
     const { data, error } = await supabaseAdmin
       .from('programs')
       .update(dbUpdates)
+      .eq('company_id', companyId)
       .eq('id', id)
       .select()
       .single();
@@ -405,9 +417,9 @@ export async function updateProgram(id: string, updates: Partial<Program>): Prom
   }
 }
 
-export async function deleteProgram(id: string): Promise<{ success: boolean; error: Error | null }> {
+export async function deleteProgram(companyId: string, id: string): Promise<{ success: boolean; error: Error | null }> {
   try {
-    const { error } = await supabaseAdmin.from('programs').delete().eq('id', id);
+    const { error } = await supabaseAdmin.from('programs').delete().eq('company_id', companyId).eq('id', id);
     if (error) return { success: false, error: new Error(error.message) };
     return { success: true, error: null };
   } catch (err) {
@@ -430,11 +442,12 @@ function rowToQuickReset(row: Record<string, unknown>): QuickReset {
   };
 }
 
-export async function getQuickResets(): Promise<{ data: QuickReset[]; error: Error | null }> {
+export async function getQuickResets(companyId: string): Promise<{ data: QuickReset[]; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('quick_resets')
       .select('*')
+      .eq('company_id', companyId)
       .order('sort_order', { ascending: true });
 
     if (error) return { data: [], error: new Error(error.message) };
@@ -444,11 +457,12 @@ export async function getQuickResets(): Promise<{ data: QuickReset[]; error: Err
   }
 }
 
-export async function getQuickResetById(id: string): Promise<{ data: QuickReset | null; error: Error | null }> {
+export async function getQuickResetById(companyId: string, id: string): Promise<{ data: QuickReset | null; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('quick_resets')
       .select('*')
+      .eq('company_id', companyId)
       .eq('id', id)
       .single();
 
@@ -462,13 +476,14 @@ export async function getQuickResetById(id: string): Promise<{ data: QuickReset 
   }
 }
 
-export async function createQuickReset(reset: Omit<QuickReset, 'id'> & { id?: string }): Promise<{ data: QuickReset | null; error: Error | null }> {
+export async function createQuickReset(companyId: string, reset: Omit<QuickReset, 'id'> & { id?: string }): Promise<{ data: QuickReset | null; error: Error | null }> {
   try {
     const id = reset.id || reset.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const { data, error } = await supabaseAdmin
       .from('quick_resets')
       .insert({
         id,
+        company_id: companyId,
         title: reset.title,
         duration: reset.duration,
         type: reset.type,
@@ -485,7 +500,7 @@ export async function createQuickReset(reset: Omit<QuickReset, 'id'> & { id?: st
   }
 }
 
-export async function updateQuickReset(id: string, updates: Partial<QuickReset>): Promise<{ data: QuickReset | null; error: Error | null }> {
+export async function updateQuickReset(companyId: string, id: string, updates: Partial<QuickReset>): Promise<{ data: QuickReset | null; error: Error | null }> {
   try {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;
@@ -497,6 +512,7 @@ export async function updateQuickReset(id: string, updates: Partial<QuickReset>)
     const { data, error } = await supabaseAdmin
       .from('quick_resets')
       .update(dbUpdates)
+      .eq('company_id', companyId)
       .eq('id', id)
       .select()
       .single();
@@ -508,9 +524,9 @@ export async function updateQuickReset(id: string, updates: Partial<QuickReset>)
   }
 }
 
-export async function deleteQuickReset(id: string): Promise<{ success: boolean; error: Error | null }> {
+export async function deleteQuickReset(companyId: string, id: string): Promise<{ success: boolean; error: Error | null }> {
   try {
-    const { error } = await supabaseAdmin.from('quick_resets').delete().eq('id', id);
+    const { error } = await supabaseAdmin.from('quick_resets').delete().eq('company_id', companyId).eq('id', id);
     if (error) return { success: false, error: new Error(error.message) };
     return { success: true, error: null };
   } catch (err) {
@@ -539,11 +555,12 @@ function rowToArticle(row: Record<string, unknown>): KnowledgeArticle {
   };
 }
 
-export async function getArticles(): Promise<{ data: KnowledgeArticle[]; error: Error | null }> {
+export async function getArticles(companyId: string): Promise<{ data: KnowledgeArticle[]; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('knowledge_articles')
       .select('*')
+      .eq('company_id', companyId)
       .order('sort_order', { ascending: true });
 
     if (error) return { data: [], error: new Error(error.message) };
@@ -553,11 +570,12 @@ export async function getArticles(): Promise<{ data: KnowledgeArticle[]; error: 
   }
 }
 
-export async function getArticleBySlug(slug: string): Promise<{ data: KnowledgeArticle | null; error: Error | null }> {
+export async function getArticleBySlug(companyId: string, slug: string): Promise<{ data: KnowledgeArticle | null; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('knowledge_articles')
       .select('*')
+      .eq('company_id', companyId)
       .eq('slug', slug)
       .single();
 
@@ -571,13 +589,14 @@ export async function getArticleBySlug(slug: string): Promise<{ data: KnowledgeA
   }
 }
 
-export async function createArticle(article: Omit<KnowledgeArticle, 'updatedAt'> & { slug?: string }): Promise<{ data: KnowledgeArticle | null; error: Error | null }> {
+export async function createArticle(companyId: string, article: Omit<KnowledgeArticle, 'updatedAt'> & { slug?: string }): Promise<{ data: KnowledgeArticle | null; error: Error | null }> {
   try {
     const slug = article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const { data, error } = await supabaseAdmin
       .from('knowledge_articles')
       .insert({
         slug,
+        company_id: companyId,
         title: article.title,
         category: article.category,
         author: article.author,
@@ -599,7 +618,7 @@ export async function createArticle(article: Omit<KnowledgeArticle, 'updatedAt'>
   }
 }
 
-export async function updateArticle(slug: string, updates: Partial<KnowledgeArticle>): Promise<{ data: KnowledgeArticle | null; error: Error | null }> {
+export async function updateArticle(companyId: string, slug: string, updates: Partial<KnowledgeArticle>): Promise<{ data: KnowledgeArticle | null; error: Error | null }> {
   try {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;
@@ -616,6 +635,7 @@ export async function updateArticle(slug: string, updates: Partial<KnowledgeArti
     const { data, error } = await supabaseAdmin
       .from('knowledge_articles')
       .update(dbUpdates)
+      .eq('company_id', companyId)
       .eq('slug', slug)
       .select()
       .single();
@@ -627,9 +647,9 @@ export async function updateArticle(slug: string, updates: Partial<KnowledgeArti
   }
 }
 
-export async function deleteArticle(slug: string): Promise<{ success: boolean; error: Error | null }> {
+export async function deleteArticle(companyId: string, slug: string): Promise<{ success: boolean; error: Error | null }> {
   try {
-    const { error } = await supabaseAdmin.from('knowledge_articles').delete().eq('slug', slug);
+    const { error } = await supabaseAdmin.from('knowledge_articles').delete().eq('company_id', companyId).eq('slug', slug);
     if (error) return { success: false, error: new Error(error.message) };
     return { success: true, error: null };
   } catch (err) {

@@ -66,7 +66,7 @@ const columns: ContentColumn<Program>[] = [
 	},
 ];
 
-export function ProgramManager() {
+export function ProgramManager({ companyId }: { companyId: string }) {
 	const [items, setItems] = useState<Program[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,7 +77,7 @@ export function ProgramManager() {
 	const fetchItems = useCallback(async () => {
 		setIsLoading(true);
 		try {
-			const res = await fetch("/api/admin/programs");
+			const res = await fetch(`/api/admin/programs?company_id=${encodeURIComponent(companyId)}`);
 			const json = await res.json();
 			setItems(json.items || []);
 		} catch (err) {
@@ -120,7 +120,7 @@ export function ProgramManager() {
 
 	const handleDelete = async (item: Program) => {
 		if (!confirm(`Delete "${item.title}"?`)) return;
-		await fetch(`/api/admin/programs/${item.id}`, { method: "DELETE" });
+		await fetch(`/api/admin/programs/${item.id}?company_id=${encodeURIComponent(companyId)}`, { method: "DELETE" });
 		fetchItems();
 	};
 
@@ -128,13 +128,13 @@ export function ProgramManager() {
 		setIsSubmitting(true);
 		try {
 			if (editingItem) {
-				await fetch(`/api/admin/programs/${editingItem.id}`, {
+				await fetch(`/api/admin/programs/${editingItem.id}?company_id=${encodeURIComponent(companyId)}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
 				});
 			} else {
-				await fetch("/api/admin/programs", {
+				await fetch(`/api/admin/programs?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
@@ -191,7 +191,7 @@ export function ProgramManager() {
 
 				<FormCheckbox label="Premium" checked={form.isPremium} onChange={(v) => setForm({ ...form, isPremium: v })} />
 
-				<ProgramDayEditor days={form.days} onChange={(days) => setForm({ ...form, days })} />
+				<ProgramDayEditor companyId={companyId} days={form.days} onChange={(days) => setForm({ ...form, days })} />
 			</ContentFormModal>
 		</>
 	);

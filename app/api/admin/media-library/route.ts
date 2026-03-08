@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import {
   getMediaItems,
   createMediaItem,
@@ -12,12 +12,13 @@ import { createSignedUploadUrl, validateMediaFile } from '@/lib/storage/audioSto
 
 export async function GET(request: Request) {
   try {
+    const companyId = extractCompanyId(request);
     await getAuthUser(await headers());
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') as 'audio' | 'video' | 'link' | null;
     const filter = type === 'audio' || type === 'video' || type === 'link' ? type : undefined;
 
-    const { data, error } = await getMediaItems(filter);
+    const { data, error } = await getMediaItems(companyId, filter);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ items: data, total: data.length });
   } catch {
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const companyId = extractCompanyId(request);
     await getAuthUser(await headers());
     const body = await request.json();
 
@@ -48,12 +50,12 @@ export async function POST(request: Request) {
       }
 
       if (items.length === 1) {
-        const { data, error } = await createMediaItem(items[0]);
+        const { data, error } = await createMediaItem(companyId, items[0]);
         if (error) return NextResponse.json({ error: error.message }, { status: 400 });
         return NextResponse.json({ items: [data] }, { status: 201 });
       }
 
-      const { data, error } = await createMediaItems(items);
+      const { data, error } = await createMediaItems(companyId, items);
       if (error) return NextResponse.json({ error: error.message }, { status: 400 });
       return NextResponse.json({ items: data }, { status: 201 });
     }
@@ -66,12 +68,13 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const companyId = extractCompanyId(request);
     await getAuthUser(await headers());
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 });
 
-    const { success, error } = await deleteMediaItem(id);
+    const { success, error } = await deleteMediaItem(companyId, id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     if (!success) return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
     return NextResponse.json({ success: true });
@@ -82,13 +85,14 @@ export async function DELETE(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const companyId = extractCompanyId(request);
     await getAuthUser(await headers());
     const { id, tags } = await request.json();
     if (!id || !Array.isArray(tags)) {
       return NextResponse.json({ error: 'id and tags[] are required' }, { status: 400 });
     }
 
-    const { data, error } = await updateMediaItemTags(id, tags);
+    const { data, error } = await updateMediaItemTags(companyId, id, tags);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     return NextResponse.json(data);
   } catch {

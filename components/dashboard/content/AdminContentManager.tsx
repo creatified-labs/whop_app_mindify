@@ -9,9 +9,10 @@ import { ArticleManager } from "./ArticleManager";
 
 interface AdminContentManagerProps {
 	overviewContent: React.ReactNode;
+	companyId: string;
 }
 
-export function AdminContentManager({ overviewContent }: AdminContentManagerProps) {
+export function AdminContentManager({ overviewContent, companyId }: AdminContentManagerProps) {
 	const { activeTab, setActiveTab } = useContentTab();
 
 	return (
@@ -19,11 +20,11 @@ export function AdminContentManager({ overviewContent }: AdminContentManagerProp
 			<ContentTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
 			{activeTab === "overview" && overviewContent}
-			{activeTab === "meditations" && <MeditationManager />}
-			{activeTab === "hypnosis" && <HypnosisManager />}
-			{activeTab === "programs" && <ProgramManager />}
-			{activeTab === "quick-resets" && <QuickResetManager />}
-			{activeTab === "knowledge" && <ArticleManager />}
+			{activeTab === "meditations" && <MeditationManager companyId={companyId} />}
+			{activeTab === "hypnosis" && <HypnosisManager companyId={companyId} />}
+			{activeTab === "programs" && <ProgramManager companyId={companyId} />}
+			{activeTab === "quick-resets" && <QuickResetManager companyId={companyId} />}
+			{activeTab === "knowledge" && <ArticleManager companyId={companyId} />}
 		</>
 	);
 }

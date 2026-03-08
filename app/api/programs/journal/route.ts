@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import { saveJournalEntry } from '@/lib/database/journalService';
 
 type JournalPayload = {
@@ -15,6 +15,7 @@ type JournalPayload = {
  */
 export async function POST(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Save journal entry to database
     const { data: entry, error } = await saveJournalEntry(
+      companyId,
       userId,
       body.programId,
       body.dayNumber,

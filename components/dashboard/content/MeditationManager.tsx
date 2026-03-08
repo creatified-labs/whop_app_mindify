@@ -60,7 +60,7 @@ const columns: ContentColumn<Meditation>[] = [
 	},
 ];
 
-export function MeditationManager() {
+export function MeditationManager({ companyId }: { companyId: string }) {
 	const [items, setItems] = useState<Meditation[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,7 +71,7 @@ export function MeditationManager() {
 	const fetchItems = useCallback(async () => {
 		setIsLoading(true);
 		try {
-			const res = await fetch("/api/admin/meditations");
+			const res = await fetch(`/api/admin/meditations?company_id=${encodeURIComponent(companyId)}`);
 			const json = await res.json();
 			setItems(json.items || []);
 		} catch (err) {
@@ -110,7 +110,7 @@ export function MeditationManager() {
 
 	const handleDelete = async (item: Meditation) => {
 		if (!confirm(`Delete "${item.title}"?`)) return;
-		await fetch(`/api/admin/meditations/${item.id}`, { method: "DELETE" });
+		await fetch(`/api/admin/meditations/${item.id}?company_id=${encodeURIComponent(companyId)}`, { method: "DELETE" });
 		fetchItems();
 	};
 
@@ -118,13 +118,13 @@ export function MeditationManager() {
 		setIsSubmitting(true);
 		try {
 			if (editingItem) {
-				await fetch(`/api/admin/meditations/${editingItem.id}`, {
+				await fetch(`/api/admin/meditations/${editingItem.id}?company_id=${encodeURIComponent(companyId)}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
 				});
 			} else {
-				await fetch("/api/admin/meditations", {
+				await fetch(`/api/admin/meditations?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
@@ -172,7 +172,7 @@ export function MeditationManager() {
 					<FormSelect label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v as MeditationCategory })} options={categoryOptions} />
 				</div>
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/..." />
-				<AudioUploadButton contentType="meditations" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
+				<AudioUploadButton companyId={companyId} contentType="meditations" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormInput label="Image URL" value={form.imageUrl} onChange={(v) => setForm({ ...form, imageUrl: v })} placeholder="/images/..." />
 
 				<div>

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import {
   getProgramProgress,
   resetProgramProgress,
@@ -15,6 +15,7 @@ export async function GET(
   context: { params: Promise<{ programId: string }> }
 ) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
     const { programId } = await context.params;
@@ -28,7 +29,7 @@ export async function GET(
     }
 
     // Get progress from database
-    const { data: progress, error } = await getProgramProgress(userId, programId);
+    const { data: progress, error } = await getProgramProgress(companyId, userId, programId);
 
     if (error) {
       return NextResponse.json(
@@ -69,6 +70,7 @@ export async function PUT(
   context: { params: Promise<{ programId: string }> }
 ) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
     const { programId } = await context.params;
@@ -82,7 +84,7 @@ export async function PUT(
     }
 
     // Reset progress in database
-    const { success, error } = await resetProgramProgress(userId, programId);
+    const { success, error } = await resetProgramProgress(companyId, userId, programId);
 
     if (!success || error) {
       return NextResponse.json(

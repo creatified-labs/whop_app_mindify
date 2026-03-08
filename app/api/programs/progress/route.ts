@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import {
   getProgramProgress,
   updateProgramProgress,
@@ -22,6 +22,7 @@ type ProgressPayload = {
  */
 export async function POST(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
@@ -37,11 +38,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Get existing progress or enroll if new
-    let existing = await getProgramProgress(userId, body.programId);
+    let existing = await getProgramProgress(companyId, userId, body.programId);
 
     if (!existing.data) {
       // User not enrolled yet, enroll them
-      const enrolled = await enrollInProgram(userId, body.programId);
+      const enrolled = await enrollInProgram(companyId, userId, body.programId);
       if (enrolled.error) {
         return NextResponse.json(
           { error: 'Failed to enroll in program' },
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     if (isCompleted) {
       // Mark day as completed
-      const result = await completeProgramDay(userId, body.programId, body.dayNumber);
+      const result = await completeProgramDay(companyId, userId, body.programId, body.dayNumber);
 
       if (result.error) {
         return NextResponse.json(
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
         result.data!.completedAt = new Date().toISOString();
         result.data!.currentDay = body.totalDays;
 
-        await updateProgramProgress(userId, result.data!);
+        await updateProgramProgress(companyId, userId, result.data!);
       }
 
       return NextResponse.json(result.data);
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     };
 
-    const result = await updateProgramProgress(userId, updated);
+    const result = await updateProgramProgress(companyId, userId, updated);
 
     if (result.error) {
       return NextResponse.json(

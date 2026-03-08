@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import { getJournalEntry } from '@/lib/database/journalService';
 
 /**
@@ -12,6 +12,7 @@ export async function GET(
   context: { params: Promise<{ programId: string; dayNumber: string }> }
 ) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
     const { programId, dayNumber } = await context.params;
@@ -33,7 +34,7 @@ export async function GET(
     }
 
     // Get journal entry from database
-    const { data: entry, error } = await getJournalEntry(userId, programId, day);
+    const { data: entry, error } = await getJournalEntry(companyId, userId, programId, day);
 
     if (error) {
       return NextResponse.json(

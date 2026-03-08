@@ -23,14 +23,18 @@ export default async function AdminDashboardPage({
 		whopsdk.users.retrieve(userId),
 	]);
 
-	// Fetch all users from database for admin view
+	// Fetch all users from database for admin view (scoped to company)
 	const { data: allUsers } = await supabaseAdmin
 		.from("users_metadata")
 		.select("*")
+		.eq("company_id", companyId)
 		.order("created_at", { ascending: false });
 
-	// Fetch all activity for stats
-	const { data: allActivity } = await supabaseAdmin.from("user_activity").select("*");
+	// Fetch all activity for stats (scoped to company)
+	const { data: allActivity } = await supabaseAdmin
+		.from("user_activity")
+		.select("*")
+		.eq("company_id", companyId);
 
 	// Calculate admin stats
 	const totalUsers = allUsers?.length || 0;
@@ -123,6 +127,7 @@ export default async function AdminDashboardPage({
 
 				{/* Content Management Tabs */}
 				<AdminContentManager
+					companyId={companyId}
 					overviewContent={
 						<>
 							{/* Admin Stats */}

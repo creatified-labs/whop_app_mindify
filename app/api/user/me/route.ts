@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import { getOrCreateUser } from '@/lib/database/userService';
 import { whopsdk } from '@/lib/whop-sdk';
 
@@ -8,12 +8,13 @@ import { whopsdk } from '@/lib/whop-sdk';
  * GET /api/user/me
  * Returns current user's display info for client-side use
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const companyId = extractCompanyId(request);
     const userId = await getAuthUser(await headers());
 
     // Get DB metadata (ensures user row exists)
-    const { data: userMeta } = await getOrCreateUser(userId);
+    const { data: userMeta } = await getOrCreateUser(companyId, userId);
 
     let displayName = userMeta?.display_name || null;
 

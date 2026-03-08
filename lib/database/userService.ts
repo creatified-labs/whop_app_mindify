@@ -20,14 +20,16 @@ export interface UserMetadata {
  * This is called when a user first authenticates via Whop
  */
 export async function getOrCreateUser(
+  companyId: string,
   whopUserId: string,
   userData?: Partial<UserMetadata>
 ): Promise<{ data: UserMetadata | null; error: Error | null }> {
   try {
-    // First, try to get the user
+    // First, try to get the user by both company_id and whop_user_id
     const { data: existingUser, error: fetchError } = await supabaseAdmin
       .from('users_metadata')
       .select('*')
+      .eq('company_id', companyId)
       .eq('whop_user_id', whopUserId)
       .single();
 
@@ -39,6 +41,7 @@ export async function getOrCreateUser(
     const { data: newUser, error: insertError } = await supabaseAdmin
       .from('users_metadata')
       .insert({
+        company_id: companyId,
         whop_user_id: whopUserId,
         display_name: userData?.display_name || null,
         email: userData?.email || null,
@@ -63,6 +66,7 @@ export async function getOrCreateUser(
  * Update user metadata
  */
 export async function updateUserMetadata(
+  companyId: string,
   whopUserId: string,
   metadata: Partial<Omit<UserMetadata, 'whop_user_id' | 'created_at' | 'updated_at'>>
 ): Promise<{ data: UserMetadata | null; error: Error | null }> {
@@ -70,6 +74,7 @@ export async function updateUserMetadata(
     const { data, error } = await supabaseAdmin
       .from('users_metadata')
       .update(metadata)
+      .eq('company_id', companyId)
       .eq('whop_user_id', whopUserId)
       .select()
       .single();
@@ -91,12 +96,13 @@ export async function updateUserMetadata(
  * This is called when a user purchases or cancels a subscription
  */
 export async function syncUserTier(
+  companyId: string,
   whopUserId: string,
   tier: 'free' | 'premium'
 ): Promise<{ success: boolean; error: Error | null }> {
   try {
     // Ensure user exists first
-    const { data: user } = await getOrCreateUser(whopUserId, { membership_tier: tier });
+    const { data: user } = await getOrCreateUser(companyId, whopUserId, { membership_tier: tier });
 
     if (!user) {
       return { success: false, error: new Error('Failed to get or create user') };
@@ -106,6 +112,7 @@ export async function syncUserTier(
     const { error } = await supabaseAdmin
       .from('users_metadata')
       .update({ membership_tier: tier })
+      .eq('company_id', companyId)
       .eq('whop_user_id', whopUserId);
 
     if (error) {
@@ -125,12 +132,14 @@ export async function syncUserTier(
  * Get user metadata by Whop user ID
  */
 export async function getUserMetadata(
+  companyId: string,
   whopUserId: string
 ): Promise<{ data: UserMetadata | null; error: Error | null }> {
   try {
     const { data, error } = await supabaseAdmin
       .from('users_metadata')
       .select('*')
+      .eq('company_id', companyId)
       .eq('whop_user_id', whopUserId)
       .single();
 
@@ -150,9 +159,9 @@ export async function getUserMetadata(
  * Get user's membership tier
  * Returns 'free' by default if user not found
  */
-export async function getUserTier(whopUserId: string): Promise<'free' | 'premium'> {
+export async function getUserTier(companyId: string, whopUserId: string): Promise<'free' | 'premium'> {
   try {
-    const { data } = await getUserMetadata(whopUserId);
+    const { data } = await getUserMetadata(companyId, whopUserId);
     return data?.membership_tier || 'free';
   } catch (err) {
     console.error('[UserService] Error getting user tier:', err);

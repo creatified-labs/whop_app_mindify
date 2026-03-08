@@ -12,9 +12,24 @@ import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { MotivationCTA } from "@/components/dashboard/MotivationCTA";
 import { getSettings } from "@/lib/database/settingsService";
 
-export default async function UserDashboardPage() {
+export default async function UserDashboardPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ company_id?: string }>;
+}) {
 	// Get authenticated user
 	const userId = await getAuthUser(await headers());
+	const resolvedSearchParams = await searchParams;
+
+	// Get company ID from query param
+	const companyId = resolvedSearchParams.company_id;
+	if (!companyId) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-cream-50 dark:bg-[#0E1012]">
+				<p className="text-earth-600 dark:text-[#CFC7BB]">Company context required.</p>
+			</div>
+		);
+	}
 
 	// Fetch user data from Whop
 	const user = await whopsdk.users.retrieve(userId);
@@ -27,11 +42,11 @@ export default async function UserDashboardPage() {
 
 	// Fetch user stats and activity from database
 	const [statsResult, programsResult, activityResult, settingsResult, allProgramsResult] = await Promise.all([
-		getActivityStats(userId),
-		getAllProgramProgress(userId),
-		getUserActivity(userId, { limit: 10 }),
-		getSettings(),
-		getPrograms(),
+		getActivityStats(companyId, userId),
+		getAllProgramProgress(companyId, userId),
+		getUserActivity(companyId, userId, { limit: 10 }),
+		getSettings(companyId),
+		getPrograms(companyId),
 	]);
 
 	// Calculate stats

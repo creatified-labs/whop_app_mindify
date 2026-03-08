@@ -44,6 +44,7 @@ export default async function ExperiencePage({
 		whopsdk.users.checkAccess(experienceId, { id: userId }),
 	]);
 
+	const companyId = experience.company.id;
 	const displayName = user.name || `@${user.username ?? "member"}`;
 	const userInitial = displayName.trim().charAt(0).toUpperCase();
 	const accessMeta = access as {
@@ -69,15 +70,15 @@ export default async function ExperiencePage({
 		{ data: quickResets },
 		{ data: allPrograms },
 	] = await Promise.all([
-		getActivityStats(userId),
-		getRecentActivity(userId, 5),
-		getUserActivity(userId),
-		getFavorites(userId),
-		getAllProgramProgress(userId),
-		getMeditations(),
-		getHypnosisSessions(),
-		getQuickResets(),
-		getPrograms(),
+		getActivityStats(companyId, userId),
+		getRecentActivity(companyId, userId, 5),
+		getUserActivity(companyId, userId),
+		getFavorites(companyId, userId),
+		getAllProgramProgress(companyId, userId),
+		getMeditations(companyId),
+		getHypnosisSessions(companyId),
+		getQuickResets(companyId),
+		getPrograms(companyId),
 	]);
 
 	const streakDays = activityStats?.streakDays ?? 0;
@@ -139,7 +140,7 @@ export default async function ExperiencePage({
 	let currentProgram: ProgramSnapshot | null = null;
 	const activeProgram = (programProgressRows || []).find((p) => !p.completedAt);
 	if (activeProgram) {
-		const { data: programData } = await getProgramById(activeProgram.programId);
+		const { data: programData } = await getProgramById(companyId, activeProgram.programId);
 		if (programData) {
 			const totalDays = programData.days?.length || programData.duration || 1;
 			const completedCount = activeProgram.completedDays.length;
@@ -250,6 +251,7 @@ export default async function ExperiencePage({
 					recommendedSessions={recommendedSessions}
 					streakDays={streakDays}
 					userProgress={userProgress}
+					companyId={companyId}
 				/>
 			</div>
 		</AppLayout>

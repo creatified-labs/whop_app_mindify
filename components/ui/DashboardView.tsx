@@ -90,6 +90,7 @@ export interface DashboardViewProps {
 	recommendedSessions: RecommendedSession[];
 	streakDays: number;
 	userProgress: UserProgress | null;
+	companyId: string;
 }
 
 const glassCard =
@@ -104,9 +105,9 @@ export function ExperienceContent(props: DashboardViewProps) {
 
 	if (navSelection === "meditations") return <SectionErrorBoundary><MeditationGrid /></SectionErrorBoundary>;
 	if (navSelection === "hypnosis") return <SectionErrorBoundary><HypnosisStack /></SectionErrorBoundary>;
-	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary /></SectionErrorBoundary>;
-	if (navSelection === "quick-resets") return <SectionErrorBoundary><QuickResetsList /></SectionErrorBoundary>;
-	if (navSelection === "knowledge-hub") return <SectionErrorBoundary><KnowledgeHub /></SectionErrorBoundary>;
+	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary companyId={props.companyId} /></SectionErrorBoundary>;
+	if (navSelection === "quick-resets") return <SectionErrorBoundary><QuickResetsList companyId={props.companyId} /></SectionErrorBoundary>;
+	if (navSelection === "knowledge-hub") return <SectionErrorBoundary><KnowledgeHub companyId={props.companyId} /></SectionErrorBoundary>;
 
 	return (
 		<div className={`${glassCard} min-h-[420px]`}>

@@ -64,7 +64,7 @@ const userProgress: UserProgress = {
 };
 
 export default async function HomePage() {
-	const { data: settings } = await getSettings();
+	const { data: settings } = await getSettings("demo");
 	return (
 		<AppLayout userName="Creatified" streakDays={streakDays} membershipTier="free">
 			<main className="space-y-16">
@@ -112,6 +112,7 @@ export default async function HomePage() {
 					recommendedSessions={recommendedSessions}
 					streakDays={streakDays}
 					userProgress={userProgress}
+					companyId="demo"
 				/>
 
 				<section className="space-y-8">

@@ -20,6 +20,7 @@ export interface Favorite {
  * Get all favorites for a user
  */
 export async function getFavorites(
+  companyId: string,
   userId: string,
   contentType?: ContentType
 ): Promise<{ data: Favorite[]; error: Error | null }> {
@@ -27,6 +28,7 @@ export async function getFavorites(
     let query = supabaseAdmin
       .from('user_favorites')
       .select('*')
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -53,6 +55,7 @@ export async function getFavorites(
  * Check if content is favorited by user
  */
 export async function isFavorited(
+  companyId: string,
   userId: string,
   contentType: ContentType,
   contentId: string
@@ -61,6 +64,7 @@ export async function isFavorited(
     const { data, error } = await supabaseAdmin
       .from('user_favorites')
       .select('id')
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('content_type', contentType)
       .eq('content_id', contentId)
@@ -86,19 +90,21 @@ export async function isFavorited(
  * Add a favorite
  */
 export async function addFavorite(
+  companyId: string,
   userId: string,
   contentType: ContentType,
   contentId: string
 ): Promise<{ data: Favorite | null; error: Error | null }> {
   try {
     // Check if already favorited
-    const { isFavorited: alreadyFavorited } = await isFavorited(userId, contentType, contentId);
+    const { isFavorited: alreadyFavorited } = await isFavorited(companyId, userId, contentType, contentId);
 
     if (alreadyFavorited) {
       // Already favorited, just return success
       const { data } = await supabaseAdmin
         .from('user_favorites')
         .select('*')
+        .eq('company_id', companyId)
         .eq('user_id', userId)
         .eq('content_type', contentType)
         .eq('content_id', contentId)
@@ -111,6 +117,7 @@ export async function addFavorite(
     const { data, error } = await supabaseAdmin
       .from('user_favorites')
       .insert({
+        company_id: companyId,
         user_id: userId,
         content_type: contentType,
         content_id: contentId,
@@ -135,6 +142,7 @@ export async function addFavorite(
  * Remove a favorite
  */
 export async function removeFavorite(
+  companyId: string,
   userId: string,
   contentType: ContentType,
   contentId: string
@@ -143,6 +151,7 @@ export async function removeFavorite(
     const { error } = await supabaseAdmin
       .from('user_favorites')
       .delete()
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('content_type', contentType)
       .eq('content_id', contentId);
@@ -163,22 +172,23 @@ export async function removeFavorite(
  * Toggle favorite (add if not favorited, remove if favorited)
  */
 export async function toggleFavorite(
+  companyId: string,
   userId: string,
   contentType: ContentType,
   contentId: string
 ): Promise<{ isFavorited: boolean; error: Error | null }> {
   try {
-    const { isFavorited: alreadyFavorited } = await isFavorited(userId, contentType, contentId);
+    const { isFavorited: alreadyFavorited } = await isFavorited(companyId, userId, contentType, contentId);
 
     if (alreadyFavorited) {
-      const { error } = await removeFavorite(userId, contentType, contentId);
+      const { error } = await removeFavorite(companyId, userId, contentType, contentId);
       if (error) {
         return { isFavorited: true, error };
       }
       return { isFavorited: false, error: null };
     }
 
-    const { error } = await addFavorite(userId, contentType, contentId);
+    const { error } = await addFavorite(companyId, userId, contentType, contentId);
     if (error) {
       return { isFavorited: false, error };
     }
@@ -193,6 +203,7 @@ export async function toggleFavorite(
  * Get favorite count for a user
  */
 export async function getFavoriteCount(
+  companyId: string,
   userId: string,
   contentType?: ContentType
 ): Promise<{ count: number; error: Error | null }> {
@@ -200,6 +211,7 @@ export async function getFavoriteCount(
     let query = supabaseAdmin
       .from('user_favorites')
       .select('*', { count: 'exact', head: true })
+      .eq('company_id', companyId)
       .eq('user_id', userId);
 
     if (contentType) {
@@ -225,6 +237,7 @@ export async function getFavoriteCount(
  * Returns array of content IDs for a specific content type
  */
 export async function getFavoriteIds(
+  companyId: string,
   userId: string,
   contentType: ContentType
 ): Promise<{ ids: string[]; error: Error | null }> {
@@ -232,6 +245,7 @@ export async function getFavoriteIds(
     const { data, error } = await supabaseAdmin
       .from('user_favorites')
       .select('content_id')
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('content_type', contentType);
 

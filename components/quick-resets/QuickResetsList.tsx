@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import type { QuickReset } from "@/lib/types";
 import { useAudioStore } from "@/lib/stores/audioStore";
 
-export function QuickResetsList() {
+export function QuickResetsList({ companyId }: { companyId: string }) {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const [resets, setResets] = useState<QuickReset[]>([]);
 	const playTrack = useAudioStore((state) => state.playTrack);
 
 	useEffect(() => {
-		fetch("/api/quick-resets")
+		fetch(`/api/quick-resets?company_id=${encodeURIComponent(companyId)}`)
 			.then((res) => res.json())
 			.then((data) => setResets(data.items || []))
 			.catch(() => {});
-	}, []);
+	}, [companyId]);
 
 	const handlePlay = (reset: QuickReset) => {
 		setActiveId(reset.id);

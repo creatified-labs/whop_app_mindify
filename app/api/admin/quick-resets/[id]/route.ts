@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import { updateQuickReset, deleteQuickReset } from '@/lib/database/contentService';
 
 export async function PUT(
@@ -8,10 +8,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const companyId = extractCompanyId(request);
     await getAuthUser(await headers());
     const { id } = await params;
     const body = await request.json();
-    const { data, error } = await updateQuickReset(id, body);
+    const { data, error } = await updateQuickReset(companyId, id, body);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     return NextResponse.json(data);
   } catch {
@@ -20,13 +21,14 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const companyId = extractCompanyId(request);
     await getAuthUser(await headers());
     const { id } = await params;
-    const { success, error } = await deleteQuickReset(id);
+    const { success, error } = await deleteQuickReset(companyId, id);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     return NextResponse.json({ success });
   } catch {

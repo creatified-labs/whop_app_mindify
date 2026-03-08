@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import { getCommunityPosts, createCommunityPost } from '@/lib/database/communityService';
 import { getOrCreateUser } from '@/lib/database/userService';
 
@@ -10,12 +10,13 @@ import { getOrCreateUser } from '@/lib/database/userService';
  */
 export async function GET(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     const userId = await getAuthUser(await headers());
 
     const { searchParams } = new URL(request.url);
     const postType = searchParams.get('post_type') as 'check-in' | 'weekly-win' | 'reflection' | null;
 
-    const { data: posts, error } = await getCommunityPosts({
+    const { data: posts, error } = await getCommunityPosts(companyId, {
       postType: postType || undefined,
       limit: 50,
     });
@@ -46,10 +47,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     const userId = await getAuthUser(await headers());
 
     // Ensure user exists in DB
-    await getOrCreateUser(userId);
+    await getOrCreateUser(companyId, userId);
 
     const body = await request.json();
 
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: post, error } = await createCommunityPost(userId, {
+    const { data: post, error } = await createCommunityPost(companyId, userId, {
       content: body.content,
       postType: body.postType,
       programId: body.programId,

@@ -10,6 +10,7 @@ import { AudioUploadButton } from "./AudioUploadButton";
 interface ProgramDayEditorProps {
 	days: ProgramDay[];
 	onChange: (days: ProgramDay[]) => void;
+	companyId: string;
 }
 
 const emptyDay: ProgramDay = {
@@ -19,7 +20,7 @@ const emptyDay: ProgramDay = {
 	journalPrompts: [],
 };
 
-export function ProgramDayEditor({ days, onChange }: ProgramDayEditorProps) {
+export function ProgramDayEditor({ days, onChange, companyId }: ProgramDayEditorProps) {
 	const [expandedDay, setExpandedDay] = useState<number | null>(null);
 
 	const addDay = () => {
@@ -110,6 +111,7 @@ export function ProgramDayEditor({ days, onChange }: ProgramDayEditorProps) {
 										placeholder="Upload or paste audio URL"
 									/>
 									<AudioUploadButton
+										companyId={companyId}
 										contentType="programs"
 										onUploadComplete={(url) => updateDay(index, { audioUrl: url })}
 									/>

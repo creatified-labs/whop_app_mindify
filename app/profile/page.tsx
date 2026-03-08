@@ -10,23 +10,29 @@ import {
 import { ProfilePageClient } from "@/components/profile/ProfilePageClient";
 import type { UserStats } from "@/components/profile/StatsCard";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+	searchParams,
+}: {
+	searchParams: Promise<{ company_id?: string }>;
+}) {
 	const requestHeaders = await headers();
 	const { userId } = await whopsdk.verifyUserToken(requestHeaders);
+	const resolvedSearchParams = await searchParams;
+	const companyId = resolvedSearchParams.company_id || "default";
 
 	// Fetch all data in parallel
 	const [whopUser, { data: activityStats }, { data: programProgress }, { count: favoritesCount }] =
 		await Promise.all([
 			whopsdk.users.retrieve(userId),
-			getActivityStats(userId),
-			getAllProgramProgress(userId),
-			getFavoriteCount(userId),
+			getActivityStats(companyId, userId),
+			getAllProgramProgress(companyId, userId),
+			getFavoriteCount(companyId, userId),
 		]);
 
 	// Ensure user row exists and get metadata
 	const displayName = whopUser.name || `@${whopUser.username ?? "member"}`;
-	await getOrCreateUser(userId, { display_name: displayName });
-	const { data: userMeta } = await getUserMetadata(userId);
+	await getOrCreateUser(companyId, userId, { display_name: displayName });
+	const { data: userMeta } = await getUserMetadata(companyId, userId);
 
 	const completedPrograms = (programProgress || []).filter((p) => p.completedAt).length;
 

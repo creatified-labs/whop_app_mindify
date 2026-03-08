@@ -36,11 +36,13 @@ export interface ActivityStats {
  * Record a user activity (meditation, hypnosis, reset, program day completion)
  */
 export async function recordActivity(
+  companyId: string,
   userId: string,
   activity: ActivityRecord
 ): Promise<{ success: boolean; error: Error | null }> {
   try {
     const { error } = await supabaseAdmin.from('user_activity').insert({
+      company_id: companyId,
       user_id: userId,
       activity_type: activity.activity_type,
       content_id: activity.content_id,
@@ -65,6 +67,7 @@ export async function recordActivity(
  * Get user activity history with optional filters
  */
 export async function getUserActivity(
+  companyId: string,
   userId: string,
   filters?: ActivityFilters
 ): Promise<{ data: any[]; error: Error | null }> {
@@ -72,6 +75,7 @@ export async function getUserActivity(
     let query = supabaseAdmin
       .from('user_activity')
       .select('*')
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .order('completed_at', { ascending: false });
 
@@ -110,6 +114,7 @@ export async function getUserActivity(
  * Get aggregated activity statistics for a user
  */
 export async function getActivityStats(
+  companyId: string,
   userId: string
 ): Promise<{ data: ActivityStats | null; error: Error | null }> {
   try {
@@ -117,6 +122,7 @@ export async function getActivityStats(
     const { data: activities, error: fetchError } = await supabaseAdmin
       .from('user_activity')
       .select('*')
+      .eq('company_id', companyId)
       .eq('user_id', userId);
 
     if (fetchError) {
@@ -233,22 +239,25 @@ function calculateStreak(activities: any[]): number {
  * Get recent activity (last N items)
  */
 export async function getRecentActivity(
+  companyId: string,
   userId: string,
   limit: number = 10
 ): Promise<{ data: any[]; error: Error | null }> {
-  return getUserActivity(userId, { limit });
+  return getUserActivity(companyId, userId, { limit });
 }
 
 /**
  * Delete all activity for a user (for testing/cleanup)
  */
 export async function deleteAllUserActivity(
+  companyId: string,
   userId: string
 ): Promise<{ success: boolean; error: Error | null }> {
   try {
     const { error } = await supabaseAdmin
       .from('user_activity')
       .delete()
+      .eq('company_id', companyId)
       .eq('user_id', userId);
 
     if (error) {

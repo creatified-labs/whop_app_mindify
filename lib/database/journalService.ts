@@ -11,6 +11,7 @@ import type { ProgramJournalEntry } from '@/lib/types';
  * Get a specific journal entry
  */
 export async function getJournalEntry(
+  companyId: string,
   userId: string,
   programId: string,
   dayNumber: number
@@ -19,6 +20,7 @@ export async function getJournalEntry(
     const { data, error } = await supabaseAdmin
       .from('program_journal_entries')
       .select('*')
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('program_id', programId)
       .eq('day_number', dayNumber)
@@ -52,6 +54,7 @@ export async function getJournalEntry(
  * Get all journal entries for a program
  */
 export async function getAllJournalEntries(
+  companyId: string,
   userId: string,
   programId: string
 ): Promise<{ data: ProgramJournalEntry[]; error: Error | null }> {
@@ -59,6 +62,7 @@ export async function getAllJournalEntries(
     const { data, error } = await supabaseAdmin
       .from('program_journal_entries')
       .select('*')
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('program_id', programId)
       .order('day_number', { ascending: true });
@@ -87,6 +91,7 @@ export async function getAllJournalEntries(
  * Save or update a journal entry
  */
 export async function saveJournalEntry(
+  companyId: string,
   userId: string,
   programId: string,
   dayNumber: number,
@@ -100,6 +105,7 @@ export async function saveJournalEntry(
       .from('program_journal_entries')
       .upsert(
         {
+          company_id: companyId,
           user_id: userId,
           program_id: programId,
           day_number: dayNumber,
@@ -138,6 +144,7 @@ export async function saveJournalEntry(
  * Delete a journal entry
  */
 export async function deleteJournalEntry(
+  companyId: string,
   userId: string,
   programId: string,
   dayNumber: number
@@ -146,6 +153,7 @@ export async function deleteJournalEntry(
     const { error } = await supabaseAdmin
       .from('program_journal_entries')
       .delete()
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('program_id', programId)
       .eq('day_number', dayNumber);
@@ -166,6 +174,7 @@ export async function deleteJournalEntry(
  * Get count of journal entries for a program
  */
 export async function getJournalEntryCount(
+  companyId: string,
   userId: string,
   programId: string
 ): Promise<{ count: number; error: Error | null }> {
@@ -173,6 +182,7 @@ export async function getJournalEntryCount(
     const { count, error } = await supabaseAdmin
       .from('program_journal_entries')
       .select('*', { count: 'exact', head: true })
+      .eq('company_id', companyId)
       .eq('user_id', userId)
       .eq('program_id', programId);
 

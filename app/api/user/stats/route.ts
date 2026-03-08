@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { getAuthUser } from '@/lib/auth/getAuthUser';
+import { getAuthUser, extractCompanyId } from '@/lib/auth/getAuthUser';
 import { getActivityStats } from '@/lib/database/activityService';
 import { getAllProgramProgress } from '@/lib/database/programService';
 import { getFavoriteCount } from '@/lib/database/favoritesService';
@@ -11,25 +11,26 @@ import { getFavoriteCount } from '@/lib/database/favoritesService';
  */
 export async function GET(request: NextRequest) {
   try {
+    const companyId = extractCompanyId(request);
     // Get authenticated user
     const userId = await getAuthUser(await headers());
 
     // Get activity stats
-    const { data: activityStats, error: activityError } = await getActivityStats(userId);
+    const { data: activityStats, error: activityError } = await getActivityStats(companyId, userId);
 
     if (activityError) {
       console.error('[API] Error fetching activity stats:', activityError);
     }
 
     // Get program stats
-    const { data: programProgress, error: programError } = await getAllProgramProgress(userId);
+    const { data: programProgress, error: programError } = await getAllProgramProgress(companyId, userId);
 
     if (programError) {
       console.error('[API] Error fetching program progress:', programError);
     }
 
     // Get favorites count
-    const { count: favoritesCount, error: favoritesError } = await getFavoriteCount(userId);
+    const { count: favoritesCount, error: favoritesError } = await getFavoriteCount(companyId, userId);
 
     if (favoritesError) {
       console.error('[API] Error fetching favorites count:', favoritesError);
