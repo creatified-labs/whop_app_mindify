@@ -3,7 +3,7 @@
 import { Component, useEffect, useMemo, type ReactNode } from "react";
 import { useAppStore, type NavSection } from "@/lib/stores/appStore";
 import { useAudioStore } from "@/lib/stores/audioStore";
-import type { UserProgress } from "@/lib/types";
+import type { UserProgress, Meditation, HypnosisSession } from "@/lib/types";
 import { Flame } from "lucide-react";
 import { NoFavorites, NoActivity, NoPrograms } from "@/components/ui/EmptyState";
 import { InlineErrorBoundaryFallback } from "@/components/ui/ErrorState";
@@ -91,6 +91,8 @@ export interface DashboardViewProps {
 	streakDays: number;
 	userProgress: UserProgress | null;
 	companyId: string;
+	meditations?: Meditation[];
+	hypnosisSessions?: HypnosisSession[];
 }
 
 const glassCard =
@@ -103,8 +105,8 @@ export function ExperienceContent(props: DashboardViewProps) {
 		return <DashboardView {...props} />;
 	}
 
-	if (navSelection === "meditations") return <SectionErrorBoundary><MeditationGrid /></SectionErrorBoundary>;
-	if (navSelection === "hypnosis") return <SectionErrorBoundary><HypnosisStack /></SectionErrorBoundary>;
+	if (navSelection === "meditations") return <SectionErrorBoundary><MeditationGrid meditations={props.meditations} /></SectionErrorBoundary>;
+	if (navSelection === "hypnosis") return <SectionErrorBoundary><HypnosisStack hypnosisSessions={props.hypnosisSessions} /></SectionErrorBoundary>;
 	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary companyId={props.companyId} /></SectionErrorBoundary>;
 	if (navSelection === "quick-resets") return <SectionErrorBoundary><QuickResetsList companyId={props.companyId} /></SectionErrorBoundary>;
 	if (navSelection === "knowledge-hub") return <SectionErrorBoundary><KnowledgeHub companyId={props.companyId} /></SectionErrorBoundary>;

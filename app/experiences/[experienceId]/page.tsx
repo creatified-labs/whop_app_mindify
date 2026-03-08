@@ -252,6 +252,8 @@ export default async function ExperiencePage({
 					streakDays={streakDays}
 					userProgress={userProgress}
 					companyId={companyId}
+					meditations={meditations || []}
+					hypnosisSessions={hypnosisSessions || []}
 				/>
 			</div>
 		</AppLayout>

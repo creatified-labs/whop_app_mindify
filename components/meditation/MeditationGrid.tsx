@@ -3,9 +3,11 @@
 import type { ComponentType } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import { MEDITATION_SESSIONS } from "@/constants";
 import { useSoundscapeStore } from "@/lib/stores/soundscapeStore";
 import { MindifyPanel, StatBadge } from "@/components/ui/MindifyPanel";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Music } from "lucide-react";
+import type { Meditation } from "@/lib/types";
 
 type MindifyPlayerProps = {
 	url: string;
@@ -22,62 +24,79 @@ const ReactPlayer = dynamic(
 	},
 ) as unknown as ComponentType<MindifyPlayerProps>;
 
-const toneAccents: Record<string, string> = {
-	dusk: "border-sage-200",
-	twilight: "border-cream-200",
-	deep: "border-sage-300",
-	lagoon: "border-teal-200",
-	mist: "border-cream-300",
-	rose: "border-gold-200",
-};
+interface MeditationGridProps {
+	meditations?: Meditation[];
+}
 
-export function MeditationGrid() {
+export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 	const { currentSession, selectSession } = useSoundscapeStore();
+
+	if (meditations.length === 0) {
+		return (
+			<EmptyState
+				icon={<Music className="h-10 w-10 text-purple-500" />}
+				title="No meditations yet"
+				description="The creator hasn't added any meditation sessions yet. Check back soon!"
+			/>
+		);
+	}
 
 	return (
 		<div className="space-y-8">
 			<div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{MEDITATION_SESSIONS.map((session, index) => (
-					<motion.button
-						key={session.id}
-						onClick={() => selectSession(session)}
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: index * 0.05, duration: 0.3 }}
-						whileHover={{ y: -8, scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						className={`group relative overflow-hidden rounded-3xl border bg-cream-50 p-5 text-left shadow-card transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-sage-300 hover:shadow-elevated active:scale-98 dark:border-white/10 dark:bg-[#13151A] ${
-							toneAccents[session.tone] ?? "border-sage-100"
-						}`}
-					>
-						{/* Gradient overlay on hover */}
-						<div className="absolute inset-0 bg-gradient-to-br from-sage-500/0 to-sage-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-sage-400/0 dark:to-sage-400/10" />
+				{meditations.map((session, index) => {
+					const soundscapeSession = {
+						id: session.id,
+						title: session.title,
+						duration: session.duration,
+						focus: session.category,
+						neuroscientist: "",
+						audioUrl: session.audioUrl,
+						tone: "mist" as const,
+						description: session.description,
+					};
+					return (
+						<motion.button
+							key={session.id}
+							onClick={() => selectSession(soundscapeSession)}
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ delay: index * 0.05, duration: 0.3 }}
+							whileHover={{ y: -8, scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							className="group relative overflow-hidden rounded-3xl border border-sage-100 bg-cream-50 p-5 text-left shadow-card transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-sage-300 hover:shadow-elevated active:scale-98 dark:border-white/10 dark:bg-[#13151A]"
+						>
+							<div className="absolute inset-0 bg-gradient-to-br from-sage-500/0 to-sage-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-sage-400/0 dark:to-sage-400/10" />
 
-						<div className="relative flex items-center justify-between text-xs uppercase tracking-[0.3em] text-earth-500 dark:text-[#AFA79B]">
-							<span>{session.focus}</span>
-							<span>{session.duration}m</span>
-						</div>
-						<h3 className="relative mt-4 text-2xl font-serif font-semibold text-earth-900 dark:text-[#F4EFE6]">
-							{session.title}
-						</h3>
-						<p className="relative mt-3 text-base leading-relaxed text-earth-600 dark:text-[#CFC7BB]">
-							{session.description}
-						</p>
-						<div className="relative mt-6 flex flex-wrap gap-3 text-xs tracking-wide text-earth-600 dark:text-[#CFC7BB]">
-							<StatBadge label="Scientist" value={session.neuroscientist} />
-							<StatBadge label="Tone" value={session.tone} />
-						</div>
-						{currentSession?.id === session.id && (
-							<motion.p
-								initial={{ opacity: 0, y: -10 }}
-								animate={{ opacity: 1, y: 0 }}
-								className="relative mt-6 text-sm text-sage-600 dark:text-[#CBB796]"
-							>
-								Now channeling this soundscape.
-							</motion.p>
-						)}
-					</motion.button>
-				))}
+							<div className="relative flex items-center justify-between text-xs uppercase tracking-[0.3em] text-earth-500 dark:text-[#AFA79B]">
+								<span>{session.category}</span>
+								<span>{session.duration}m</span>
+							</div>
+							<h3 className="relative mt-4 text-2xl font-serif font-semibold text-earth-900 dark:text-[#F4EFE6]">
+								{session.title}
+							</h3>
+							<p className="relative mt-3 text-base leading-relaxed text-earth-600 dark:text-[#CFC7BB]">
+								{session.description}
+							</p>
+							{session.tags && session.tags.length > 0 && (
+								<div className="relative mt-6 flex flex-wrap gap-3 text-xs tracking-wide text-earth-600 dark:text-[#CFC7BB]">
+									{session.tags.map((tag) => (
+										<StatBadge key={tag} label="Tag" value={tag} />
+									))}
+								</div>
+							)}
+							{currentSession?.id === session.id && (
+								<motion.p
+									initial={{ opacity: 0, y: -10 }}
+									animate={{ opacity: 1, y: 0 }}
+									className="relative mt-6 text-sm text-sage-600 dark:text-[#CBB796]"
+								>
+									Now channeling this soundscape.
+								</motion.p>
+							)}
+						</motion.button>
+					);
+				})}
 			</div>
 
 			<motion.div layout>

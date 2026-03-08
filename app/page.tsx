@@ -3,7 +3,6 @@ import { Button } from "@whop/react/components";
 import {
 	FEATURE_PILLARS,
 	HERO_COPY,
-	MEDITATION_SESSIONS,
 	PROGRESS_METRICS,
 } from "@/constants";
 import { getSettings } from "@/lib/database/settingsService";
@@ -17,8 +16,6 @@ import {
 	type RecommendedSession,
 } from "@/components/ui/DashboardView";
 import type { UserProgress } from "@/lib/types";
-import { MeditationGrid } from "@/components/meditation/MeditationGrid";
-import { HypnosisStack } from "@/components/hypnosis/HypnosisStack";
 import { ProgramGallery } from "@/components/programs/ProgramGallery";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MindifyPanel } from "@/components/ui/MindifyPanel";
@@ -115,16 +112,6 @@ export default async function HomePage() {
 					companyId="demo"
 				/>
 
-				<section className="space-y-8">
-					<SectionHeading
-						eyebrow="Meditation"
-						title="Neuroscience-guided soundscapes"
-						description="Choose a ritual and Mindify streams immersive audio for your members, directly inside your Whop experience."
-					/>
-					<MeditationGrid />
-				</section>
-
-				<HypnosisStack />
 				<ProgramGallery />
 
 				<section className="space-y-8">
