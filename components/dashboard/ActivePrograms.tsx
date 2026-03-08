@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Calendar, CheckCircle2, Flame } from "lucide-react";
 import type { Program, ProgramProgress } from "@/lib/types";
+import { useAppStore } from "@/lib/stores/appStore";
 
 interface ActiveProgramCardProps {
 	program: Program;
@@ -116,13 +117,14 @@ export default function ActivePrograms({ programs, loading = false }: ActiveProg
 				<p className="mb-4 text-sm text-earth-600 dark:text-[#CFC7BB]">
 					Start a transformation program to track your progress
 				</p>
-				<Link
-					href="/programs"
+				<button
+					type="button"
+					onClick={() => useAppStore.getState().setNavSelection("programs")}
 					className="inline-flex items-center gap-2 rounded-xl bg-sage-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-sage-700 dark:bg-sage-500 dark:hover:bg-sage-600"
 				>
 					Browse Programs
 					<ArrowRight className="h-4 w-4" />
-				</Link>
+				</button>
 			</div>
 		);
 	}

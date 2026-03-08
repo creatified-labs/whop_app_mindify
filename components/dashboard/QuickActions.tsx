@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Brain, Sparkles, BookOpen, Users } from "lucide-react";
+import { useAppStore, type NavSection } from "@/lib/stores/appStore";
 
 interface QuickAction {
 	title: string;
 	description: string;
-	href: string;
+	navTarget: NavSection | null;
+	href?: string;
 	icon: React.ReactNode;
 	color: string;
 	gradient: string;
@@ -17,7 +19,7 @@ const quickActions: QuickAction[] = [
 	{
 		title: "Start Meditating",
 		description: "Browse meditation library",
-		href: "/meditation",
+		navTarget: "meditations",
 		icon: <Brain className="h-6 w-6" />,
 		color: "text-sage-600 dark:text-sage-400",
 		gradient: "from-sage-500 to-sage-600",
@@ -25,7 +27,7 @@ const quickActions: QuickAction[] = [
 	{
 		title: "Hypnosis Session",
 		description: "Transform your mindset",
-		href: "/hypnosis",
+		navTarget: "hypnosis",
 		icon: <Sparkles className="h-6 w-6" />,
 		color: "text-purple-600 dark:text-purple-400",
 		gradient: "from-purple-500 to-purple-600",
@@ -33,7 +35,7 @@ const quickActions: QuickAction[] = [
 	{
 		title: "Programs",
 		description: "Start a transformation",
-		href: "/programs",
+		navTarget: "programs",
 		icon: <BookOpen className="h-6 w-6" />,
 		color: "text-amber-600 dark:text-amber-400",
 		gradient: "from-amber-500 to-amber-600",
@@ -41,6 +43,7 @@ const quickActions: QuickAction[] = [
 	{
 		title: "Community",
 		description: "Connect with others",
+		navTarget: null,
 		href: "/community",
 		icon: <Users className="h-6 w-6" />,
 		color: "text-blue-600 dark:text-blue-400",
@@ -49,6 +52,18 @@ const quickActions: QuickAction[] = [
 ];
 
 export default function QuickActions() {
+	const setNavSelection = useAppStore((state) => state.setNavSelection);
+	const router = useRouter();
+
+	const handleClick = (action: QuickAction) => {
+		if (action.navTarget) {
+			setNavSelection(action.navTarget);
+			router.push("/");
+		} else if (action.href) {
+			router.push(action.href);
+		}
+	};
+
 	return (
 		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 			{quickActions.map((action, index) => (
@@ -58,7 +73,7 @@ export default function QuickActions() {
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.3, delay: index * 0.05 }}
 				>
-					<Link href={action.href}>
+					<button type="button" onClick={() => handleClick(action)} className="w-full text-left">
 						<div className="group relative overflow-hidden rounded-2xl border border-sage-200/50 bg-gradient-to-br from-cream-50 to-cream-100 p-6 shadow-sm transition-all hover:scale-105 hover:shadow-lg dark:border-white/10 dark:from-[#1A1D23] dark:to-[#14171C]">
 							{/* Gradient background on hover */}
 							<div
@@ -82,7 +97,7 @@ export default function QuickActions() {
 								</p>
 							</div>
 						</div>
-					</Link>
+					</button>
 				</motion.div>
 			))}
 		</div>

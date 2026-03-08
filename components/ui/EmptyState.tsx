@@ -1,10 +1,12 @@
+"use client";
+
 /**
  * Empty State Components
  * Helpful messages when there's no data
  */
 
 import { Heart, BookOpen, Sparkles, TrendingUp, Users } from "lucide-react";
-import Link from "next/link";
+import { useAppStore } from "@/lib/stores/appStore";
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -12,7 +14,6 @@ interface EmptyStateProps {
   description: string;
   action?: {
     label: string;
-    href?: string;
     onClick?: () => void;
   };
 }
@@ -35,29 +36,19 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       </p>
 
       {action && (
-        <>
-          {action.href ? (
-            <Link
-              href={action.href}
-              className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950"
-            >
-              {action.label}
-            </Link>
-          ) : (
-            <button
-              onClick={action.onClick}
-              className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950"
-            >
-              {action.label}
-            </button>
-          )}
-        </>
+        <button
+          onClick={action.onClick}
+          className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950"
+        >
+          {action.label}
+        </button>
       )}
     </div>
   );
 }
 
 export function NoFavorites() {
+  const setNavSelection = useAppStore((state) => state.setNavSelection);
   return (
     <EmptyState
       icon={<Heart className="h-10 w-10 text-purple-500" />}
@@ -65,13 +56,14 @@ export function NoFavorites() {
       description="Start exploring meditations, programs, and sessions. Tap the heart icon to save your favorites."
       action={{
         label: "Explore Meditations",
-        href: "/meditations",
+        onClick: () => setNavSelection("meditations"),
       }}
     />
   );
 }
 
 export function NoPrograms() {
+  const setNavSelection = useAppStore((state) => state.setNavSelection);
   return (
     <EmptyState
       icon={<TrendingUp className="h-10 w-10 text-purple-500" />}
@@ -79,13 +71,14 @@ export function NoPrograms() {
       description="Choose a transformation program to begin your journey. Each program includes daily sessions and guided activities."
       action={{
         label: "Browse Programs",
-        href: "/programs",
+        onClick: () => setNavSelection("programs"),
       }}
     />
   );
 }
 
 export function NoJournalEntries() {
+  const setNavSelection = useAppStore((state) => state.setNavSelection);
   return (
     <EmptyState
       icon={<BookOpen className="h-10 w-10 text-purple-500" />}
@@ -93,13 +86,14 @@ export function NoJournalEntries() {
       description="Complete today's session and reflect on your practice. Your journal helps track insights and progress."
       action={{
         label: "Start Today's Session",
-        href: "#",
+        onClick: () => setNavSelection("meditations"),
       }}
     />
   );
 }
 
 export function NoActivity() {
+  const setNavSelection = useAppStore((state) => state.setNavSelection);
   return (
     <EmptyState
       icon={<Sparkles className="h-10 w-10 text-purple-500" />}
@@ -107,7 +101,7 @@ export function NoActivity() {
       description="Complete a meditation, hypnosis session, or quick reset to start tracking your progress and building your streak."
       action={{
         label: "Get Started",
-        href: "/meditations",
+        onClick: () => setNavSelection("meditations"),
       }}
     />
   );
@@ -128,6 +122,7 @@ export function NoCommunityPosts() {
 }
 
 export function SearchEmpty({ query }: { query: string }) {
+  const setNavSelection = useAppStore((state) => state.setNavSelection);
   return (
     <EmptyState
       icon={<BookOpen className="h-10 w-10 text-gray-400" />}
@@ -135,7 +130,7 @@ export function SearchEmpty({ query }: { query: string }) {
       description={`We couldn't find any content matching "${query}". Try adjusting your search or browse all content.`}
       action={{
         label: "Clear Search",
-        href: "#",
+        onClick: () => setNavSelection("dashboard"),
       }}
     />
   );

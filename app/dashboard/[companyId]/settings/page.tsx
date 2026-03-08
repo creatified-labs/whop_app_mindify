@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, Globe, DollarSign, Bell, Shield, Library, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Globe, Bell, Shield, Library, Loader2 } from "lucide-react";
 import MediaLibrarySection from "@/components/dashboard/settings/MediaLibrarySection";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -14,7 +14,6 @@ interface SettingsSection {
 
 const sections: SettingsSection[] = [
 	{ id: "general", label: "General", icon: Globe },
-	{ id: "pricing", label: "Pricing & Access", icon: DollarSign },
 	{ id: "notifications", label: "Notifications", icon: Bell },
 	{ id: "advanced", label: "Advanced", icon: Shield },
 	{ id: "media", label: "Media Library", icon: Library },
@@ -140,13 +139,6 @@ export default function SettingsPage() {
 		"Welcome to your mindfulness journey"
 	);
 
-	// Pricing settings
-	const [monthlyPrice, setMonthlyPrice] = useState("14.99");
-	const [annualPrice, setAnnualPrice] = useState("149.99");
-	const [freeMeditationLimit, setFreeMeditationLimit] = useState("5");
-	const [freeHypnosisLimit, setFreeHypnosisLimit] = useState("2");
-	const [freeProgramLimit, setFreeProgramLimit] = useState("1");
-
 	// Notification settings
 	const [emailNotifications, setEmailNotifications] = useState(true);
 	const [streakReminders, setStreakReminders] = useState(true);
@@ -168,11 +160,6 @@ export default function SettingsPage() {
 				setAppTagline(data.appTagline);
 				setWelcomeMessage(data.welcomeMessage);
 				setSupportEmail(data.supportEmail);
-				setMonthlyPrice(String(data.monthlyPrice));
-				setAnnualPrice(String(data.annualPrice));
-				setFreeMeditationLimit(String(data.freeMeditationLimit));
-				setFreeHypnosisLimit(String(data.freeHypnosisLimit));
-				setFreeProgramLimit(String(data.freeProgramLimit));
 				setEmailNotifications(data.emailNotifications);
 				setStreakReminders(data.streakReminders);
 				setWeeklyDigest(data.weeklyDigest);
@@ -200,11 +187,6 @@ export default function SettingsPage() {
 					appTagline,
 					welcomeMessage,
 					supportEmail,
-					monthlyPrice: parseFloat(monthlyPrice),
-					annualPrice: parseFloat(annualPrice),
-					freeMeditationLimit: parseInt(freeMeditationLimit, 10),
-					freeHypnosisLimit: parseInt(freeHypnosisLimit, 10),
-					freeProgramLimit: parseInt(freeProgramLimit, 10),
 					emailNotifications,
 					streakReminders,
 					weeklyDigest,
@@ -336,57 +318,6 @@ export default function SettingsPage() {
 										placeholder="support@example.com"
 										helpText="Users will see this for support inquiries"
 									/>
-								</SectionCard>
-							</>
-						)}
-
-						{activeSection === "pricing" && (
-							<>
-								<SectionCard
-									title="Pricing Tiers"
-									description="Configure pricing for premium access. Changes here are for display only — update actual billing in Whop."
-								>
-									<div className="grid grid-cols-2 gap-4">
-										<SettingsInput
-											label="Monthly Price ($)"
-											value={monthlyPrice}
-											onChange={setMonthlyPrice}
-											type="number"
-											placeholder="14.99"
-										/>
-										<SettingsInput
-											label="Annual Price ($)"
-											value={annualPrice}
-											onChange={setAnnualPrice}
-											type="number"
-											placeholder="149.99"
-										/>
-									</div>
-								</SectionCard>
-								<SectionCard
-									title="Free Tier Limits"
-									description="How much content free users can access"
-								>
-									<div className="grid grid-cols-3 gap-4">
-										<SettingsInput
-											label="Meditations"
-											value={freeMeditationLimit}
-											onChange={setFreeMeditationLimit}
-											type="number"
-										/>
-										<SettingsInput
-											label="Hypnosis"
-											value={freeHypnosisLimit}
-											onChange={setFreeHypnosisLimit}
-											type="number"
-										/>
-										<SettingsInput
-											label="Programs"
-											value={freeProgramLimit}
-											onChange={setFreeProgramLimit}
-											type="number"
-										/>
-									</div>
 								</SectionCard>
 							</>
 						)}
