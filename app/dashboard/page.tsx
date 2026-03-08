@@ -3,12 +3,13 @@ import { whopsdk } from "@/lib/whop-sdk";
 import { getAuthUser } from "@/lib/auth/getAuthUser";
 import { getActivityStats, getUserActivity } from "@/lib/database/activityService";
 import { getAllProgramProgress } from "@/lib/database/programService";
-import { PROGRAMS_LIBRARY } from "@/lib/mockData/programs";
+import { getPrograms } from "@/lib/database/contentService";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import ActivePrograms from "@/components/dashboard/ActivePrograms";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import QuickActions from "@/components/dashboard/QuickActions";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
+import { MotivationCTA } from "@/components/dashboard/MotivationCTA";
 import { getSettings } from "@/lib/database/settingsService";
 
 export default async function UserDashboardPage() {
@@ -25,11 +26,12 @@ export default async function UserDashboardPage() {
 	const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
 
 	// Fetch user stats and activity from database
-	const [statsResult, programsResult, activityResult, settingsResult] = await Promise.all([
+	const [statsResult, programsResult, activityResult, settingsResult, allProgramsResult] = await Promise.all([
 		getActivityStats(userId),
 		getAllProgramProgress(userId),
 		getUserActivity(userId, { limit: 10 }),
 		getSettings(),
+		getPrograms(),
 	]);
 
 	// Calculate stats
@@ -41,9 +43,10 @@ export default async function UserDashboardPage() {
 	};
 
 	// Get active programs with details
+	const dbPrograms = allProgramsResult.data || [];
 	const activePrograms = (programsResult.data || [])
 		.map((progress) => {
-			const program = PROGRAMS_LIBRARY.find((p) => p.id === progress.programId);
+			const program = dbPrograms.find((p) => p.id === progress.programId);
 			return program ? { program, progress } : null;
 		})
 		.filter((item): item is NonNullable<typeof item> => item !== null)
@@ -108,20 +111,7 @@ export default async function UserDashboardPage() {
 							Start with a quick 5-minute meditation or dive into a transformation
 							program
 						</p>
-						<div className="flex flex-wrap justify-center gap-4">
-							<a
-								href="/meditation"
-								className="rounded-xl bg-sage-600 px-6 py-3 font-medium text-white transition-colors hover:bg-sage-700 dark:bg-sage-500 dark:hover:bg-sage-600"
-							>
-								Start Meditating
-							</a>
-							<a
-								href="/programs"
-								className="rounded-xl border-2 border-sage-600 px-6 py-3 font-medium text-sage-700 transition-colors hover:bg-sage-50 dark:border-sage-400 dark:text-sage-400 dark:hover:bg-sage-900/30"
-							>
-								Browse Programs
-							</a>
-						</div>
+						<MotivationCTA />
 					</div>
 				)}
 			</div>

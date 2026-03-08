@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { KnowledgeArticle, KnowledgeCategory } from "@/lib/mockData/articles";
+import type { KnowledgeArticle, KnowledgeCategory } from "@/lib/types";
 import { ContentTable, type ContentColumn } from "./ContentTable";
 import { ContentFormModal, FormInput, FormSelect, FormTextarea } from "./ContentFormModal";
 import { ArrayFieldEditor } from "./ArrayFieldEditor";

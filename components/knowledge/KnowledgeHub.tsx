@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchIcon, ClockIcon } from "lucide-react";
-import { KNOWLEDGE_ARTICLES, type KnowledgeArticle, type KnowledgeCategory } from "@/lib/mockData/articles";
+import type { KnowledgeArticle, KnowledgeCategory } from "@/lib/types";
 import { ArticleView } from "@/components/knowledge/ArticleView";
 
 const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
@@ -16,10 +16,19 @@ const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
 ];
 
 export function KnowledgeHub() {
+	const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
 	const [query, setQuery] = useState("");
 	const [category, setCategory] = useState<(typeof categories)[number]["value"]>("all");
 	const [activeArticle, setActiveArticle] = useState<KnowledgeArticle | null>(null);
 	const [bookmarkedSlugs, setBookmarkedSlugs] = useState<Set<string>>(new Set());
+
+	// Fetch articles from API
+	useEffect(() => {
+		fetch("/api/articles")
+			.then((res) => res.json())
+			.then((data) => setArticles(data.items || []))
+			.catch(() => {});
+	}, []);
 
 	// Fetch bookmarked article slugs on mount
 	useEffect(() => {
@@ -68,7 +77,7 @@ export function KnowledgeHub() {
 	}, []);
 
 	const filteredArticles = useMemo(() => {
-		return KNOWLEDGE_ARTICLES.filter((article) => {
+		return articles.filter((article) => {
 			const matchesCategory = category === "all" || article.category === category;
 			const matchesQuery =
 				query === "" ||
@@ -76,7 +85,7 @@ export function KnowledgeHub() {
 				article.keyTakeaways.some((takeaway) => takeaway.toLowerCase().includes(query.toLowerCase()));
 			return matchesCategory && matchesQuery;
 		});
-	}, [category, query]);
+	}, [articles, category, query]);
 
 	return (
 		<section className="space-y-6">
@@ -153,7 +162,7 @@ export function KnowledgeHub() {
 				</div>
 			) : (
 				<div className="py-8 text-center text-sm text-[rgb(var(--earth-500))] dark:text-white/60">
-					No articles found for &quot;{query}&quot;
+					{articles.length === 0 ? "No articles available yet." : `No articles found for "${query}"`}
 				</div>
 			)}
 
@@ -162,7 +171,7 @@ export function KnowledgeHub() {
 					article={activeArticle}
 					onClose={() => setActiveArticle(null)}
 					onNavigate={(slug) => {
-						const article = KNOWLEDGE_ARTICLES.find((a) => a.slug === slug);
+						const article = articles.find((a) => a.slug === slug);
 						if (article) setActiveArticle(article);
 					}}
 					isBookmarked={bookmarkedSlugs.has(activeArticle.slug)}

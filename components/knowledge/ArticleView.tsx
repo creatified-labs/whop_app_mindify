@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkIcon, Share2Icon, XIcon, HeadphonesIcon, CheckIcon } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
-import type { KnowledgeArticle } from "@/lib/mockData/articles";
+import type { KnowledgeArticle } from "@/lib/types";
 
 const categoryColors: Record<string, string> = {
 	neuroscience: "from-indigo-600/50 to-purple-500/30",

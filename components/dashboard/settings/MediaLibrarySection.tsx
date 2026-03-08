@@ -11,11 +11,12 @@ import {
 	CheckCircle2,
 	XCircle,
 	FileAudio,
+	FileVideo,
 	ExternalLink,
 } from "lucide-react";
 import type { MediaLibraryItem } from "@/lib/types";
 
-type FilterTab = "all" | "audio" | "link";
+type FilterTab = "all" | "audio" | "video" | "link";
 
 type UploadFileStatus = {
 	file: File;
@@ -122,13 +123,16 @@ export default function MediaLibrarySection() {
 
 			try {
 				// Step 1: Get signed upload URL
+				const fileContentType = item.file.type || "audio/mpeg";
+				const isVideo = fileContentType.startsWith("video/");
+
 				const uploadRes = await fetch("/api/admin/media-library", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						action: "upload",
 						fileName: item.file.name,
-						contentType: item.file.type || "audio/mpeg",
+						contentType: fileContentType,
 						fileSize: item.file.size,
 					}),
 				});
@@ -145,7 +149,7 @@ export default function MediaLibrarySection() {
 				const storageRes = await fetch(signedUrl, {
 					method: "PUT",
 					headers: {
-						"Content-Type": item.file.type || "audio/mpeg",
+						"Content-Type": fileContentType,
 						"x-upsert": "false",
 					},
 					body: item.file,
@@ -169,10 +173,10 @@ export default function MediaLibrarySection() {
 									/\.[^/.]+$/,
 									""
 								),
-								mediaType: "audio",
+								mediaType: isVideo ? "video" : "audio",
 								url: publicUrl,
 								storagePath: path,
-								mimeType: item.file.type || "audio/mpeg",
+								mimeType: fileContentType,
 								fileSizeBytes: item.file.size,
 								tags: [],
 							},
@@ -308,8 +312,8 @@ export default function MediaLibrarySection() {
 		<div className="space-y-6">
 			{/* Upload Audio Files */}
 			<SectionCard
-				title="Upload Audio Files"
-				description="Drag and drop audio files or browse to upload"
+				title="Upload Media Files"
+				description="Drag and drop audio or video files to upload"
 			>
 				<div
 					onDragOver={handleDragOver}
@@ -324,16 +328,16 @@ export default function MediaLibrarySection() {
 				>
 					<Upload className="mb-3 h-8 w-8 text-[rgb(var(--sage-400))]" />
 					<p className="text-sm font-medium text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
-						Drop audio files here or click to browse
+						Drop audio or video files here or click to browse
 					</p>
 					<p className="mt-1 text-xs text-[rgb(var(--earth-400))] dark:text-[#B5AFA3]">
-						MP3, WAV, M4A, OGG, WebM, AAC - up to 100MB
+						MP3, WAV, M4A, OGG, AAC, MP4, WebM, MOV — audio up to 100MB, video up to 500MB
 					</p>
 					<input
 						ref={fileInputRef}
 						type="file"
 						multiple
-						accept="audio/*"
+						accept="audio/*,video/*"
 						className="hidden"
 						onChange={(e) => {
 							if (e.target.files)
@@ -351,7 +355,11 @@ export default function MediaLibrarySection() {
 								key={idx}
 								className="flex items-center gap-3 rounded-lg border border-[rgb(var(--sage-200)/0.5)] bg-[rgb(var(--cream-50))] px-4 py-2.5 dark:border-white/5 dark:bg-[#14171C]"
 							>
-								<FileAudio className="h-4 w-4 shrink-0 text-[rgb(var(--sage-500))]" />
+								{item.file.type.startsWith("video/") ? (
+									<FileVideo className="h-4 w-4 shrink-0 text-purple-500" />
+								) : (
+									<FileAudio className="h-4 w-4 shrink-0 text-[rgb(var(--sage-500))]" />
+								)}
 								<span className="flex-1 truncate text-sm text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
 									{item.file.name}
 								</span>
@@ -445,6 +453,7 @@ export default function MediaLibrarySection() {
 						[
 							{ id: "all", label: "All" },
 							{ id: "audio", label: "Audio" },
+							{ id: "video", label: "Video" },
 							{ id: "link", label: "Links" },
 						] as const
 					).map((tab) => (
@@ -485,6 +494,8 @@ export default function MediaLibrarySection() {
 								{/* Icon */}
 								{item.mediaType === "audio" ? (
 									<FileAudio className="h-5 w-5 shrink-0 text-[rgb(var(--sage-500))]" />
+								) : item.mediaType === "video" ? (
+									<FileVideo className="h-5 w-5 shrink-0 text-purple-500" />
 								) : (
 									<ExternalLink className="h-5 w-5 shrink-0 text-blue-500" />
 								)}
@@ -499,12 +510,16 @@ export default function MediaLibrarySection() {
 											className={`rounded px-1.5 py-0.5 font-medium ${
 												item.mediaType === "audio"
 													? "bg-[rgb(var(--sage-100))] text-[rgb(var(--sage-700))] dark:bg-[rgb(var(--sage-900)/0.3)] dark:text-[rgb(var(--sage-300))]"
-													: "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+													: item.mediaType === "video"
+														? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400"
+														: "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
 											}`}
 										>
 											{item.mediaType === "audio"
 												? "Audio"
-												: "Link"}
+												: item.mediaType === "video"
+													? "Video"
+													: "Link"}
 										</span>
 										{item.fileSizeBytes && (
 											<span>

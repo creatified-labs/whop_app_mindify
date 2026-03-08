@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { QUICK_RESETS } from "@/lib/mockData/quickResets";
+import { useState, useEffect } from "react";
 import type { QuickReset } from "@/lib/types";
 import { useAudioStore } from "@/lib/stores/audioStore";
 
 export function QuickResetsList() {
 	const [activeId, setActiveId] = useState<string | null>(null);
+	const [resets, setResets] = useState<QuickReset[]>([]);
 	const playTrack = useAudioStore((state) => state.playTrack);
+
+	useEffect(() => {
+		fetch("/api/quick-resets")
+			.then((res) => res.json())
+			.then((data) => setResets(data.items || []))
+			.catch(() => {});
+	}, []);
 
 	const handlePlay = (reset: QuickReset) => {
 		setActiveId(reset.id);
@@ -21,6 +28,20 @@ export function QuickResetsList() {
 		});
 	};
 
+	if (resets.length === 0) {
+		return (
+			<section className="space-y-6">
+				<header className="flex flex-wrap items-center justify-between gap-3">
+					<div>
+						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Quick Resets</p>
+						<h2 className="text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Rapid Nervous System Tools</h2>
+					</div>
+				</header>
+				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">No quick resets available yet.</p>
+			</section>
+		);
+	}
+
 	return (
 		<section className="space-y-6">
 			<header className="flex flex-wrap items-center justify-between gap-3">
@@ -31,7 +52,7 @@ export function QuickResetsList() {
 				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">Tap a protocol to play instantly.</p>
 			</header>
 			<div className="grid gap-4 lg:grid-cols-2">
-				{QUICK_RESETS.map((reset) => (
+				{resets.map((reset) => (
 					<button
 						key={reset.id}
 						type="button"

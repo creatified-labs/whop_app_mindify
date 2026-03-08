@@ -8,14 +8,14 @@ import {
   deleteMediaItem,
   updateMediaItemTags,
 } from '@/lib/database/mediaLibraryService';
-import { createSignedUploadUrl, validateAudioFile } from '@/lib/storage/audioStorage';
+import { createSignedUploadUrl, validateMediaFile } from '@/lib/storage/audioStorage';
 
 export async function GET(request: Request) {
   try {
     await getAuthUser(await headers());
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') as 'audio' | 'link' | null;
-    const filter = type === 'audio' || type === 'link' ? type : undefined;
+    const type = searchParams.get('type') as 'audio' | 'video' | 'link' | null;
+    const filter = type === 'audio' || type === 'video' || type === 'link' ? type : undefined;
 
     const { data, error } = await getMediaItems(filter);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     if (body.action === 'upload') {
       const { fileName, contentType, fileSize } = body;
-      const validation = validateAudioFile(fileName, contentType, fileSize);
+      const validation = validateMediaFile(fileName, contentType, fileSize);
       if (!validation.valid) {
         return NextResponse.json({ error: validation.error }, { status: 400 });
       }

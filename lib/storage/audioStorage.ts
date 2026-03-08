@@ -1,16 +1,17 @@
 /**
- * Audio Storage Service - Supabase Storage operations for audio files
+ * Media Storage Service - Supabase Storage operations for audio and video files
  *
- * Handles upload URL generation, deletion, listing, and validation for audio files.
+ * Handles upload URL generation, deletion, listing, and validation for media files.
  * Uses supabaseAdmin (service role) to bypass RLS.
  */
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 const BUCKET_NAME = 'audio';
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_VIDEO_SIZE = 500 * 1024 * 1024; // 500MB
 
-const ALLOWED_MIME_TYPES = [
+const ALLOWED_AUDIO_MIME_TYPES = [
   'audio/mpeg',
   'audio/mp3',
   'audio/wav',
@@ -23,14 +24,34 @@ const ALLOWED_MIME_TYPES = [
   'audio/aac',
 ];
 
-const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.ogg', '.webm', '.aac'];
+const ALLOWED_VIDEO_MIME_TYPES = [
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-m4v',
+  'video/mpeg',
+  'video/ogg',
+];
+
+const ALLOWED_MIME_TYPES = [...ALLOWED_AUDIO_MIME_TYPES, ...ALLOWED_VIDEO_MIME_TYPES];
+
+const ALLOWED_AUDIO_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.ogg', '.webm', '.aac'];
+const ALLOWED_VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mov', '.m4v', '.mpeg', '.ogv'];
+const ALLOWED_EXTENSIONS = [...ALLOWED_AUDIO_EXTENSIONS, ...ALLOWED_VIDEO_EXTENSIONS];
 
 export type AudioContentType = 'meditations' | 'hypnosis' | 'programs' | 'quick-resets' | 'general';
 
 /**
- * Validate an audio file before upload
+ * Determine if a MIME type is video
  */
-export function validateAudioFile(
+export function isVideoMimeType(contentType: string): boolean {
+  return ALLOWED_VIDEO_MIME_TYPES.includes(contentType);
+}
+
+/**
+ * Validate a media file (audio or video) before upload
+ */
+export function validateMediaFile(
   fileName: string,
   contentType: string,
   fileSize?: number
@@ -44,12 +65,18 @@ export function validateAudioFile(
     return { valid: false, error: `Invalid MIME type: ${contentType}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}` };
   }
 
-  if (fileSize && fileSize > MAX_FILE_SIZE) {
-    return { valid: false, error: `File too large: ${(fileSize / 1024 / 1024).toFixed(1)}MB. Maximum: 100MB` };
+  const maxSize = isVideoMimeType(contentType) ? MAX_VIDEO_SIZE : MAX_AUDIO_SIZE;
+  const maxLabel = isVideoMimeType(contentType) ? '500MB' : '100MB';
+
+  if (fileSize && fileSize > maxSize) {
+    return { valid: false, error: `File too large: ${(fileSize / 1024 / 1024).toFixed(1)}MB. Maximum: ${maxLabel}` };
   }
 
   return { valid: true };
 }
+
+/** @deprecated Use validateMediaFile instead */
+export const validateAudioFile = validateMediaFile;
 
 /**
  * Generate a unique storage path for a file
@@ -79,11 +106,11 @@ export async function createSignedUploadUrl(
       });
 
     if (error) {
-      console.error('[AudioStorage] Error creating signed upload URL:', error);
+      console.error('[MediaStorage] Error creating signed upload URL:', error);
       return { data: null, error: new Error(error.message) };
     }
 
-    const publicUrl = getAudioPublicUrl(path);
+    const publicUrl = getPublicUrl(path);
 
     return {
       data: {
@@ -95,13 +122,13 @@ export async function createSignedUploadUrl(
       error: null,
     };
   } catch (err) {
-    console.error('[AudioStorage] Error in createSignedUploadUrl:', err);
+    console.error('[MediaStorage] Error in createSignedUploadUrl:', err);
     return { data: null, error: err as Error };
   }
 }
 
 /**
- * Delete an audio file from storage
+ * Delete a file from storage
  */
 export async function deleteAudio(storagePath: string): Promise<{ success: boolean; error: Error | null }> {
   try {
@@ -110,19 +137,19 @@ export async function deleteAudio(storagePath: string): Promise<{ success: boole
       .remove([storagePath]);
 
     if (error) {
-      console.error('[AudioStorage] Error deleting audio:', error);
+      console.error('[MediaStorage] Error deleting file:', error);
       return { success: false, error: new Error(error.message) };
     }
 
     return { success: true, error: null };
   } catch (err) {
-    console.error('[AudioStorage] Error in deleteAudio:', err);
+    console.error('[MediaStorage] Error in deleteAudio:', err);
     return { success: false, error: err as Error };
   }
 }
 
 /**
- * List audio files in a folder
+ * List files in a folder
  */
 export async function listAudioFiles(
   folder: AudioContentType = 'general',
@@ -137,7 +164,7 @@ export async function listAudioFiles(
       });
 
     if (error) {
-      console.error('[AudioStorage] Error listing audio files:', error);
+      console.error('[MediaStorage] Error listing files:', error);
       return { data: [], error: new Error(error.message) };
     }
 
@@ -148,25 +175,28 @@ export async function listAudioFiles(
         return {
           name: file.name,
           path,
-          publicUrl: getAudioPublicUrl(path),
+          publicUrl: getPublicUrl(path),
           createdAt: file.created_at,
         };
       });
 
     return { data: files, error: null };
   } catch (err) {
-    console.error('[AudioStorage] Error in listAudioFiles:', err);
+    console.error('[MediaStorage] Error in listAudioFiles:', err);
     return { data: [], error: err as Error };
   }
 }
 
 /**
- * Construct the public URL for an audio file
+ * Construct the public URL for a file in the media bucket
  */
-export function getAudioPublicUrl(path: string): string {
+export function getPublicUrl(path: string): string {
   const { data } = supabaseAdmin.storage
     .from(BUCKET_NAME)
     .getPublicUrl(path);
 
   return data.publicUrl;
 }
+
+/** @deprecated Use getPublicUrl instead */
+export const getAudioPublicUrl = getPublicUrl;

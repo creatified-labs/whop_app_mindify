@@ -49,7 +49,7 @@ export function AudioUploadButton({ onUploadComplete, contentType = "general" }:
 			const { signedUrl, publicUrl } = await res.json();
 
 			// Step 2: Upload file directly to Supabase Storage
-			setProgress("Uploading audio...");
+			setProgress("Uploading file...");
 
 			const uploadRes = await fetch(signedUrl, {
 				method: "PUT",
@@ -90,7 +90,7 @@ export function AudioUploadButton({ onUploadComplete, contentType = "general" }:
 			<input
 				ref={fileInputRef}
 				type="file"
-				accept="audio/*"
+				accept="audio/*,video/*"
 				onChange={handleFileChange}
 				className="hidden"
 			/>
@@ -111,7 +111,7 @@ export function AudioUploadButton({ onUploadComplete, contentType = "general" }:
 				{state === "success" && <Check className="h-3.5 w-3.5" />}
 				{state === "error" && <AlertCircle className="h-3.5 w-3.5" />}
 				{state === "idle" && <Upload className="h-3.5 w-3.5" />}
-				{state === "idle" ? "Upload Audio" : progress}
+				{state === "idle" ? "Upload File" : progress}
 			</button>
 
 			{state === "error" && error && (

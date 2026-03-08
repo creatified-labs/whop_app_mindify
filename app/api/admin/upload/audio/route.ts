@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { getAuthUser } from '@/lib/auth/getAuthUser';
 import {
-  validateAudioFile,
+  validateMediaFile,
   createSignedUploadUrl,
   deleteAudio,
   listAudioFiles,
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const validation = validateAudioFile(fileName, contentType);
+    const validation = validateMediaFile(fileName, contentType);
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }

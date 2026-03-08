@@ -11,8 +11,8 @@ import type {
   Program,
   ProgramDay,
   QuickReset,
+  KnowledgeArticle,
 } from '@/lib/types';
-import type { KnowledgeArticle } from '@/lib/mockData/articles';
 
 // =============================================================================
 // MEDITATIONS

@@ -1,7 +1,7 @@
 "use client";
 
-import { PROGRAMS_LIBRARY } from "@/lib/mockData/programs";
-import type { ProgramCategory } from "@/lib/types";
+import { useState, useEffect } from "react";
+import type { Program, ProgramCategory } from "@/lib/types";
 
 const categoryGradients: Record<ProgramCategory, string> = {
 	focus: "from-indigo-600/40 via-purple-500/30 to-blue-500/20",
@@ -12,6 +12,27 @@ const categoryGradients: Record<ProgramCategory, string> = {
 };
 
 export function ProgramsLibrary() {
+	const [programs, setPrograms] = useState<Program[]>([]);
+
+	useEffect(() => {
+		fetch("/api/programs/content")
+			.then((res) => res.json())
+			.then((data) => setPrograms(data.items || []))
+			.catch(() => {});
+	}, []);
+
+	if (programs.length === 0) {
+		return (
+			<section className="space-y-8">
+				<header className="space-y-2">
+					<p className="text-xs uppercase tracking-[0.5em] text-[rgb(var(--earth-500))] dark:text-white/60">Transformation Programs</p>
+					<h2 className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Choose your current protocol</h2>
+				</header>
+				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">No programs available yet.</p>
+			</section>
+		);
+	}
+
 	return (
 		<section className="space-y-8">
 			<header className="space-y-2">
@@ -23,7 +44,7 @@ export function ProgramsLibrary() {
 				</p>
 			</header>
 			<div className="grid gap-6 lg:grid-cols-2">
-				{PROGRAMS_LIBRARY.map((program) => {
+				{programs.map((program) => {
 					const gradient = categoryGradients[program.category] ?? categoryGradients.focus;
 					return (
 						<div

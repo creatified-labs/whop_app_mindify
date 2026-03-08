@@ -6,7 +6,7 @@ function rowToMediaItem(row: Record<string, unknown>): MediaLibraryItem {
   return {
     id: row.id as string,
     name: row.name as string,
-    mediaType: row.media_type as 'audio' | 'link',
+    mediaType: row.media_type as 'audio' | 'video' | 'link',
     url: row.url as string,
     storagePath: row.storage_path as string | null,
     mimeType: row.mime_type as string | null,
@@ -18,7 +18,7 @@ function rowToMediaItem(row: Record<string, unknown>): MediaLibraryItem {
 }
 
 export async function getMediaItems(
-  filter?: 'audio' | 'link'
+  filter?: 'audio' | 'video' | 'link'
 ): Promise<{ data: MediaLibraryItem[]; error: Error | null }> {
   try {
     let query = supabaseAdmin

@@ -159,7 +159,7 @@ export interface UserProgress {
 export interface MediaLibraryItem {
 	id: string;
 	name: string;
-	mediaType: "audio" | "link";
+	mediaType: "audio" | "video" | "link";
 	url: string;
 	storagePath?: string | null;
 	mimeType?: string | null;
@@ -167,6 +167,30 @@ export interface MediaLibraryItem {
 	tags: string[];
 	createdAt: string;
 	updatedAt: string;
+}
+
+export type KnowledgeCategory =
+	| "neuroscience"
+	| "psychology"
+	| "breathwork"
+	| "sleep"
+	| "focus"
+	| "productivity";
+
+export interface KnowledgeArticle {
+	slug: string;
+	title: string;
+	category: KnowledgeCategory;
+	readTimeMinutes: number;
+	thumbnail: string;
+	author: string;
+	updatedAt: string;
+	audioTrack?: AudioTrack;
+	content: string;
+	keyTakeaways: string[];
+	actionSteps: string[];
+	recommendedSessions: { id: string; type: "meditation" | "hypnosis"; title: string }[];
+	references: string[];
 }
 
 export type MoodFilter = "all" | Mood;
