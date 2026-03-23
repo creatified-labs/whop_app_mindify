@@ -177,6 +177,12 @@ export type KnowledgeCategory =
 	| "focus"
 	| "productivity";
 
+export interface KnowledgeAttachment {
+	url: string;
+	title: string;
+	type: "audio" | "video" | "link";
+}
+
 export interface KnowledgeArticle {
 	slug: string;
 	title: string;
@@ -191,6 +197,7 @@ export interface KnowledgeArticle {
 	actionSteps: string[];
 	recommendedSessions: { id: string; type: "meditation" | "hypnosis"; title: string }[];
 	references: string[];
+	attachments?: KnowledgeAttachment[];
 }
 
 export type MoodFilter = "all" | Mood;

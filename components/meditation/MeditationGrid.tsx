@@ -4,10 +4,11 @@ import type { ComponentType } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useSoundscapeStore } from "@/lib/stores/soundscapeStore";
+import { useAudioStore } from "@/lib/stores/audioStore";
 import { MindifyPanel, StatBadge } from "@/components/ui/MindifyPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Music } from "lucide-react";
-import type { Meditation } from "@/lib/types";
+import { Music, Play } from "lucide-react";
+import type { Meditation, MeditationCategory } from "@/lib/types";
 
 type MindifyPlayerProps = {
 	url: string;
@@ -30,6 +31,17 @@ interface MeditationGridProps {
 
 export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 	const { currentSession, selectSession } = useSoundscapeStore();
+	const playTrack = useAudioStore((state) => state.playTrack);
+
+	const handlePlayInGlobalPlayer = (session: Meditation) => {
+		playTrack({
+			id: session.id,
+			title: session.title,
+			audioUrl: session.audioUrl,
+			duration: session.duration * 60,
+			trackType: "meditation",
+		});
+	};
 
 	if (meditations.length === 0) {
 		return (
@@ -129,6 +141,23 @@ export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 								height="80px"
 							/>
 						</div>
+						<button
+							type="button"
+							onClick={() => handlePlayInGlobalPlayer({
+								id: currentSession.id,
+								title: currentSession.title,
+								description: currentSession.description,
+								duration: currentSession.duration,
+								category: currentSession.focus as MeditationCategory,
+								audioUrl: currentSession.audioUrl,
+								imageUrl: "",
+								mood: [],
+							})}
+							className="mt-4 inline-flex items-center gap-2 rounded-full bg-[rgb(var(--sage-600))] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[rgb(var(--sage-700))] dark:bg-white/90 dark:text-black dark:hover:bg-white"
+						>
+							<Play className="h-4 w-4" />
+							Play in global player
+						</button>
 					</MindifyPanel>
 				) : (
 					<MindifyPanel

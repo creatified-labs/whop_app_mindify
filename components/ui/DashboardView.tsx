@@ -45,6 +45,7 @@ export interface ContinueSession {
 	type: SessionType;
 	progressPercent: number;
 	durationMinutes: number;
+	audioUrl?: string;
 	moodTag?: string;
 }
 
@@ -61,6 +62,7 @@ export interface FavoriteSession {
 	title: string;
 	type: SessionType;
 	durationMinutes: number;
+	audioUrl?: string;
 	isPremium?: boolean;
 }
 
@@ -77,6 +79,7 @@ export interface RecommendedSession {
 	type: SessionType;
 	durationMinutes: number;
 	timeOfDay: string;
+	audioUrl?: string;
 	isPremium?: boolean;
 }
 
@@ -160,13 +163,15 @@ export function DashboardView({
 		return "Evening";
 	}, []);
 
-	const handlePlay = (trackId: string, trackTitle: string) =>
+	const handlePlay = (trackId: string, trackTitle: string, audioUrl?: string, trackType: "meditation" | "hypnosis" | "reset" | "program" = "meditation") => {
+		if (!audioUrl) return;
 		playTrack({
 			id: trackId,
 			title: trackTitle,
-			audioUrl: `/audio/${trackId}.mp3`,
-			trackType: "meditation",
+			audioUrl,
+			trackType,
 		});
+	};
 
 	return (
 		<div className="space-y-6">
@@ -207,7 +212,7 @@ export function DashboardView({
 								<span className="font-medium">{continueSession.progressPercent}% complete</span>
 								<button
 									type="button"
-									onClick={() => handlePlay(continueSession.id, continueSession.title)}
+									onClick={() => handlePlay(continueSession.id, continueSession.title, continueSession.audioUrl, continueSession.type)}
 									className="rounded-full border border-[rgb(var(--sage-200))] px-4 py-2 text-xs uppercase tracking-[0.3em] text-[rgb(var(--sage-700))] hover:bg-[rgb(var(--sage-50))] dark:border-white/10 dark:text-[#E2DBCF] dark:hover:bg-white/10"
 								>
 									Play
@@ -299,7 +304,7 @@ export function DashboardView({
 							<button
 								type="button"
 								key={fav.id}
-								onClick={() => handlePlay(fav.id, fav.title)}
+								onClick={() => handlePlay(fav.id, fav.title, fav.audioUrl, fav.type)}
 								className="group rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-left shadow-card transition hover:-translate-y-1 hover:shadow-hover dark:border-white/10 dark:bg-[#13151A]"
 							>
 								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">{fav.type}</p>
@@ -348,7 +353,7 @@ export function DashboardView({
 								<button
 									type="button"
 									disabled={locked}
-									onClick={() => handlePlay(session.id, session.title)}
+									onClick={() => handlePlay(session.id, session.title, session.audioUrl, session.type)}
 									className={`mt-4 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.3em] ${
 										locked
 											? "border-[rgb(var(--sage-100))] text-[rgb(var(--earth-500))]"

@@ -15,21 +15,36 @@ export type NavSection =
 
 interface AppStore {
 	navSelection: NavSection;
+	navHistory: NavSection[];
 	filterState: FilterState;
 	userProgress: UserProgress | null;
 	membershipTier: "free" | "premium";
 	setNavSelection: (section: NavSection) => void;
+	goBack: () => void;
+	canGoBack: () => boolean;
 	setFilterState: (updater: Partial<FilterState>) => void;
 	setUserProgress: (progress: UserProgress) => void;
 	setMembershipTier: (tier: "free" | "premium") => void;
 }
 
-export const useAppStore = create<AppStore>((set) => ({
+export const useAppStore = create<AppStore>((set, get) => ({
 	navSelection: "dashboard",
+	navHistory: [],
 	filterState: DEFAULT_FILTER_STATE,
 	userProgress: null,
 	membershipTier: "free",
-	setNavSelection: (section) => set({ navSelection: section }),
+	setNavSelection: (section) =>
+		set((state) => ({
+			navSelection: section,
+			navHistory: [...state.navHistory, state.navSelection].slice(-20),
+		})),
+	goBack: () => {
+		const { navHistory } = get();
+		if (navHistory.length === 0) return;
+		const previous = navHistory[navHistory.length - 1];
+		set({ navSelection: previous, navHistory: navHistory.slice(0, -1) });
+	},
+	canGoBack: () => get().navHistory.length > 0,
 	setFilterState: (updater) =>
 		set((state) => ({
 			filterState: {

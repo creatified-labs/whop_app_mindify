@@ -3,9 +3,10 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, Sparkles } from "lucide-react";
+import { ArrowLeft, Leaf, Sparkles } from "lucide-react";
 import { MindifyLogo } from "@/components/branding/MindifyLogo";
 import { Navigation } from "@/components/ui/Navigation";
+import { useAppStore } from "@/lib/stores/appStore";
 
 type AppLayoutProps = {
 	children: ReactNode;
@@ -26,6 +27,10 @@ export function AppLayout({
 }: AppLayoutProps) {
 	const initial = userInitial ?? userName.charAt(0).toUpperCase();
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+	const navSelection = useAppStore((state) => state.navSelection);
+	const goBack = useAppStore((state) => state.goBack);
+	const canGoBack = useAppStore((state) => state.canGoBack);
+	const showBackButton = navSelection !== "dashboard" && canGoBack();
 
 	return (
 		<div
@@ -87,6 +92,19 @@ export function AppLayout({
 						<MindifyLogo size="sm" />
 					</div>
 				</header>
+
+				{showBackButton && (
+					<div className="hidden lg:block px-12 pt-6">
+						<button
+							type="button"
+							onClick={goBack}
+							className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--sage-200))] px-4 py-2 text-sm text-[rgb(var(--earth-700))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:text-white/80 dark:hover:border-white/40"
+						>
+							<ArrowLeft className="h-4 w-4" />
+							Back
+						</button>
+					</div>
+				)}
 
 				<main className="min-h-screen bg-[rgb(var(--cream-50))] px-4 py-4 pb-24 md:px-8 md:py-6 lg:px-12 dark:bg-[#0E1012]">{children}</main>
 			</div>

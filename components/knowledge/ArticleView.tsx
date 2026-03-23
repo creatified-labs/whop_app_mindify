@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookmarkIcon, Share2Icon, XIcon, HeadphonesIcon, CheckIcon } from "lucide-react";
+import { BookmarkIcon, Share2Icon, XIcon, HeadphonesIcon, CheckIcon, FileAudioIcon, VideoIcon, ExternalLinkIcon } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import type { KnowledgeArticle } from "@/lib/types";
 
@@ -185,7 +185,32 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 										))}
 									</ul>
 								</div>
-								{relatedArticles.length > 0 && (
+								{article.attachments && article.attachments.length > 0 && (
+									<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
+										<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Media & Resources</p>
+										<div className="mt-3 space-y-3">
+											{article.attachments.map((attachment) => {
+												const Icon = attachment.type === "audio" ? FileAudioIcon : attachment.type === "video" ? VideoIcon : ExternalLinkIcon;
+												return (
+													<a
+														key={attachment.url}
+														href={attachment.url}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="flex items-center gap-3 rounded-2xl border border-[rgb(var(--sage-100))] bg-white p-3 text-sm transition hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:bg-white/5 dark:hover:border-white/40"
+													>
+														<Icon className="h-5 w-5 flex-shrink-0 text-[rgb(var(--sage-600))]" />
+														<div className="min-w-0 flex-1">
+															<p className="truncate font-medium text-[rgb(var(--earth-900))] dark:text-white">{attachment.title}</p>
+															<p className="text-xs capitalize text-[rgb(var(--earth-500))] dark:text-white/50">{attachment.type}</p>
+														</div>
+													</a>
+												);
+											})}
+										</div>
+									</div>
+								)}
+							{relatedArticles.length > 0 && (
 									<div className="mt-6">
 										<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Related Articles</p>
 										<div className="mt-3 grid gap-3 md:grid-cols-2">

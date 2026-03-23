@@ -552,6 +552,7 @@ function rowToArticle(row: Record<string, unknown>): KnowledgeArticle {
     actionSteps: (row.action_steps as string[]) || [],
     recommendedSessions: (row.recommended_sessions as KnowledgeArticle['recommendedSessions']) || [],
     references: (row.references as string[]) || [],
+    attachments: (row.attachments as KnowledgeArticle['attachments']) || [],
   };
 }
 
@@ -607,6 +608,7 @@ export async function createArticle(companyId: string, article: Omit<KnowledgeAr
         action_steps: article.actionSteps,
         recommended_sessions: article.recommendedSessions as unknown as Record<string, unknown>[],
         references: article.references,
+        attachments: (article.attachments || []) as unknown as Record<string, unknown>[],
       })
       .select()
       .single();
@@ -631,6 +633,7 @@ export async function updateArticle(companyId: string, slug: string, updates: Pa
     if (updates.actionSteps !== undefined) dbUpdates.action_steps = updates.actionSteps;
     if (updates.recommendedSessions !== undefined) dbUpdates.recommended_sessions = updates.recommendedSessions;
     if (updates.references !== undefined) dbUpdates.references = updates.references;
+    if (updates.attachments !== undefined) dbUpdates.attachments = updates.attachments;
 
     const { data, error } = await supabaseAdmin
       .from('knowledge_articles')

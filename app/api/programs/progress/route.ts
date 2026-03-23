@@ -11,7 +11,8 @@ import type { ProgramProgress } from '@/lib/types';
 
 type ProgressPayload = {
   programId: string;
-  dayNumber: number;
+  action?: 'enroll';
+  dayNumber?: number;
   totalDays?: number;
   completed?: boolean;
 };
@@ -30,9 +31,33 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as ProgressPayload;
 
     // Validate payload
-    if (!body?.programId || typeof body.dayNumber !== 'number') {
+    if (!body?.programId) {
       return NextResponse.json(
-        { error: 'programId and dayNumber are required' },
+        { error: 'programId is required' },
+        { status: 400 }
+      );
+    }
+
+    // Handle explicit enrollment action
+    if (body.action === 'enroll') {
+      const existing = await getProgramProgress(companyId, userId, body.programId);
+      if (existing.data) {
+        return NextResponse.json(existing.data);
+      }
+      const enrolled = await enrollInProgram(companyId, userId, body.programId);
+      if (enrolled.error) {
+        return NextResponse.json(
+          { error: 'Failed to enroll in program' },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json(enrolled.data);
+    }
+
+    // For day progress updates, dayNumber is required
+    if (typeof body.dayNumber !== 'number') {
+      return NextResponse.json(
+        { error: 'dayNumber is required for progress updates' },
         { status: 400 }
       );
     }

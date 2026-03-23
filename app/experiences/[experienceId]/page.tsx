@@ -119,10 +119,10 @@ export default async function ExperiencePage({
 			program_day: "program",
 		};
 		// Build a content lookup for titles
-		const contentMap = new Map<string, { title: string; duration: number }>();
-		for (const m of meditations || []) contentMap.set(m.id, { title: m.title, duration: m.duration });
-		for (const h of hypnosisSessions || []) contentMap.set(h.id, { title: h.title, duration: h.duration });
-		for (const r of quickResets || []) contentMap.set(r.id, { title: r.title, duration: r.duration });
+		const contentMap = new Map<string, { title: string; duration: number; audioUrl?: string }>();
+		for (const m of meditations || []) contentMap.set(m.id, { title: m.title, duration: m.duration, audioUrl: m.audioUrl });
+		for (const h of hypnosisSessions || []) contentMap.set(h.id, { title: h.title, duration: h.duration, audioUrl: h.audioUrl });
+		for (const r of quickResets || []) contentMap.set(r.id, { title: r.title, duration: r.duration, audioUrl: r.audioUrl });
 
 		const content = contentMap.get(lastItem.content_id);
 		if (content) {
@@ -132,6 +132,7 @@ export default async function ExperiencePage({
 				type: typeMap[lastItem.activity_type] || "meditation",
 				progressPercent: 100, // completed sessions
 				durationMinutes: content.duration || lastItem.duration_minutes || 10,
+				audioUrl: content.audioUrl,
 			};
 		}
 	}
@@ -155,14 +156,14 @@ export default async function ExperiencePage({
 	}
 
 	// --- Build favorites ---
-	const contentMap = new Map<string, { title: string; duration: number; type: "meditation" | "hypnosis" | "program" | "reset" }>();
-	for (const m of meditations || []) contentMap.set(m.id, { title: m.title, duration: m.duration, type: "meditation" });
-	for (const h of hypnosisSessions || []) contentMap.set(h.id, { title: h.title, duration: h.duration, type: "hypnosis" });
-	for (const r of quickResets || []) contentMap.set(r.id, { title: r.title, duration: r.duration, type: "reset" });
+	const contentMap = new Map<string, { title: string; duration: number; type: "meditation" | "hypnosis" | "program" | "reset"; audioUrl?: string }>();
+	for (const m of meditations || []) contentMap.set(m.id, { title: m.title, duration: m.duration, type: "meditation", audioUrl: m.audioUrl });
+	for (const h of hypnosisSessions || []) contentMap.set(h.id, { title: h.title, duration: h.duration, type: "hypnosis", audioUrl: h.audioUrl });
+	for (const r of quickResets || []) contentMap.set(r.id, { title: r.title, duration: r.duration, type: "reset", audioUrl: r.audioUrl });
 	for (const p of allPrograms || []) contentMap.set(p.id, { title: p.title, duration: p.duration, type: "program" });
 
 	const favorites: FavoriteSession[] = (favoritesRows || [])
-		.map((fav) => {
+		.map((fav): FavoriteSession | null => {
 			const content = contentMap.get(fav.content_id);
 			if (!content) return null;
 			return {
@@ -170,6 +171,7 @@ export default async function ExperiencePage({
 				title: content.title,
 				type: content.type,
 				durationMinutes: content.duration || 10,
+				audioUrl: content.audioUrl,
 			};
 		})
 		.filter((f): f is FavoriteSession => f !== null)
@@ -196,9 +198,9 @@ export default async function ExperiencePage({
 	// --- Build recommendedSessions (content not yet completed) ---
 	const completedIds = new Set((allActivity || []).map((a) => a.content_id));
 	const allContent = [
-		...(meditations || []).map((m) => ({ id: m.id, title: m.title, type: "meditation" as const, duration: m.duration, isPremium: m.isPremium })),
-		...(hypnosisSessions || []).map((h) => ({ id: h.id, title: h.title, type: "hypnosis" as const, duration: h.duration, isPremium: h.isPremium })),
-		...(quickResets || []).map((r) => ({ id: r.id, title: r.title, type: "reset" as const, duration: r.duration, isPremium: false })),
+		...(meditations || []).map((m) => ({ id: m.id, title: m.title, type: "meditation" as const, duration: m.duration, isPremium: m.isPremium, audioUrl: m.audioUrl })),
+		...(hypnosisSessions || []).map((h) => ({ id: h.id, title: h.title, type: "hypnosis" as const, duration: h.duration, isPremium: h.isPremium, audioUrl: h.audioUrl })),
+		...(quickResets || []).map((r) => ({ id: r.id, title: r.title, type: "reset" as const, duration: r.duration, isPremium: false, audioUrl: r.audioUrl })),
 	];
 	const notCompleted = allContent.filter((c) => !completedIds.has(c.id));
 	const recommendedSessions: RecommendedSession[] = notCompleted.slice(0, 3).map((c) => ({
@@ -207,6 +209,7 @@ export default async function ExperiencePage({
 		type: c.type,
 		durationMinutes: c.duration || 10,
 		timeOfDay: "anytime",
+		audioUrl: c.audioUrl,
 		isPremium: c.isPremium && membershipTier === "free" ? true : undefined,
 	}));
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Program, ProgramCategory } from "@/lib/types";
+import { ArrowLeft } from "lucide-react";
+import type { Program, ProgramCategory, ProgramProgress } from "@/lib/types";
+import { ProgramDetail } from "@/components/programs/ProgramDetail";
 
 const categoryGradients: Record<ProgramCategory, string> = {
 	focus: "from-indigo-600/40 via-purple-500/30 to-blue-500/20",
@@ -13,6 +15,8 @@ const categoryGradients: Record<ProgramCategory, string> = {
 
 export function ProgramsLibrary({ companyId }: { companyId: string }) {
 	const [programs, setPrograms] = useState<Program[]>([]);
+	const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+	const [enrolling, setEnrolling] = useState(false);
 
 	useEffect(() => {
 		fetch(`/api/programs/content?company_id=${encodeURIComponent(companyId)}`)
@@ -20,6 +24,40 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 			.then((data) => setPrograms(data.items || []))
 			.catch(() => {});
 	}, [companyId]);
+
+	const handleStart = async (program: Program) => {
+		setEnrolling(true);
+		try {
+			await fetch(`/api/programs/progress?company_id=${encodeURIComponent(companyId)}`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ programId: program.id, action: "enroll" }),
+			});
+		} catch {
+			// silently fail
+		} finally {
+			setEnrolling(false);
+		}
+	};
+
+	if (selectedProgram) {
+		return (
+			<section className="space-y-4">
+				<button
+					type="button"
+					onClick={() => setSelectedProgram(null)}
+					className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--sage-200))] px-4 py-2 text-sm text-[rgb(var(--earth-700))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:text-white/80 dark:hover:border-white/40"
+				>
+					<ArrowLeft className="h-4 w-4" />
+					Back to programs
+				</button>
+				<ProgramDetail
+					program={selectedProgram}
+					onStart={() => handleStart(selectedProgram)}
+				/>
+			</section>
+		);
+	}
 
 	if (programs.length === 0) {
 		return (
@@ -96,6 +134,7 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 										</div>
 										<button
 											type="button"
+											onClick={() => setSelectedProgram(program)}
 											className="self-start rounded-3xl bg-[rgb(var(--sage-600))] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[rgb(var(--sage-700))] dark:bg-white/90 dark:text-black dark:hover:bg-white"
 										>
 											View Program
