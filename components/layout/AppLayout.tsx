@@ -30,8 +30,8 @@ export function AppLayout({
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 	const navSelection = useAppStore((state) => state.navSelection);
 	const goBack = useAppStore((state) => state.goBack);
-	const canGoBack = useAppStore((state) => state.canGoBack);
-	const showBackButton = navSelection !== "dashboard" && canGoBack();
+	const hasHistory = useAppStore((state) => state.navHistory.length > 0);
+	const showBackButton = navSelection !== "dashboard" && hasHistory;
 
 	return (
 		<div

@@ -1,7 +1,5 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-
-export const dynamic = 'force-dynamic';
 import {
 	type ActivityItem,
 	type ContinueSession,
@@ -26,6 +24,8 @@ import {
 	getPrograms,
 	getProgramById,
 } from "@/lib/database";
+
+export const dynamic = 'force-dynamic';
 
 export default async function ExperiencePage({
 	params,
