@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import type { Program, ProgramCategory, ProgramProgress } from "@/lib/types";
 import { ProgramDetail } from "@/components/programs/ProgramDetail";
 
@@ -14,9 +15,11 @@ const categoryGradients: Record<ProgramCategory, string> = {
 };
 
 export function ProgramsLibrary({ companyId }: { companyId: string }) {
+	const router = useRouter();
 	const [programs, setPrograms] = useState<Program[]>([]);
 	const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
 	const [enrolling, setEnrolling] = useState(false);
+	const [enrollSuccess, setEnrollSuccess] = useState(false);
 
 	useEffect(() => {
 		fetch(`/api/programs/content?company_id=${encodeURIComponent(companyId)}`)
@@ -28,11 +31,19 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 	const handleStart = async (program: Program) => {
 		setEnrolling(true);
 		try {
-			await fetch(`/api/programs/progress?company_id=${encodeURIComponent(companyId)}`, {
+			const res = await fetch(`/api/programs/progress?company_id=${encodeURIComponent(companyId)}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ programId: program.id, action: "enroll" }),
 			});
+			if (res.ok) {
+				setEnrollSuccess(true);
+				router.refresh();
+				setTimeout(() => {
+					setEnrollSuccess(false);
+					setSelectedProgram(null);
+				}, 1500);
+			}
 		} catch {
 			// silently fail
 		} finally {
@@ -54,6 +65,8 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 				<ProgramDetail
 					program={selectedProgram}
 					onStart={() => handleStart(selectedProgram)}
+					isEnrolling={enrolling}
+					enrollSuccess={enrollSuccess}
 				/>
 			</section>
 		);
@@ -87,9 +100,9 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 					return (
 						<div
 							key={program.id}
-							className="rounded-[36px] border border-[rgb(var(--sage-100))] bg-white p-1 shadow-card dark:border-white/10 dark:bg-gradient-to-br dark:from-[#0C0A20] dark:via-[#161437] dark:to-[#0B1127] dark:shadow-[0_30px_80px_rgba(8,6,22,0.25)]"
+							className="rounded-[36px] border border-[rgb(var(--sage-100))] bg-white p-1 shadow-card dark:border-white/10 dark:bg-[#13151A]"
 						>
-							<div className="overflow-hidden rounded-[28px] border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/5 dark:bg-white/5">
+							<div className="overflow-hidden rounded-[28px] border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/10 dark:bg-[#111318]">
 								<div className="flex flex-col gap-5 md:flex-row">
 									<div className={`relative flex h-56 w-full items-end overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} md:h-64 md:w-1/3`}>
 										<div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/80">
@@ -115,7 +128,7 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 												</span>
 											))}
 										</div>
-										<div className="rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-sm text-[rgb(var(--earth-700))] dark:border-white/10 dark:bg-black/30 dark:text-white/80">
+										<div className="rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-sm text-[rgb(var(--earth-700))] dark:border-white/10 dark:bg-[#13151A] dark:text-white/80">
 											<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/50">What&apos;s included</p>
 											<ul className="mt-2 grid grid-cols-3 gap-3 text-center text-sm">
 												<li>
