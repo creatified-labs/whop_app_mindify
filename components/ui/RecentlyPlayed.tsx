@@ -23,11 +23,9 @@ const trackTypeColors: Record<string, string> = {
 };
 
 export function RecentlyPlayed() {
-	const { history, playTrack, removeFromHistory } = useAudioStore((state) => ({
-		history: state.history,
-		playTrack: state.playTrack,
-		removeFromHistory: state.removeFromHistory,
-	}));
+	const history = useAudioStore((state) => state.history);
+	const playTrack = useAudioStore((state) => state.playTrack);
+	const removeFromHistory = useAudioStore((state) => state.removeFromHistory);
 
 	if (history.length === 0) {
 		return (

@@ -8,10 +8,8 @@ import { useAppStore } from "@/lib/stores/appStore";
 const categoryEntries = Object.entries(MEDITATION_CATEGORY_DEFINITIONS);
 
 export function MeditationFilters() {
-	const { filterState, setFilterState } = useAppStore((state) => ({
-		filterState: state.filterState,
-		setFilterState: state.setFilterState,
-	}));
+	const filterState = useAppStore((state) => state.filterState);
+	const setFilterState = useAppStore((state) => state.setFilterState);
 
 	const activeFilters = useMemo(() => {
 		let count = 0;

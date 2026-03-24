@@ -14,13 +14,11 @@ type QuickResetPlayerProps = {
 const circumference = 2 * Math.PI * 54;
 
 export function QuickResetPlayer({ track, totalDurationSeconds, onAutoNextLabel }: QuickResetPlayerProps) {
-	const { isPlaying, progress, pauseTrack, resumeTrack, seekTo } = useAudioStore((state) => ({
-		isPlaying: state.isPlaying,
-		progress: state.progress,
-		pauseTrack: state.pauseTrack,
-		resumeTrack: state.resumeTrack,
-		seekTo: state.seekTo,
-	}));
+	const isPlaying = useAudioStore((state) => state.isPlaying);
+	const progress = useAudioStore((state) => state.progress);
+	const pauseTrack = useAudioStore((state) => state.pauseTrack);
+	const resumeTrack = useAudioStore((state) => state.resumeTrack);
+	const seekTo = useAudioStore((state) => state.seekTo);
 
 	const remainingSeconds = Math.max(0, Math.round(totalDurationSeconds - progress));
 	const progressOffset = useMemo(() => {

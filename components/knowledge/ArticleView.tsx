@@ -28,7 +28,7 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 	const [bookmarked, setBookmarked] = useState(isBookmarked);
 	useEffect(() => { setBookmarked(isBookmarked); }, [isBookmarked]);
 	const [copied, setCopied] = useState(false);
-	const { playTrack } = useAudioStore((state) => ({ playTrack: state.playTrack }));
+	const playTrack = useAudioStore((state) => state.playTrack);
 
 	const articleAudioTrack = useMemo(() => {
 		if (article.audioTrack) return article.audioTrack;
