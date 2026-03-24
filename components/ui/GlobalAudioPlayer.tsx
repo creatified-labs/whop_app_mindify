@@ -29,41 +29,25 @@ const formatTime = (seconds: number) => {
 export function GlobalAudioPlayer() {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
-	const {
-		currentTrack,
-		isPlaying,
-		progress,
-		duration,
-		volume,
-		queue,
-		playTrack,
-		pauseTrack,
-		resumeTrack,
-		playNext,
-		playPrevious,
-		seekTo,
-		setVolume,
-		restoreFromPersisted,
-	} = useAudioStore((state) => ({
-		currentTrack: state.currentTrack,
-		isPlaying: state.isPlaying,
-		progress: state.progress,
-		duration: state.duration,
-		volume: state.volume,
-		queue: state.queue,
-		playTrack: state.playTrack,
-		pauseTrack: state.pauseTrack,
-		resumeTrack: state.resumeTrack,
-		playNext: state.playNext,
-		playPrevious: state.playPrevious,
-		seekTo: state.seekTo,
-		setVolume: state.setVolume,
-		restoreFromPersisted: state.restoreFromPersisted,
-	}));
+	const currentTrack = useAudioStore((state) => state.currentTrack);
+	const isPlaying = useAudioStore((state) => state.isPlaying);
+	const progress = useAudioStore((state) => state.progress);
+	const duration = useAudioStore((state) => state.duration);
+	const volume = useAudioStore((state) => state.volume);
+	const queue = useAudioStore((state) => state.queue);
+	const playTrack = useAudioStore((state) => state.playTrack);
+	const pauseTrack = useAudioStore((state) => state.pauseTrack);
+	const resumeTrack = useAudioStore((state) => state.resumeTrack);
+	const playNext = useAudioStore((state) => state.playNext);
+	const playPrevious = useAudioStore((state) => state.playPrevious);
+	const seekTo = useAudioStore((state) => state.seekTo);
+	const setVolume = useAudioStore((state) => state.setVolume);
+	const restoreFromPersisted = useAudioStore((state) => state.restoreFromPersisted);
 
 	useEffect(() => {
 		restoreFromPersisted();
-	}, [restoreFromPersisted]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	useEffect(() => {
 		if (currentTrack) {
