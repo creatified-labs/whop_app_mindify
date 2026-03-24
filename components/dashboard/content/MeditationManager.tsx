@@ -6,6 +6,7 @@ import { ContentTable, type ContentColumn } from "./ContentTable";
 import { ContentFormModal, FormInput, FormSelect, FormTextarea, FormCheckbox } from "./ContentFormModal";
 import { ArrayFieldEditor } from "./ArrayFieldEditor";
 import { AudioUploadButton } from "./AudioUploadButton";
+import { ImageUploadButton } from "./ImageUploadButton";
 
 const categoryOptions = [
 	{ value: "focus", label: "Focus" },
@@ -174,6 +175,7 @@ export function MeditationManager({ companyId }: { companyId: string }) {
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/..." />
 				<AudioUploadButton companyId={companyId} contentType="meditations" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormInput label="Image URL" value={form.imageUrl} onChange={(v) => setForm({ ...form, imageUrl: v })} placeholder="/images/..." />
+				<ImageUploadButton companyId={companyId} contentType="meditations" onUploadComplete={(url) => setForm((prev) => ({ ...prev, imageUrl: url }))} />
 
 				<div>
 					<label className="mb-1.5 block text-sm font-medium text-earth-700 dark:text-[#D9D3C8]">Mood Tags</label>

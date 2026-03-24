@@ -46,7 +46,7 @@ export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 	if (meditations.length === 0) {
 		return (
 			<EmptyState
-				icon={<Music className="h-10 w-10 text-purple-500" />}
+				icon={<Music className="h-10 w-10 text-[rgb(var(--sage-600))]" />}
 				title="No meditations yet"
 				description="The creator hasn't added any meditation sessions yet. Check back soon!"
 			/>

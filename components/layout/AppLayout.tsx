@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Leaf, Sparkles } from "lucide-react";
 import { MindifyLogo } from "@/components/branding/MindifyLogo";
 import { Navigation } from "@/components/ui/Navigation";
+import { GlobalAudioPlayer } from "@/components/ui/GlobalAudioPlayer";
 import { useAppStore } from "@/lib/stores/appStore";
 
 type AppLayoutProps = {
@@ -106,8 +107,10 @@ export function AppLayout({
 					</div>
 				)}
 
-				<main className="min-h-screen bg-[rgb(var(--cream-50))] px-4 py-4 pb-24 md:px-8 md:py-6 lg:px-12 dark:bg-[#0E1012]">{children}</main>
+				<main className="min-h-screen bg-[rgb(var(--cream-50))] px-4 py-4 pb-32 md:px-8 md:py-6 lg:px-12 dark:bg-[#0E1012]">{children}</main>
 			</div>
+
+			<GlobalAudioPlayer />
 		</div>
 	);
 }

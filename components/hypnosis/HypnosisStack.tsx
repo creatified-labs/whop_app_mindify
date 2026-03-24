@@ -35,7 +35,7 @@ export function HypnosisStack({ hypnosisSessions = [] }: HypnosisStackProps) {
 					description="Clinical hypnotists craft each ritual with somatic cues, layered storytelling, and precise breath patterning."
 				/>
 				<EmptyState
-					icon={<Brain className="h-10 w-10 text-purple-500" />}
+					icon={<Brain className="h-10 w-10 text-[rgb(var(--sage-600))]" />}
 					title="No hypnosis sessions yet"
 					description="The creator hasn't added any hypnosis sessions yet. Check back soon!"
 				/>

@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
 import {
 	type ActivityItem,
 	type ContinueSession,

@@ -6,6 +6,7 @@ import { ContentTable, type ContentColumn } from "./ContentTable";
 import { ContentFormModal, FormInput, FormSelect, FormTextarea, FormCheckbox } from "./ContentFormModal";
 import { ArrayFieldEditor } from "./ArrayFieldEditor";
 import { ProgramDayEditor } from "./ProgramDayEditor";
+import { ImageUploadButton } from "./ImageUploadButton";
 
 const categoryOptions: { value: ProgramCategory; label: string }[] = [
 	{ value: "focus", label: "Focus" },
@@ -177,6 +178,7 @@ export function ProgramManager({ companyId }: { companyId: string }) {
 					<FormSelect label="Difficulty" value={form.difficulty} onChange={(v) => setForm({ ...form, difficulty: v as ProgramDifficulty })} options={difficultyOptions} />
 				</div>
 				<FormInput label="Cover Image URL" value={form.coverImage} onChange={(v) => setForm({ ...form, coverImage: v })} placeholder="/images/programs/..." />
+				<ImageUploadButton companyId={companyId} contentType="programs" onUploadComplete={(url) => setForm((prev) => ({ ...prev, coverImage: url }))} />
 				<FormInput label="Time Commitment" value={form.timeCommitment} onChange={(v) => setForm({ ...form, timeCommitment: v })} placeholder="e.g. 25-35 minutes per day" />
 
 				<div className="grid grid-cols-3 gap-4">

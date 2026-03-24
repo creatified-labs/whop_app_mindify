@@ -107,14 +107,18 @@ export function GlobalAudioPlayer() {
 				<div className="rounded-[28px] border border-white/10 bg-gradient-to-br from-[#080A1F] via-[#0D122E] to-[#05060C] p-4 text-white shadow-[0_25px_80px_rgba(3,5,20,0.65)] backdrop-blur-xl">
 					<div className="flex items-center justify-between gap-4">
 						<div className="flex items-center gap-3">
-							<div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-								<Image
-									src={currentTrack.thumbnail ?? "/images/audio/default-wave.jpg"}
-									alt={currentTrack.title}
-									fill
-									className="object-cover"
-									unoptimized
-								/>
+							<div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+								{currentTrack.thumbnail ? (
+									<Image
+										src={currentTrack.thumbnail}
+										alt={currentTrack.title}
+										fill
+										className="object-cover"
+										unoptimized
+									/>
+								) : (
+									<Volume2Icon className="h-6 w-6 text-white/40" />
+								)}
 							</div>
 							<div>
 								<p className="text-sm uppercase tracking-[0.4em] text-white/50">{currentTrack.trackType}</p>

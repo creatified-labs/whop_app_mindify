@@ -82,7 +82,7 @@ export function KnowledgeHub({ companyId }: { companyId: string }) {
 			const matchesQuery =
 				query === "" ||
 				article.title.toLowerCase().includes(query.toLowerCase()) ||
-				article.keyTakeaways.some((takeaway) => takeaway.toLowerCase().includes(query.toLowerCase()));
+				(article.keyTakeaways || []).some((takeaway) => takeaway.toLowerCase().includes(query.toLowerCase()));
 			return matchesCategory && matchesQuery;
 		});
 	}, [articles, category, query]);
@@ -138,7 +138,7 @@ export function KnowledgeHub({ companyId }: { companyId: string }) {
 							<div className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/50">{String(article.category)}</div>
 							<h3 className="mt-3 text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{String(article.title)}</h3>
 							<p className="mt-2 text-sm text-[rgb(var(--earth-600))] line-clamp-3 dark:text-white/70">
-								{String(article.keyTakeaways[0] ?? "Applied nervous system science for modern operators.")}
+								{String((article.keyTakeaways || [])[0] ?? "Applied nervous system science for modern operators.")}
 							</p>
 							<div className="mt-4 flex items-center gap-3 text-xs text-[rgb(var(--earth-500))] dark:text-white/50">
 								<span className="inline-flex items-center gap-1">
@@ -148,7 +148,7 @@ export function KnowledgeHub({ companyId }: { companyId: string }) {
 								<span>{String(article.author)}</span>
 							</div>
 							<div className="mt-4 flex gap-2 text-xs text-[rgb(var(--earth-500))] dark:text-white/50">
-								{article.keyTakeaways.slice(0, 2).map((takeaway) => (
+								{(article.keyTakeaways || []).slice(0, 2).map((takeaway) => (
 									<span
 										key={String(takeaway)}
 										className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 line-clamp-1 group-hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:group-hover:border-white/40"

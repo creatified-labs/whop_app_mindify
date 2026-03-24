@@ -129,12 +129,12 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 							<div className="mt-5 flex-1 overflow-y-auto pr-2">
 								<div className="prose max-w-none prose-headings:font-semibold prose-headings:text-[rgb(var(--earth-900))] prose-p:text-[rgb(var(--earth-700))] prose-li:text-[rgb(var(--earth-700))] dark:prose-invert dark:prose-headings:text-white dark:prose-p:text-white/80 dark:prose-li:text-white/80">
 									{/* eslint-disable-next-line react/no-danger */}
-									<div dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, "<br/>") }} />
+									<div dangerouslySetInnerHTML={{ __html: (article.content || "").replace(/\n/g, "<br/>") }} />
 								</div>
 								<div className="mt-6 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
 									<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Key Takeaways</p>
 									<ul className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-700))] dark:text-white/80">
-										{article.keyTakeaways.map((item) => (
+										{(article.keyTakeaways || []).map((item) => (
 											<li key={item} className="flex items-start gap-3">
 												<span className="mt-1 h-2 w-2 rounded-full bg-mindify-lagoon" />
 												{item}
@@ -145,7 +145,7 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 								<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-white/5">
 									<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Actionable Steps</p>
 									<ol className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-700))] list-decimal pl-5 dark:text-white/80">
-										{article.actionSteps.map((item) => (
+										{(article.actionSteps || []).map((item) => (
 											<li key={item}>{item}</li>
 										))}
 									</ol>
@@ -153,7 +153,7 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 								<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-black/30">
 									<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Recommended Sessions</p>
 									<div className="mt-3 grid gap-3 md:grid-cols-2">
-										{article.recommendedSessions.map((session) => (
+										{(article.recommendedSessions || []).map((session) => (
 											<div key={session.id} className="rounded-2xl border border-[rgb(var(--sage-100))] bg-white p-3 text-sm dark:border-white/15 dark:bg-white/5">
 												<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-400))] dark:text-white/40">{session.type}</p>
 												<p className="text-[rgb(var(--earth-700))] dark:text-white/80">{session.title}</p>
@@ -180,7 +180,7 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 								<div className="mt-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/15 dark:bg-black/20">
 									<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">References</p>
 									<ul className="mt-3 space-y-2 text-sm text-[rgb(var(--earth-600))] list-disc pl-5 dark:text-white/70">
-										{article.references.map((ref) => (
+										{(article.references || []).map((ref) => (
 											<li key={ref}>{ref}</li>
 										))}
 									</ul>

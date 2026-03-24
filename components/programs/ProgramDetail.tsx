@@ -32,14 +32,18 @@ export function ProgramDetail({ program, progress, onStart }: ProgramDetailProps
 								gradients[program.category] ?? "from-[#151527] to-[#060610]"
 							}`}
 						/>
-						<Image
-							src={program.coverImage}
-							alt={program.title}
-							width={960}
-							height={540}
-							className="h-64 w-full object-cover opacity-60 mix-blend-screen"
-							unoptimized
-						/>
+						{program.coverImage ? (
+							<Image
+								src={program.coverImage}
+								alt={program.title}
+								width={960}
+								height={540}
+								className="h-64 w-full object-cover opacity-60 mix-blend-screen"
+								unoptimized
+							/>
+						) : (
+							<div className="h-64 w-full" />
+						)}
 						<div className="relative z-10 p-8">
 							<p className="text-xs uppercase tracking-[0.5em] text-white/70">{program.category}</p>
 							<h2 className="mt-2 text-3xl font-semibold">{program.title}</h2>
