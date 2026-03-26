@@ -107,7 +107,7 @@ export function AppLayout({
 					</div>
 				)}
 
-				<main className="min-h-screen bg-[rgb(var(--cream-50))] px-4 py-4 pb-32 md:px-8 md:py-6 lg:px-12 dark:bg-[#0E1012]">{children}</main>
+				<main className="min-h-screen bg-[rgb(var(--cream-50))] px-4 py-4 pb-40 md:px-8 md:py-6 md:pb-32 lg:px-12 dark:bg-[#0E1012]">{children}</main>
 			</div>
 
 			<GlobalAudioPlayer />

@@ -20,6 +20,7 @@ export interface AudioStore {
 	volume: number;
 	queue: AudioTrack[];
 	history: PlaybackHistoryItem[];
+	lastActiveAt: number | null;
 	error?: string | null;
 	restoreFromPersisted: () => void;
 
@@ -65,10 +66,16 @@ export const useAudioStore = create<AudioStore>()(
 			volume: 0.85,
 			queue: [],
 			history: [],
+			lastActiveAt: null,
 			error: null,
 			restoreFromPersisted: () => {
 				const state = get();
 				if (!state.currentTrack) return;
+				const FOUR_HOURS = 4 * 60 * 60 * 1000;
+				if (state.lastActiveAt && Date.now() - state.lastActiveAt > FOUR_HOURS) {
+					set({ currentTrack: null, isPlaying: false, progress: 0, duration: 0 });
+					return;
+				}
 				audioService.registerCallbacks(
 					{
 						onProgress: (seconds) => set({ progress: seconds }),
@@ -116,6 +123,7 @@ export const useAudioStore = create<AudioStore>()(
 						progress: 0,
 						duration: 0,
 						error: null,
+						lastActiveAt: Date.now(),
 					});
 				});
 			},
@@ -125,7 +133,7 @@ export const useAudioStore = create<AudioStore>()(
 			},
 			resumeTrack: () => {
 				audioService.resume();
-				set({ isPlaying: true });
+				set({ isPlaying: true, lastActiveAt: Date.now() });
 			},
 			seekTo: (time) => {
 				audioService.seek(time);
@@ -190,6 +198,7 @@ export const useAudioStore = create<AudioStore>()(
 				volume: state.volume,
 				queue: state.queue,
 				history: state.history,
+				lastActiveAt: state.lastActiveAt,
 			}),
 		},
 	),
