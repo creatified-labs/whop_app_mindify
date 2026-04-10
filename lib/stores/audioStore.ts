@@ -21,6 +21,8 @@ export interface AudioStore {
 	queue: AudioTrack[];
 	history: PlaybackHistoryItem[];
 	lastActiveAt: number | null;
+	/** True once the current track has been recorded to the DB this session (prevents double-logging). */
+	currentTrackLogged: boolean;
 	error?: string | null;
 	restoreFromPersisted: () => void;
 
@@ -40,6 +42,9 @@ export interface AudioStore {
 
 const MAX_HISTORY = 10;
 
+/** Minimum listen time before a partial play is recorded. */
+const PARTIAL_LOG_THRESHOLD_SECONDS = 30;
+
 function updateUserProgressFromTrack(track: AudioTrack, durationSeconds: number) {
 	const { userProgress, setUserProgress } = useAppStore.getState();
 	if (!userProgress) return;
@@ -56,6 +61,39 @@ function updateUserProgressFromTrack(track: AudioTrack, durationSeconds: number)
 	setUserProgress(updated);
 }
 
+/**
+ * POST the activity to /api/user/activity so it shows up in Recent Activity and
+ * the user's stats. Silently no-ops if companyId isn't set yet (e.g. on marketing
+ * page) or if the track type isn't a tracked activity.
+ */
+async function persistActivityToDb(track: AudioTrack, durationSeconds: number) {
+	const companyId = useAppStore.getState().companyId;
+	if (!companyId) return;
+
+	const typeMap: Record<AudioTrack["trackType"], "meditation" | "hypnosis" | "reset" | "program_day" | null> = {
+		meditation: "meditation",
+		hypnosis: "hypnosis",
+		reset: "reset",
+		program: "program_day",
+	};
+	const activityType = typeMap[track.trackType];
+	if (!activityType) return;
+
+	try {
+		await fetch(`/api/user/activity?company_id=${encodeURIComponent(companyId)}`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				activity_type: activityType,
+				content_id: track.id,
+				duration_minutes: Math.max(1, Math.round(durationSeconds / 60)),
+			}),
+		});
+	} catch (err) {
+		console.error("[audioStore] Failed to record activity:", err);
+	}
+}
+
 export const useAudioStore = create<AudioStore>()(
 	persist(
 		(set, get) => ({
@@ -67,6 +105,7 @@ export const useAudioStore = create<AudioStore>()(
 			queue: [],
 			history: [],
 			lastActiveAt: null,
+			currentTrackLogged: false,
 			error: null,
 			restoreFromPersisted: () => {
 				const state = get();
@@ -97,7 +136,18 @@ export const useAudioStore = create<AudioStore>()(
 				});
 			},
 			playTrack: (track, options) => {
-				const { currentTrack } = get();
+				const prev = get();
+
+				// If switching away from a track that hasn't been logged yet but was
+				// listened to long enough, persist it before it's replaced.
+				if (
+					prev.currentTrack &&
+					prev.currentTrack.id !== track.id &&
+					!prev.currentTrackLogged &&
+					prev.progress >= PARTIAL_LOG_THRESHOLD_SECONDS
+				) {
+					persistActivityToDb(prev.currentTrack, prev.progress);
+				}
 
 				if (!options?.enqueue) {
 					set({ queue: [] });
@@ -124,11 +174,23 @@ export const useAudioStore = create<AudioStore>()(
 						duration: 0,
 						error: null,
 						lastActiveAt: Date.now(),
+						currentTrackLogged: false,
 					});
 				});
 			},
 			pauseTrack: () => {
 				audioService.pause();
+				const state = get();
+				// Record partial plays on pause so users see activity without
+				// having to listen to completion.
+				if (
+					state.currentTrack &&
+					!state.currentTrackLogged &&
+					state.progress >= PARTIAL_LOG_THRESHOLD_SECONDS
+				) {
+					persistActivityToDb(state.currentTrack, state.progress);
+					set({ currentTrackLogged: true });
+				}
 				set({ isPlaying: false });
 			},
 			resumeTrack: () => {
@@ -186,7 +248,13 @@ export const useAudioStore = create<AudioStore>()(
 						},
 					].slice(-MAX_HISTORY);
 					updateUserProgressFromTrack(track, durationSeconds);
-					return { history: updated };
+					// Persist to DB on completion (guarded by currentTrackLogged to
+					// avoid double-logging if the user already crossed the partial
+					// threshold and was recorded mid-play).
+					if (!state.currentTrackLogged) {
+						persistActivityToDb(track, durationSeconds);
+					}
+					return { history: updated, currentTrackLogged: true };
 				}),
 		}),
 		{

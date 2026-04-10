@@ -1,7 +1,5 @@
 "use client";
 
-import type { ComponentType } from "react";
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useSoundscapeStore } from "@/lib/stores/soundscapeStore";
 import { useAudioStore } from "@/lib/stores/audioStore";
@@ -9,21 +7,6 @@ import { MindifyPanel, StatBadge } from "@/components/ui/MindifyPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Music, Play } from "lucide-react";
 import type { Meditation, MeditationCategory } from "@/lib/types";
-
-type MindifyPlayerProps = {
-	url: string;
-	controls?: boolean;
-	width?: string | number;
-	height?: string | number;
-	playing?: boolean;
-};
-
-const ReactPlayer = dynamic(
-	() => import("react-player").then((mod) => mod.default),
-	{
-		ssr: false,
-	},
-) as unknown as ComponentType<MindifyPlayerProps>;
 
 interface MeditationGridProps {
 	meditations?: Meditation[];
@@ -133,14 +116,6 @@ export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 						<p className="text-lg text-earth-700 dark:text-[#D9D3C8]">
 							{currentSession.description}
 						</p>
-						<div className="mt-4 overflow-hidden rounded-3xl border border-sage-100 bg-cream-50 p-4 dark:border-white/10 dark:bg-[#111318]">
-							<ReactPlayer
-								url={currentSession.audioUrl}
-								controls
-								width="100%"
-								height="80px"
-							/>
-						</div>
 						<button
 							type="button"
 							onClick={() => handlePlayInGlobalPlayer({

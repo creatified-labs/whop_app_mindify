@@ -30,6 +30,37 @@ export interface AppSettings {
   updatedAt: string;
 }
 
+/**
+ * Returned from getSettings when no row exists yet for a company. Mirrors the
+ * column defaults in supabase/migrations/007_app_settings.sql so callers can
+ * read fields directly without null-checks. A real row is created on first
+ * save via updateSettings.
+ */
+function buildDefaultSettings(): AppSettings {
+  return {
+    id: "",
+    appName: "Mindify",
+    appTagline: "Transform your mind, one session at a time",
+    welcomeMessage: "Welcome to your mindfulness journey",
+    supportEmail: "",
+    monthlyPrice: 14.99,
+    annualPrice: 149.99,
+    freeMeditationLimit: 5,
+    freeHypnosisLimit: 2,
+    freeProgramLimit: 1,
+    emailNotifications: true,
+    streakReminders: true,
+    weeklyDigest: false,
+    newContentAlerts: true,
+    maintenanceMode: false,
+    analyticsTracking: true,
+    debugMode: false,
+    experienceCopy: {},
+    experienceSections: {},
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 function rowToSettings(row: Record<string, unknown>): AppSettings {
   return {
     id: row.id as string,
@@ -64,6 +95,8 @@ export async function getSettings(companyId: string): Promise<{ data: AppSetting
       .single();
 
     if (error) {
+      // PGRST116 = no row yet for this company — not an error, return defaults
+      if (error.code === 'PGRST116') return { data: buildDefaultSettings(), error: null };
       console.error('[SettingsService] Error fetching settings:', error);
       return { data: null, error: new Error(error.message) };
     }

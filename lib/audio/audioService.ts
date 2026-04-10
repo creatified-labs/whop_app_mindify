@@ -16,6 +16,8 @@ class AudioService {
 	private fadeDuration = 250;
 	private shouldResumeAfterVisibility = false;
 	private listeningStart: number | null = null;
+	/** Monotonic counter — each play() call captures its value and bails if superseded. */
+	private playToken = 0;
 
 	constructor() {
 		if (typeof window !== "undefined") {
@@ -37,14 +39,24 @@ class AudioService {
 
 	public async play(track: AudioTrack, options?: { startAt?: number; volume?: number }) {
 		if (!this.audio) return;
+		const token = ++this.playToken;
 		try {
 			await this.crossfadeOut();
+			if (token !== this.playToken || !this.audio) return; // superseded
+			// Pause and clear the current track before swapping src so the
+			// previous play() promise resolves cleanly and we don't race a
+			// new load against an in-flight play request (AbortError).
+			if (!this.audio.paused) this.audio.pause();
 			this.audio.src = track.audioUrl;
 			this.audio.currentTime = options?.startAt ?? 0;
 			await this.audio.play();
+			if (token !== this.playToken) return; // superseded during load
 			await this.crossfadeIn(options?.volume);
 			this.listeningStart = Date.now();
 		} catch (error) {
+			// AbortError fires when a newer play() superseded this one — not a real failure.
+			if (error instanceof DOMException && error.name === "AbortError") return;
+			if (token !== this.playToken) return;
 			console.error("[Mindify] Audio play error", error);
 			this.callbacks?.onError("Unable to start playback");
 		}

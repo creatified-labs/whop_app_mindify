@@ -116,6 +116,14 @@ const glassCard =
 
 export function ExperienceContent(props: DashboardViewProps) {
 	const navSelection = useAppStore((state) => state.navSelection);
+	const setCompanyId = useAppStore((state) => state.setCompanyId);
+	const storedCompanyId = useAppStore((state) => state.companyId);
+
+	useEffect(() => {
+		if (props.companyId && props.companyId !== storedCompanyId) {
+			setCompanyId(props.companyId);
+		}
+	}, [props.companyId, storedCompanyId, setCompanyId]);
 
 	if (navSelection === "dashboard") {
 		return <DashboardView {...props} />;

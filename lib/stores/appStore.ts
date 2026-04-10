@@ -19,12 +19,14 @@ interface AppStore {
 	filterState: FilterState;
 	userProgress: UserProgress | null;
 	membershipTier: "free" | "premium";
+	companyId: string | null;
 	setNavSelection: (section: NavSection) => void;
 	goBack: () => void;
 	canGoBack: () => boolean;
 	setFilterState: (updater: Partial<FilterState>) => void;
 	setUserProgress: (progress: UserProgress) => void;
 	setMembershipTier: (tier: "free" | "premium") => void;
+	setCompanyId: (id: string) => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -33,6 +35,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 	filterState: DEFAULT_FILTER_STATE,
 	userProgress: null,
 	membershipTier: "free",
+	companyId: null,
 	setNavSelection: (section) =>
 		set((state) => ({
 			navSelection: section,
@@ -54,4 +57,5 @@ export const useAppStore = create<AppStore>((set, get) => ({
 		})),
 	setUserProgress: (progress) => set({ userProgress: progress }),
 	setMembershipTier: (tier) => set({ membershipTier: tier }),
+	setCompanyId: (id) => set({ companyId: id }),
 }));
