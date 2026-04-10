@@ -3,7 +3,7 @@
 import { Component, useEffect, useMemo, type ReactNode } from "react";
 import { useAppStore, type NavSection } from "@/lib/stores/appStore";
 import { useAudioStore } from "@/lib/stores/audioStore";
-import type { UserProgress, Meditation, HypnosisSession } from "@/lib/types";
+import type { UserProgress, Meditation, HypnosisSession, QuickReset, Program } from "@/lib/types";
 import { Flame } from "lucide-react";
 import { NoFavorites, NoActivity, NoPrograms } from "@/components/ui/EmptyState";
 import { InlineErrorBoundaryFallback } from "@/components/ui/ErrorState";
@@ -12,6 +12,15 @@ import { HypnosisStack } from "@/components/hypnosis/HypnosisStack";
 import { ProgramsLibrary } from "@/components/programs/ProgramsLibrary";
 import { QuickResetsList } from "@/components/quick-resets/QuickResetsList";
 import { KnowledgeHub } from "@/components/knowledge/KnowledgeHub";
+import { HorizontalStrip } from "@/components/ui/HorizontalStrip";
+import { FeaturedProgramCard } from "@/components/ui/FeaturedProgramCard";
+import { FeaturedContentCard } from "@/components/ui/FeaturedContentCard";
+import {
+	interpolate,
+	splitOnVariable,
+	type ExperienceCopy,
+	type ExperienceSections,
+} from "@/lib/ui/experienceCopy";
 
 class SectionErrorBoundary extends Component<
 	{ children: ReactNode },
@@ -96,6 +105,10 @@ export interface DashboardViewProps {
 	companyId: string;
 	meditations?: Meditation[];
 	hypnosisSessions?: HypnosisSession[];
+	quickResets?: QuickReset[];
+	programs?: Program[];
+	experienceCopy: ExperienceCopy;
+	experienceSections: ExperienceSections;
 }
 
 const glassCard =
@@ -140,6 +153,13 @@ export function DashboardView({
 	recommendedSessions,
 	streakDays,
 	userProgress,
+	companyId,
+	meditations,
+	hypnosisSessions,
+	quickResets,
+	programs,
+	experienceCopy,
+	experienceSections,
 }: DashboardViewProps) {
 	const setUserProgress = useAppStore((state) => state.setUserProgress);
 	const storedProgress = useAppStore((state) => state.userProgress);
@@ -173,27 +193,37 @@ export function DashboardView({
 		});
 	};
 
+	const [welcomeBeforeName, welcomeAfterName] = splitOnVariable(
+		experienceCopy.welcomeHeadingTemplate,
+		"name",
+	);
+	const welcomeEyebrow = interpolate(experienceCopy.welcomeEyebrowTemplate, {
+		timeOfDay: greeting,
+		tier: membershipTier,
+	});
+
 	return (
 		<div className="space-y-6">
 			<section className={`${glassCard} grid gap-6 lg:grid-cols-[1.1fr_0.9fr]`}>
 				<div className="space-y-6">
 					<div>
 						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">
-							{greeting} ritual • {membershipTier} tier
+							{welcomeEyebrow}
 						</p>
 						<h2 className="mt-2 text-4xl font-serif font-semibold text-[rgb(var(--earth-900))]">
-							Welcome back, <span className="text-[rgb(var(--sage-600))]">{userName}</span>
+							{welcomeBeforeName}
+							<span className="text-[rgb(var(--sage-600))]">{userName}</span>
+							{welcomeAfterName}
 						</h2>
 						<p className="mt-2 max-w-2xl text-base leading-relaxed text-[rgb(var(--earth-600))]">
-							We’re holding space for your nervous system reset. Continue your ritual or
-							explore curated recommendations below.
+							{experienceCopy.welcomeBody}
 						</p>
 					</div>
-					{continueSession && (
+					{experienceSections.continueRitual && continueSession && (
 						<div className="rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/10 dark:bg-[#111318]">
 							<div className="flex flex-wrap items-center justify-between gap-4 text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
 								<p className="uppercase tracking-[0.3em] text-[rgb(var(--earth-500))]">
-									Continue Ritual
+									{experienceCopy.continueRitualLabel}
 								</p>
 								<p className="font-medium text-[rgb(var(--earth-700))] dark:text-[#E2DBCF]">
 									{continueSession.durationMinutes} mins • {continueSession.type}
@@ -221,51 +251,82 @@ export function DashboardView({
 						</div>
 					)}
 				</div>
-				<div className="space-y-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-6 dark:border-white/10 dark:bg-[#111318]">
-					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">Daily streak</p>
-					<p className="flex items-center gap-2 text-5xl font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]"><Flame className="h-6 w-6" /> {streakDays}</p>
-					<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
-						Keep the chain going to unlock deeper labs and real-time biofeedback rituals.
-					</p>
-					<div className="rounded-2xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-sm dark:border-white/10 dark:bg-[#151821]">
-						<p className="text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">Total minutes</p>
-						<p className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
-							{userProgress?.totalMinutesMeditated ?? 0}m
+				{experienceSections.dailyStreak && (
+					<div className="space-y-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-6 dark:border-white/10 dark:bg-[#111318]">
+						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+							{experienceCopy.dailyStreakEyebrow}
 						</p>
+						<p className="flex items-center gap-2 text-5xl font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]"><Flame className="h-6 w-6" /> {streakDays}</p>
+						<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
+							{experienceCopy.dailyStreakBody}
+						</p>
+						<div className="rounded-2xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-sm dark:border-white/10 dark:bg-[#151821]">
+							<p className="text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+								{experienceCopy.dailyStreakMinutesLabel}
+							</p>
+							<p className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+								{userProgress?.totalMinutesMeditated ?? 0}m
+							</p>
+						</div>
 					</div>
-				</div>
+				)}
 			</section>
 
 			<section className="grid gap-6 lg:grid-cols-2">
-				{currentProgram ? (
-					<div className={`${glassCard}`}>
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">
-							Current Program
-						</p>
-						<h3 className="mt-2 text-3xl font-serif font-semibold text-[rgb(var(--earth-900))]">{currentProgram.title}</h3>
-						<div className="mt-4 h-2 w-full rounded-full bg-[rgb(var(--sage-100))]">
-							<div
-								className="h-full rounded-full bg-gradient-sage"
-								style={{ width: `${currentProgram.progressPercent}%` }}
-							/>
-						</div>
-						<p className="mt-3 text-sm text-[rgb(var(--earth-600))]">
-							Next milestone: {currentProgram.nextMilestone}
-						</p>
-						{!currentProgram.isPremium && membershipTier === "free" && (
-							<p className="mt-3 inline-flex rounded-full border border-[rgb(var(--gold-200))] bg-[rgb(var(--gold-50))] px-4 py-1 text-xs uppercase tracking-[0.3em] text-[rgb(var(--gold-700))]">
-								Premium Preview
+				{experienceSections.currentProgram &&
+					(currentProgram ? (
+						<div className={`${glassCard}`}>
+							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">
+								{experienceCopy.currentProgramLabel}
 							</p>
-						)}
-					</div>
-				) : (
-					<div className={`${glassCard}`}>
-						<NoPrograms />
-					</div>
-				)}
+							<h3 className="mt-2 text-3xl font-serif font-semibold text-[rgb(var(--earth-900))]">{currentProgram.title}</h3>
+							<div className="mt-4 h-2 w-full rounded-full bg-[rgb(var(--sage-100))]">
+								<div
+									className="h-full rounded-full bg-gradient-sage"
+									style={{ width: `${currentProgram.progressPercent}%` }}
+								/>
+							</div>
+							<p className="mt-3 text-sm text-[rgb(var(--earth-600))]">
+								Next milestone: {currentProgram.nextMilestone}
+							</p>
+							{!currentProgram.isPremium && membershipTier === "free" && (
+								<p className="mt-3 inline-flex rounded-full border border-[rgb(var(--gold-200))] bg-[rgb(var(--gold-50))] px-4 py-1 text-xs uppercase tracking-[0.3em] text-[rgb(var(--gold-700))]">
+									Premium Preview
+								</p>
+							)}
+						</div>
+					) : programs && programs.length > 0 ? (
+						<div className={`${glassCard}`}>
+							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+								{experienceCopy.featuredProgramsLabel}
+							</p>
+							<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+								{experienceCopy.featuredProgramsHeading}
+							</h3>
+							<div className="mt-4">
+								<HorizontalStrip>
+									{programs.slice(0, 4).map((program) => (
+										<FeaturedProgramCard
+											key={program.id}
+											program={program}
+											companyId={companyId}
+											ctaLabel={experienceCopy.featuredProgramsCTA}
+										/>
+									))}
+								</HorizontalStrip>
+							</div>
+						</div>
+					) : (
+						<div className={`${glassCard}`}>
+							<NoPrograms />
+						</div>
+					))}
 
+				{experienceSections.recentActivity && (
 				<div className={`${glassCard}`}>
-					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">Recent Activity</p>
+					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+						{experienceCopy.recentActivityLabel}
+					</p>
 					{recentActivity.length > 0 ? (
 						<ul className="mt-4 space-y-4">
 							{recentActivity.map((item) => (
@@ -286,16 +347,18 @@ export function DashboardView({
 						</div>
 					)}
 				</div>
+				)}
 			</section>
 
+			{experienceSections.favoriteSoundscapes && (
 			<section className={`${glassCard}`}>
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">Quick access</p>
-						<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">Favorite soundscapes</h3>
+						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">{experienceCopy.favoritesEyebrow}</p>
+						<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">{experienceCopy.favoritesHeading}</h3>
 					</div>
 					{favorites.length > 0 && (
-						<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">Tap a tile to jump right in.</p>
+						<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">{experienceCopy.favoritesSubtitle}</p>
 					)}
 				</div>
 				{favorites.length > 0 ? (
@@ -324,16 +387,98 @@ export function DashboardView({
 					</div>
 				)}
 			</section>
+			)}
 
+			{experienceSections.featuredMeditations && meditations && meditations.length > 0 && (
+				<section className={`${glassCard}`}>
+					<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+						{experienceCopy.featuredMeditationsLabel}
+					</h3>
+					<div className="mt-4">
+						<HorizontalStrip>
+							{meditations.slice(0, 6).map((m) => (
+								<FeaturedContentCard
+									key={m.id}
+									item={{
+										id: m.id,
+										title: m.title,
+										duration: m.duration,
+										audioUrl: m.audioUrl,
+										type: "meditation",
+										isPremium: m.isPremium,
+										subtitle: m.category,
+									}}
+									membershipTier={membershipTier}
+								/>
+							))}
+						</HorizontalStrip>
+					</div>
+				</section>
+			)}
+
+			{experienceSections.featuredHypnosis && hypnosisSessions && hypnosisSessions.length > 0 && (
+				<section className={`${glassCard}`}>
+					<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+						{experienceCopy.featuredHypnosisLabel}
+					</h3>
+					<div className="mt-4">
+						<HorizontalStrip>
+							{hypnosisSessions.slice(0, 6).map((h) => (
+								<FeaturedContentCard
+									key={h.id}
+									item={{
+										id: h.id,
+										title: h.title,
+										duration: h.duration,
+										audioUrl: h.audioUrl,
+										type: "hypnosis",
+										isPremium: h.isPremium,
+										subtitle: h.theme,
+									}}
+									membershipTier={membershipTier}
+								/>
+							))}
+						</HorizontalStrip>
+					</div>
+				</section>
+			)}
+
+			{experienceSections.featuredQuickResets && quickResets && quickResets.length > 0 && (
+				<section className={`${glassCard}`}>
+					<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+						{experienceCopy.featuredQuickResetsLabel}
+					</h3>
+					<div className="mt-4">
+						<HorizontalStrip>
+							{quickResets.slice(0, 6).map((r) => (
+								<FeaturedContentCard
+									key={r.id}
+									item={{
+										id: r.id,
+										title: r.title,
+										duration: r.duration,
+										audioUrl: r.audioUrl,
+										type: "reset",
+										subtitle: r.type,
+									}}
+									membershipTier={membershipTier}
+								/>
+							))}
+						</HorizontalStrip>
+					</div>
+				</section>
+			)}
+
+			{experienceSections.recommended && (
 			<section className={`${glassCard}`}>
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">Recommended</p>
+						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">{experienceCopy.recommendedEyebrow}</p>
 						<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))]">
-							Based on this {greeting.toLowerCase()}
+							{interpolate(experienceCopy.recommendedHeadingTemplate, { timeOfDay: greeting.toLowerCase() })}
 						</h3>
 					</div>
-					<p className="text-sm text-[rgb(var(--earth-600))]">Auto-personalized by Mindify AI.</p>
+					<p className="text-sm text-[rgb(var(--earth-600))]">{experienceCopy.recommendedFooter}</p>
 				</div>
 				<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 					{recommendedSessions.map((session) => {
@@ -372,6 +517,7 @@ export function DashboardView({
 					})}
 				</div>
 			</section>
+			)}
 		</div>
 	);
 }

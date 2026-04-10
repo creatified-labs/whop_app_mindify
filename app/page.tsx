@@ -15,6 +15,10 @@ import {
 	type ActivityItem,
 	type RecommendedSession,
 } from "@/components/ui/DashboardView";
+import {
+	resolveExperienceCopy,
+	resolveExperienceSections,
+} from "@/lib/ui/experienceCopy";
 import type { UserProgress } from "@/lib/types";
 import { ProgramGallery } from "@/components/programs/ProgramGallery";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -110,6 +114,8 @@ export default async function HomePage() {
 					streakDays={streakDays}
 					userProgress={userProgress}
 					companyId="demo"
+					experienceCopy={resolveExperienceCopy()}
+					experienceSections={resolveExperienceSections()}
 				/>
 
 				<ProgramGallery />

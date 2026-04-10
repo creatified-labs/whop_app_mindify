@@ -1,10 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, Globe, Bell, Shield, Library, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Globe, Bell, Shield, Library, Loader2, Layout } from "lucide-react";
 import MediaLibrarySection from "@/components/dashboard/settings/MediaLibrarySection";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+	DEFAULT_EXPERIENCE_COPY,
+	SECTION_KEYS,
+	SECTION_LABELS,
+	type ExperienceCopy,
+	type ExperienceSections,
+	type SectionKey,
+} from "@/lib/ui/experienceCopy";
 
 interface SettingsSection {
 	id: string;
@@ -14,6 +22,7 @@ interface SettingsSection {
 
 const sections: SettingsSection[] = [
 	{ id: "general", label: "General", icon: Globe },
+	{ id: "experience", label: "Experience View", icon: Layout },
 	{ id: "notifications", label: "Notifications", icon: Bell },
 	{ id: "advanced", label: "Advanced", icon: Shield },
 	{ id: "media", label: "Media Library", icon: Library },
@@ -69,6 +78,42 @@ function SettingsInput({
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={placeholder}
 				className="w-full rounded-lg border border-[rgb(var(--sage-200))] bg-[rgb(var(--cream-50))] px-3 py-2 text-sm text-[rgb(var(--earth-900))] placeholder-[rgb(var(--earth-400))] focus:border-[rgb(var(--sage-400))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--sage-400)/0.2)] dark:border-white/10 dark:bg-[#14171C] dark:text-[#F4EFE6] dark:placeholder-[#B5AFA3]"
+			/>
+			{helpText && (
+				<p className="mt-1 text-xs text-[rgb(var(--earth-500))] dark:text-[#B5AFA3]">
+					{helpText}
+				</p>
+			)}
+		</div>
+	);
+}
+
+function SettingsTextarea({
+	label,
+	value,
+	onChange,
+	placeholder,
+	helpText,
+	rows = 2,
+}: {
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+	helpText?: string;
+	rows?: number;
+}) {
+	return (
+		<div>
+			<label className="mb-1.5 block text-sm font-medium text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
+				{label}
+			</label>
+			<textarea
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				placeholder={placeholder}
+				rows={rows}
+				className="w-full resize-y rounded-lg border border-[rgb(var(--sage-200))] bg-[rgb(var(--cream-50))] px-3 py-2 text-sm text-[rgb(var(--earth-900))] placeholder-[rgb(var(--earth-400))] focus:border-[rgb(var(--sage-400))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--sage-400)/0.2)] dark:border-white/10 dark:bg-[#14171C] dark:text-[#F4EFE6] dark:placeholder-[#B5AFA3]"
 			/>
 			{helpText && (
 				<p className="mt-1 text-xs text-[rgb(var(--earth-500))] dark:text-[#B5AFA3]">
@@ -150,6 +195,19 @@ export default function SettingsPage() {
 	const [analyticsTracking, setAnalyticsTracking] = useState(true);
 	const [debugMode, setDebugMode] = useState(false);
 
+	// Experience View settings
+	const [experienceCopy, setExperienceCopy] = useState<Partial<ExperienceCopy>>({});
+	const [experienceSections, setExperienceSections] = useState<Partial<ExperienceSections>>({});
+
+	const updateCopyField = (key: keyof ExperienceCopy, value: string) => {
+		setExperienceCopy((prev) => ({ ...prev, [key]: value }));
+	};
+	const toggleSection = (key: SectionKey, checked: boolean) => {
+		setExperienceSections((prev) => ({ ...prev, [key]: checked }));
+	};
+	const copyValue = (key: keyof ExperienceCopy): string => experienceCopy[key] ?? "";
+	const sectionValue = (key: SectionKey): boolean => experienceSections[key] !== false;
+
 	// Load settings from API on mount
 	useEffect(() => {
 		async function loadSettings() {
@@ -167,6 +225,8 @@ export default function SettingsPage() {
 				setMaintenanceMode(data.maintenanceMode);
 				setAnalyticsTracking(data.analyticsTracking);
 				setDebugMode(data.debugMode);
+				setExperienceCopy(data.experienceCopy ?? {});
+				setExperienceSections(data.experienceSections ?? {});
 			} catch (err) {
 				console.error("Failed to load settings:", err);
 			} finally {
@@ -194,6 +254,8 @@ export default function SettingsPage() {
 					maintenanceMode,
 					analyticsTracking,
 					debugMode,
+					experienceCopy,
+					experienceSections,
 				}),
 			});
 			if (!res.ok) {
@@ -318,6 +380,189 @@ export default function SettingsPage() {
 										placeholder="support@example.com"
 										helpText="Users will see this for support inquiries"
 									/>
+								</SectionCard>
+							</>
+						)}
+
+						{activeSection === "experience" && (
+							<>
+								<SectionCard
+									title="Hero & welcome"
+									description="Customize the top of the experience page and the welcome block. Leave any field blank to use the default shown below."
+								>
+									<SettingsInput
+										label="Hero eyebrow"
+										value={copyValue("heroEyebrow")}
+										onChange={(v) => updateCopyField("heroEyebrow", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.heroEyebrow}
+										helpText={`Default: "${DEFAULT_EXPERIENCE_COPY.heroEyebrow}"`}
+									/>
+									<SettingsInput
+										label="Hero title"
+										value={copyValue("heroTitle")}
+										onChange={(v) => updateCopyField("heroTitle", v)}
+										placeholder="Leave blank to show the Whop experience name"
+										helpText="Blank = uses your Whop experience name automatically."
+									/>
+									<SettingsTextarea
+										label="Hero tagline"
+										value={copyValue("heroTagline")}
+										onChange={(v) => updateCopyField("heroTagline", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.heroTagline}
+										helpText={`Default: "${DEFAULT_EXPERIENCE_COPY.heroTagline}"`}
+									/>
+									<SettingsInput
+										label="Welcome eyebrow (small caps above heading)"
+										value={copyValue("welcomeEyebrowTemplate")}
+										onChange={(v) => updateCopyField("welcomeEyebrowTemplate", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.welcomeEyebrowTemplate}
+										helpText={`Use {timeOfDay} and {tier} placeholders. Default: "${DEFAULT_EXPERIENCE_COPY.welcomeEyebrowTemplate}"`}
+									/>
+									<SettingsInput
+										label="Welcome heading"
+										value={copyValue("welcomeHeadingTemplate")}
+										onChange={(v) => updateCopyField("welcomeHeadingTemplate", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.welcomeHeadingTemplate}
+										helpText={`Use {name} where the user's name should appear. Default: "${DEFAULT_EXPERIENCE_COPY.welcomeHeadingTemplate}"`}
+									/>
+									<SettingsTextarea
+										label="Welcome body"
+										value={copyValue("welcomeBody")}
+										onChange={(v) => updateCopyField("welcomeBody", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.welcomeBody}
+										helpText={`Default: "${DEFAULT_EXPERIENCE_COPY.welcomeBody}"`}
+										rows={3}
+									/>
+								</SectionCard>
+
+								<SectionCard
+									title="Section labels"
+									description="Rename the labels and descriptions shown above each home-page section."
+								>
+									<SettingsInput
+										label="Continue Ritual label"
+										value={copyValue("continueRitualLabel")}
+										onChange={(v) => updateCopyField("continueRitualLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.continueRitualLabel}
+									/>
+									<SettingsInput
+										label="Current Program label"
+										value={copyValue("currentProgramLabel")}
+										onChange={(v) => updateCopyField("currentProgramLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.currentProgramLabel}
+									/>
+									<SettingsInput
+										label="Featured Programs eyebrow"
+										value={copyValue("featuredProgramsLabel")}
+										onChange={(v) => updateCopyField("featuredProgramsLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.featuredProgramsLabel}
+										helpText="Shown above the programs carousel when the user is not enrolled."
+									/>
+									<SettingsInput
+										label="Featured Programs heading"
+										value={copyValue("featuredProgramsHeading")}
+										onChange={(v) => updateCopyField("featuredProgramsHeading", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.featuredProgramsHeading}
+									/>
+									<SettingsInput
+										label="Featured Programs CTA button"
+										value={copyValue("featuredProgramsCTA")}
+										onChange={(v) => updateCopyField("featuredProgramsCTA", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.featuredProgramsCTA}
+									/>
+									<SettingsInput
+										label="Recent Activity label"
+										value={copyValue("recentActivityLabel")}
+										onChange={(v) => updateCopyField("recentActivityLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.recentActivityLabel}
+									/>
+									<SettingsInput
+										label="Favorites eyebrow"
+										value={copyValue("favoritesEyebrow")}
+										onChange={(v) => updateCopyField("favoritesEyebrow", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.favoritesEyebrow}
+									/>
+									<SettingsInput
+										label="Favorites heading"
+										value={copyValue("favoritesHeading")}
+										onChange={(v) => updateCopyField("favoritesHeading", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.favoritesHeading}
+									/>
+									<SettingsInput
+										label="Favorites subtitle"
+										value={copyValue("favoritesSubtitle")}
+										onChange={(v) => updateCopyField("favoritesSubtitle", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.favoritesSubtitle}
+									/>
+									<SettingsInput
+										label="Recommended eyebrow"
+										value={copyValue("recommendedEyebrow")}
+										onChange={(v) => updateCopyField("recommendedEyebrow", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.recommendedEyebrow}
+									/>
+									<SettingsInput
+										label="Recommended heading"
+										value={copyValue("recommendedHeadingTemplate")}
+										onChange={(v) => updateCopyField("recommendedHeadingTemplate", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.recommendedHeadingTemplate}
+										helpText="Use {timeOfDay} placeholder (e.g. 'morning')."
+									/>
+									<SettingsInput
+										label="Recommended footer"
+										value={copyValue("recommendedFooter")}
+										onChange={(v) => updateCopyField("recommendedFooter", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.recommendedFooter}
+									/>
+									<SettingsInput
+										label="Daily Streak eyebrow"
+										value={copyValue("dailyStreakEyebrow")}
+										onChange={(v) => updateCopyField("dailyStreakEyebrow", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.dailyStreakEyebrow}
+									/>
+									<SettingsTextarea
+										label="Daily Streak body"
+										value={copyValue("dailyStreakBody")}
+										onChange={(v) => updateCopyField("dailyStreakBody", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.dailyStreakBody}
+									/>
+									<SettingsInput
+										label="Total minutes label"
+										value={copyValue("dailyStreakMinutesLabel")}
+										onChange={(v) => updateCopyField("dailyStreakMinutesLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.dailyStreakMinutesLabel}
+									/>
+									<SettingsInput
+										label="Featured Meditations label"
+										value={copyValue("featuredMeditationsLabel")}
+										onChange={(v) => updateCopyField("featuredMeditationsLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.featuredMeditationsLabel}
+									/>
+									<SettingsInput
+										label="Featured Hypnosis label"
+										value={copyValue("featuredHypnosisLabel")}
+										onChange={(v) => updateCopyField("featuredHypnosisLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.featuredHypnosisLabel}
+									/>
+									<SettingsInput
+										label="Featured Quick Resets label"
+										value={copyValue("featuredQuickResetsLabel")}
+										onChange={(v) => updateCopyField("featuredQuickResetsLabel", v)}
+										placeholder={DEFAULT_EXPERIENCE_COPY.featuredQuickResetsLabel}
+									/>
+								</SectionCard>
+
+								<SectionCard
+									title="Visible sections"
+									description="Hide any section you don't want to show on the experience home page."
+								>
+									{SECTION_KEYS.map((key) => (
+										<SettingsToggle
+											key={key}
+											label={SECTION_LABELS[key]}
+											checked={sectionValue(key)}
+											onChange={(checked) => toggleSection(key, checked)}
+										/>
+									))}
 								</SectionCard>
 							</>
 						)}

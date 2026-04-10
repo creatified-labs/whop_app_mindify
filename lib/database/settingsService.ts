@@ -5,6 +5,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { pruneEmpty, type ExperienceCopy, type ExperienceSections } from '@/lib/ui/experienceCopy';
 
 export interface AppSettings {
   id: string;
@@ -24,6 +25,8 @@ export interface AppSettings {
   maintenanceMode: boolean;
   analyticsTracking: boolean;
   debugMode: boolean;
+  experienceCopy: Partial<ExperienceCopy>;
+  experienceSections: Partial<ExperienceSections>;
   updatedAt: string;
 }
 
@@ -46,6 +49,8 @@ function rowToSettings(row: Record<string, unknown>): AppSettings {
     maintenanceMode: row.maintenance_mode as boolean,
     analyticsTracking: row.analytics_tracking as boolean,
     debugMode: row.debug_mode as boolean,
+    experienceCopy: (row.experience_copy as Partial<ExperienceCopy> | null) ?? {},
+    experienceSections: (row.experience_sections as Partial<ExperienceSections> | null) ?? {},
     updatedAt: row.updated_at as string,
   };
 }
@@ -92,6 +97,12 @@ export async function updateSettings(
     if (updates.maintenanceMode !== undefined) dbUpdates.maintenance_mode = updates.maintenanceMode;
     if (updates.analyticsTracking !== undefined) dbUpdates.analytics_tracking = updates.analyticsTracking;
     if (updates.debugMode !== undefined) dbUpdates.debug_mode = updates.debugMode;
+    if (updates.experienceCopy !== undefined) {
+      dbUpdates.experience_copy = pruneEmpty(updates.experienceCopy as Record<string, unknown>);
+    }
+    if (updates.experienceSections !== undefined) {
+      dbUpdates.experience_sections = updates.experienceSections;
+    }
 
     // Try to find existing settings row for this company
     const { data: existingRow } = await supabaseAdmin

@@ -24,6 +24,11 @@ import {
 	getPrograms,
 	getProgramById,
 } from "@/lib/database";
+import { getSettings } from "@/lib/database/settingsService";
+import {
+	resolveExperienceCopy,
+	resolveExperienceSections,
+} from "@/lib/ui/experienceCopy";
 
 export const dynamic = 'force-dynamic';
 
@@ -71,6 +76,7 @@ export default async function ExperiencePage({
 		{ data: hypnosisSessions },
 		{ data: quickResets },
 		{ data: allPrograms },
+		{ data: settings },
 	] = await Promise.all([
 		getActivityStats(companyId, userId),
 		getRecentActivity(companyId, userId, 5),
@@ -81,7 +87,11 @@ export default async function ExperiencePage({
 		getHypnosisSessions(companyId),
 		getQuickResets(companyId),
 		getPrograms(companyId),
+		getSettings(companyId),
 	]);
+
+	const experienceCopy = resolveExperienceCopy(settings?.experienceCopy);
+	const experienceSections = resolveExperienceSections(settings?.experienceSections);
 
 	const streakDays = activityStats?.streakDays ?? 0;
 
@@ -224,27 +234,33 @@ export default async function ExperiencePage({
 			className="bg-gradient-zen"
 		>
 			<div className="space-y-8">
-				<section className="rounded-3xl border border-sage-100 bg-cream-50 p-6 shadow-card dark:border-white/10 dark:bg-[#13151A]">
-					<div className="flex flex-wrap items-center justify-between gap-4">
-						<div>
-							<p className="text-xs uppercase tracking-[0.5em] text-earth-500 dark:text-[#AFA79B]">Mindify Studio</p>
-							<h1 className="mt-1 text-2xl font-serif font-semibold text-earth-900 dark:text-[#F4EFE6]">
-								{(experience as { slug?: string }).slug ?? experience.name}
-							</h1>
-							<p className="mt-2 text-sm text-earth-600 dark:text-[#CFC7BB]">
-								Personalized nervous system rituals guided by Nicola Smith's methodology.
-							</p>
-						</div>
-						<div className="flex items-center gap-4 text-sm text-earth-600 dark:text-[#CFC7BB]">
-							<div className="rounded-2xl border border-sage-100 bg-cream-50 px-4 py-2 text-earth-700 dark:border-white/10 dark:bg-[#111318] dark:text-[#E2DBCF]">
-								<Flame className="h-4 w-4 inline" /> {streakDays} day streak
+				{experienceSections.heroBanner && (
+					<section className="rounded-3xl border border-sage-100 bg-cream-50 p-6 shadow-card dark:border-white/10 dark:bg-[#13151A]">
+						<div className="flex flex-wrap items-center justify-between gap-4">
+							<div>
+								<p className="text-xs uppercase tracking-[0.5em] text-earth-500 dark:text-[#AFA79B]">
+									{experienceCopy.heroEyebrow}
+								</p>
+								<h1 className="mt-1 text-2xl font-serif font-semibold text-earth-900 dark:text-[#F4EFE6]">
+									{experienceCopy.heroTitle ||
+										(experience as { slug?: string }).slug ||
+										experience.name}
+								</h1>
+								<p className="mt-2 text-sm text-earth-600 dark:text-[#CFC7BB]">
+									{experienceCopy.heroTagline}
+								</p>
 							</div>
-							<div className="rounded-2xl border border-sage-100 bg-cream-50 px-4 py-2 text-earth-700 dark:border-white/10 dark:bg-[#111318] dark:text-[#E2DBCF]">
-								{favorites.length} favorites
+							<div className="flex items-center gap-4 text-sm text-earth-600 dark:text-[#CFC7BB]">
+								<div className="rounded-2xl border border-sage-100 bg-cream-50 px-4 py-2 text-earth-700 dark:border-white/10 dark:bg-[#111318] dark:text-[#E2DBCF]">
+									<Flame className="h-4 w-4 inline" /> {streakDays} day streak
+								</div>
+								<div className="rounded-2xl border border-sage-100 bg-cream-50 px-4 py-2 text-earth-700 dark:border-white/10 dark:bg-[#111318] dark:text-[#E2DBCF]">
+									{favorites.length} favorites
+								</div>
 							</div>
 						</div>
-					</div>
-				</section>
+					</section>
+				)}
 
 				<ExperienceContent
 					userName={displayName}
@@ -259,6 +275,10 @@ export default async function ExperiencePage({
 					companyId={companyId}
 					meditations={meditations || []}
 					hypnosisSessions={hypnosisSessions || []}
+					quickResets={quickResets || []}
+					programs={allPrograms || []}
+					experienceCopy={experienceCopy}
+					experienceSections={experienceSections}
 				/>
 			</div>
 		</AppLayout>
