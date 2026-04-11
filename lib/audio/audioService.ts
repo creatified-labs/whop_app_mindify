@@ -26,6 +26,7 @@ class AudioService {
 			this.audio.crossOrigin = "anonymous";
 			this.audio.addEventListener("timeupdate", this.handleTimeUpdate);
 			this.audio.addEventListener("loadedmetadata", this.handleLoadedMetadata);
+			this.audio.addEventListener("durationchange", this.handleLoadedMetadata);
 			this.audio.addEventListener("ended", this.handleEnded);
 			this.audio.addEventListener("error", this.handleError);
 			document.addEventListener("visibilitychange", this.handleVisibilityChange);
@@ -152,7 +153,12 @@ class AudioService {
 
 	private handleLoadedMetadata = () => {
 		if (!this.audio) return;
-		this.callbacks?.onDuration(this.audio.duration);
+		const d = this.audio.duration;
+		// Browsers return Infinity/NaN for some streaming MP3s and VBR files
+		// until the stream has been fully buffered. Ignore those readings so
+		// the UI keeps the duration we seeded from the track metadata.
+		if (!Number.isFinite(d) || d <= 0) return;
+		this.callbacks?.onDuration(d);
 	};
 
 	private handleEnded = () => {

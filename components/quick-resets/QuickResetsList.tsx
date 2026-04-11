@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { QuickReset } from "@/lib/types";
 import { useAudioStore } from "@/lib/stores/audioStore";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 
 export function QuickResetsList({ companyId }: { companyId: string }) {
 	const [activeId, setActiveId] = useState<string | null>(null);
@@ -53,17 +54,31 @@ export function QuickResetsList({ companyId }: { companyId: string }) {
 			</header>
 			<div className="grid gap-4 lg:grid-cols-2">
 				{resets.map((reset) => (
-					<button
+					<div
 						key={reset.id}
-						type="button"
 						onClick={() => handlePlay(reset)}
-						className={`flex flex-col rounded-3xl border px-5 py-4 text-left transition ${
+						onKeyDown={(e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								handlePlay(reset);
+							}
+						}}
+						role="button"
+						tabIndex={0}
+						className={`relative flex cursor-pointer flex-col rounded-3xl border px-5 py-4 text-left transition ${
 							activeId === reset.id
 								? "border-mindify-lagoon/60 bg-mindify-lagoon/10 text-[rgb(var(--earth-900))] dark:text-white"
 								: "border-[rgb(var(--sage-200))] bg-[rgb(var(--cream-50))] text-[rgb(var(--earth-700))] hover:border-[rgb(var(--sage-400))] dark:border-white/15 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/30"
 						}`}
 					>
-						<div className="flex items-center justify-between text-xs uppercase tracking-[0.3em]">
+						<FavoriteButton
+							contentType="reset"
+							contentId={reset.id}
+							size="sm"
+							variant="solid"
+							className="absolute right-3 top-3 z-10"
+						/>
+						<div className="flex items-center justify-between pr-10 text-xs uppercase tracking-[0.3em]">
 							<span>{String(reset.type).replace("-", " ")}</span>
 							<span>{String(reset.duration)} min</span>
 						</div>
@@ -73,7 +88,7 @@ export function QuickResetsList({ companyId }: { companyId: string }) {
 							<span className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 dark:border-white/15">Instant play</span>
 							{activeId === reset.id && <span className="text-mindify-lagoon">Now playing</span>}
 						</div>
-					</button>
+					</div>
 				))}
 			</div>
 		</section>

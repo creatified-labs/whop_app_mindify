@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { MindifyPanel } from "@/components/ui/MindifyPanel";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { Brain, Play } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import type { HypnosisSession } from "@/lib/types";
@@ -54,16 +55,30 @@ export function HypnosisStack({ hypnosisSessions = [] }: HypnosisStackProps) {
 				{hypnosisSessions.map((session, index) => {
 					const isActive = currentTrack?.id === session.id;
 					return (
-						<motion.button
-							type="button"
+						<motion.div
 							key={session.id}
 							onClick={() => handlePlay(session)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									handlePlay(session);
+								}
+							}}
+							role="button"
+							tabIndex={0}
 							initial={{ opacity: 0, translateY: 20 }}
 							whileInView={{ opacity: 1, translateY: 0 }}
 							transition={{ delay: index * 0.08 }}
 							viewport={{ once: true }}
-							className="text-left"
+							className="relative cursor-pointer text-left"
 						>
+							<FavoriteButton
+								contentType="hypnosis"
+								contentId={session.id}
+								size="md"
+								variant="solid"
+								className="absolute right-4 top-4 z-10"
+							/>
 							<MindifyPanel
 								tone="deep"
 								header={
@@ -88,7 +103,7 @@ export function HypnosisStack({ hypnosisSessions = [] }: HypnosisStackProps) {
 									<span>{isActive ? "Playing" : "Play session"}</span>
 								</div>
 							</MindifyPanel>
-						</motion.button>
+						</motion.div>
 					);
 				})}
 			</div>

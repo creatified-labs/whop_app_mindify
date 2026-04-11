@@ -3,7 +3,7 @@
 import { Component, useEffect, useMemo, type ReactNode } from "react";
 import { useAppStore, type NavSection } from "@/lib/stores/appStore";
 import { useAudioStore } from "@/lib/stores/audioStore";
-import type { UserProgress, Meditation, HypnosisSession, QuickReset, Program } from "@/lib/types";
+import type { UserProgress, Meditation, HypnosisSession, QuickReset, Program, ProgramProgress } from "@/lib/types";
 import { Flame } from "lucide-react";
 import { NoFavorites, NoActivity, NoPrograms } from "@/components/ui/EmptyState";
 import { InlineErrorBoundaryFallback } from "@/components/ui/ErrorState";
@@ -15,6 +15,8 @@ import { KnowledgeHub } from "@/components/knowledge/KnowledgeHub";
 import { HorizontalStrip } from "@/components/ui/HorizontalStrip";
 import { FeaturedProgramCard } from "@/components/ui/FeaturedProgramCard";
 import { FeaturedContentCard } from "@/components/ui/FeaturedContentCard";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { useFavoritesStore } from "@/lib/stores/favoritesStore";
 import {
 	interpolate,
 	splitOnVariable,
@@ -107,6 +109,7 @@ export interface DashboardViewProps {
 	hypnosisSessions?: HypnosisSession[];
 	quickResets?: QuickReset[];
 	programs?: Program[];
+	programProgress?: ProgramProgress[];
 	experienceCopy: ExperienceCopy;
 	experienceSections: ExperienceSections;
 }
@@ -118,6 +121,7 @@ export function ExperienceContent(props: DashboardViewProps) {
 	const navSelection = useAppStore((state) => state.navSelection);
 	const setCompanyId = useAppStore((state) => state.setCompanyId);
 	const storedCompanyId = useAppStore((state) => state.companyId);
+	const initializeFavorites = useFavoritesStore((state) => state.initialize);
 
 	useEffect(() => {
 		if (props.companyId && props.companyId !== storedCompanyId) {
@@ -125,13 +129,19 @@ export function ExperienceContent(props: DashboardViewProps) {
 		}
 	}, [props.companyId, storedCompanyId, setCompanyId]);
 
+	useEffect(() => {
+		if (props.companyId) {
+			initializeFavorites(props.companyId);
+		}
+	}, [props.companyId, initializeFavorites]);
+
 	if (navSelection === "dashboard") {
 		return <DashboardView {...props} />;
 	}
 
 	if (navSelection === "meditations") return <SectionErrorBoundary><MeditationGrid meditations={props.meditations} /></SectionErrorBoundary>;
 	if (navSelection === "hypnosis") return <SectionErrorBoundary><HypnosisStack hypnosisSessions={props.hypnosisSessions} /></SectionErrorBoundary>;
-	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary companyId={props.companyId} /></SectionErrorBoundary>;
+	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary companyId={props.companyId} programProgress={props.programProgress} /></SectionErrorBoundary>;
 	if (navSelection === "quick-resets") return <SectionErrorBoundary><QuickResetsList companyId={props.companyId} /></SectionErrorBoundary>;
 	if (navSelection === "knowledge-hub") return <SectionErrorBoundary><KnowledgeHub companyId={props.companyId} /></SectionErrorBoundary>;
 
@@ -372,13 +382,27 @@ export function DashboardView({
 				{favorites.length > 0 ? (
 					<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 						{favorites.map((fav) => (
-							<button
-								type="button"
+							<div
 								key={fav.id}
 								onClick={() => handlePlay(fav.id, fav.title, fav.audioUrl, fav.type)}
-								className="group rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-left shadow-card transition hover:-translate-y-1 hover:shadow-hover dark:border-white/10 dark:bg-[#13151A]"
+								onKeyDown={(e) => {
+									if (e.key === "Enter" || e.key === " ") {
+										e.preventDefault();
+										handlePlay(fav.id, fav.title, fav.audioUrl, fav.type);
+									}
+								}}
+								role="button"
+								tabIndex={0}
+								className="group relative cursor-pointer rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-left shadow-card transition hover:-translate-y-1 hover:shadow-hover dark:border-white/10 dark:bg-[#13151A]"
 							>
-								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">{fav.type}</p>
+								<FavoriteButton
+									contentType={fav.type}
+									contentId={fav.id}
+									size="sm"
+									variant="solid"
+									className="absolute right-3 top-3 z-10"
+								/>
+								<p className="pr-10 text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">{fav.type}</p>
 								<h4 className="mt-3 text-xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">{fav.title}</h4>
 								<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">{fav.durationMinutes} mins</p>
 								{fav.isPremium && membershipTier === "free" && (
@@ -386,7 +410,7 @@ export function DashboardView({
 										Premium
 									</span>
 								)}
-							</button>
+							</div>
 						))}
 					</div>
 				) : (

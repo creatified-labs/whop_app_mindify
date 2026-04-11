@@ -16,6 +16,7 @@ import {
 	ChevronDownIcon,
 } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import type { AudioTrack } from "@/lib/types";
 
 const formatTime = (seconds: number) => {
@@ -172,6 +173,13 @@ export function GlobalAudioPlayer() {
 										className="h-1 w-24 accent-white"
 									/>
 								</div>
+								<FavoriteButton
+									contentType={currentTrack.trackType}
+									contentId={currentTrack.id}
+									size="md"
+									variant="ghost"
+									stopPropagation={false}
+								/>
 								<button
 									type="button"
 									onClick={() => setIsExpanded((prev) => !prev)}
@@ -284,6 +292,13 @@ export function GlobalAudioPlayer() {
 							>
 								{isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
 							</button>
+							<FavoriteButton
+								contentType={currentTrack.trackType}
+								contentId={currentTrack.id}
+								size="sm"
+								variant="ghost"
+								className="flex-shrink-0"
+							/>
 							<button
 								type="button"
 								onClick={(e) => {
@@ -351,6 +366,15 @@ export function GlobalAudioPlayer() {
 								<p className="text-xs uppercase tracking-[0.4em] text-white/50">{currentTrack.trackType}</p>
 								<h3 className="mt-1 text-xl font-semibold">{currentTrack.title}</h3>
 								<p className="mt-0.5 text-sm text-white/60">{currentTrack.subtitle ?? "Mindify Studio"}</p>
+								<div className="mt-3 flex justify-center">
+									<FavoriteButton
+										contentType={currentTrack.trackType}
+										contentId={currentTrack.id}
+										size="lg"
+										variant="ghost"
+										stopPropagation={false}
+									/>
+								</div>
 							</div>
 
 							{/* Progress bar */}

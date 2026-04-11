@@ -5,6 +5,7 @@ import { useSoundscapeStore } from "@/lib/stores/soundscapeStore";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { MindifyPanel, StatBadge } from "@/components/ui/MindifyPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { Music, Play } from "lucide-react";
 import type { Meditation, MeditationCategory } from "@/lib/types";
 
@@ -51,17 +52,33 @@ export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 						description: session.description,
 					};
 					return (
-						<motion.button
+						<motion.div
 							key={session.id}
 							onClick={() => selectSession(soundscapeSession)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									selectSession(soundscapeSession);
+								}
+							}}
+							role="button"
+							tabIndex={0}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.05, duration: 0.3 }}
 							whileHover={{ y: -8, scale: 1.02 }}
 							whileTap={{ scale: 0.98 }}
-							className="group relative overflow-hidden rounded-3xl border border-sage-100 bg-cream-50 p-5 text-left shadow-card transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-sage-300 hover:shadow-elevated active:scale-98 dark:border-white/10 dark:bg-[#13151A]"
+							className="group relative cursor-pointer overflow-hidden rounded-3xl border border-sage-100 bg-cream-50 p-5 text-left shadow-card transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-sage-300 hover:shadow-elevated active:scale-98 dark:border-white/10 dark:bg-[#13151A]"
 						>
 							<div className="absolute inset-0 bg-gradient-to-br from-sage-500/0 to-sage-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-sage-400/0 dark:to-sage-400/10" />
+
+							<FavoriteButton
+								contentType="meditation"
+								contentId={session.id}
+								size="md"
+								variant="solid"
+								className="absolute right-4 top-4 z-10"
+							/>
 
 							<div className="relative flex items-center justify-between text-xs uppercase tracking-[0.3em] text-earth-500 dark:text-[#AFA79B]">
 								<span>{session.category}</span>
@@ -89,7 +106,7 @@ export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 									Now channeling this soundscape.
 								</motion.p>
 							)}
-						</motion.button>
+						</motion.div>
 					);
 				})}
 			</div>

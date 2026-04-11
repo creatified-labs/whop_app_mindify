@@ -277,6 +277,7 @@ export default async function ExperiencePage({
 					hypnosisSessions={hypnosisSessions || []}
 					quickResets={quickResets || []}
 					programs={allPrograms || []}
+					programProgress={programProgressRows || []}
 					experienceCopy={experienceCopy}
 					experienceSections={experienceSections}
 				/>

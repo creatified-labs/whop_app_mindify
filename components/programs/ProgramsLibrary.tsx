@@ -14,7 +14,13 @@ const categoryGradients: Record<ProgramCategory, string> = {
 	clarity: "from-emerald-600/40 via-teal-500/30 to-cyan-500/20",
 };
 
-export function ProgramsLibrary({ companyId }: { companyId: string }) {
+export function ProgramsLibrary({
+	companyId,
+	programProgress = [],
+}: {
+	companyId: string;
+	programProgress?: ProgramProgress[];
+}) {
 	const router = useRouter();
 	const [programs, setPrograms] = useState<Program[]>([]);
 	const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
@@ -27,6 +33,10 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 			.then((data) => setPrograms(data.items || []))
 			.catch(() => {});
 	}, [companyId]);
+
+	const progressByProgramId = new Map<string, ProgramProgress>();
+	for (const p of programProgress) progressByProgramId.set(p.programId, p);
+	const selectedProgress = selectedProgram ? progressByProgramId.get(selectedProgram.id) : null;
 
 	const handleStart = async (program: Program) => {
 		setEnrolling(true);
@@ -64,6 +74,7 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 				</button>
 				<ProgramDetail
 					program={selectedProgram}
+					progress={selectedProgress}
 					onStart={() => handleStart(selectedProgram)}
 					isEnrolling={enrolling}
 					enrollSuccess={enrollSuccess}
@@ -97,6 +108,9 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 			<div className="grid gap-6 lg:grid-cols-2">
 				{programs.map((program) => {
 					const gradient = categoryGradients[program.category] ?? categoryGradients.focus;
+					const cardProgress = progressByProgramId.get(program.id);
+					const isEnrolled = !!cardProgress && !cardProgress.completedAt;
+					const isCompleted = !!cardProgress?.completedAt;
 					return (
 						<div
 							key={program.id}
@@ -108,6 +122,16 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 										<div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/80">
 											{String(program.difficulty)}
 										</div>
+										{isEnrolled && (
+											<div className="absolute right-4 top-4 rounded-full bg-[rgb(var(--sage-600))] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+												Enrolled
+											</div>
+										)}
+										{isCompleted && (
+											<div className="absolute right-4 top-4 rounded-full bg-[rgb(var(--gold-500))] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+												Completed
+											</div>
+										)}
 										{program.isPremium && (
 											<div className="absolute bottom-4 left-4 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-black">
 												Premium
@@ -121,6 +145,11 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 										</div>
 										<h3 className="text-2xl font-semibold">{String(program.title)}</h3>
 										<p className="text-base text-[rgb(var(--earth-600))] dark:text-white/70">{String(program.tagline)}</p>
+										{isEnrolled && (
+											<p className="text-sm font-medium text-[rgb(var(--sage-700))] dark:text-[rgb(var(--sage-400))]">
+												Day {cardProgress.currentDay} of {program.duration}
+											</p>
+										)}
 										<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.3em] text-[rgb(var(--earth-500))] dark:text-white/60">
 											{program.recommendedFor.slice(0, 3).map((item) => (
 												<span key={String(item)} className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 text-[11px] dark:border-white/15">
@@ -150,7 +179,7 @@ export function ProgramsLibrary({ companyId }: { companyId: string }) {
 											onClick={() => setSelectedProgram(program)}
 											className="self-start rounded-3xl bg-[rgb(var(--sage-600))] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[rgb(var(--sage-700))] dark:bg-white/90 dark:text-black dark:hover:bg-white"
 										>
-											View Program
+											{isEnrolled ? "Continue" : isCompleted ? "Review" : "View Program"}
 										</button>
 									</div>
 								</div>

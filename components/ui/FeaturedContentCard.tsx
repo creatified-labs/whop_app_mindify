@@ -3,6 +3,7 @@
 import { Play, Lock } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import type { AudioTrackContext } from "@/lib/types";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 
 export interface FeaturedContentItem {
 	id: string;
@@ -40,16 +41,30 @@ export function FeaturedContentCard({
 	};
 
 	return (
-		<button
-			type="button"
-			onClick={handleClick}
-			disabled={locked}
-			className={`group flex w-[240px] shrink-0 snap-start flex-col gap-3 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-left shadow-card transition dark:border-white/10 dark:bg-[#111318] ${
+		<div
+			className={`group relative flex w-[240px] shrink-0 snap-start flex-col gap-3 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-left shadow-card transition dark:border-white/10 dark:bg-[#111318] ${
 				locked
 					? "cursor-not-allowed opacity-70"
-					: "hover:-translate-y-1 hover:shadow-hover"
+					: "cursor-pointer hover:-translate-y-1 hover:shadow-hover"
 			}`}
+			onClick={handleClick}
+			onKeyDown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					handleClick();
+				}
+			}}
+			role="button"
+			tabIndex={locked ? -1 : 0}
+			aria-disabled={locked}
 		>
+			<FavoriteButton
+				contentType={item.type}
+				contentId={item.id}
+				size="sm"
+				variant="solid"
+				className="absolute right-3 top-3 z-10"
+			/>
 			<div className="flex items-center justify-between">
 				<p className="text-[10px] uppercase tracking-[0.3em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
 					{item.type}
@@ -70,6 +85,6 @@ export function FeaturedContentCard({
 					Premium
 				</span>
 			)}
-		</button>
+		</div>
 	);
 }

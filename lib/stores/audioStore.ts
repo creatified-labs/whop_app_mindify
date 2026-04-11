@@ -171,7 +171,10 @@ export const useAudioStore = create<AudioStore>()(
 						currentTrack: track,
 						isPlaying: true,
 						progress: 0,
-						duration: 0,
+						// Seed duration from the track metadata so the timeline
+						// is accurate immediately; the audio element will
+						// overwrite this once it reports a finite duration.
+						duration: track.duration ?? 0,
 						error: null,
 						lastActiveAt: Date.now(),
 						currentTrackLogged: false,
