@@ -27,6 +27,7 @@ import {
 import { getSettings } from "@/lib/database/settingsService";
 import {
 	resolveExperienceCopy,
+	resolveExperienceFields,
 	resolveExperienceSections,
 } from "@/lib/ui/experienceCopy";
 
@@ -92,6 +93,7 @@ export default async function ExperiencePage({
 
 	const experienceCopy = resolveExperienceCopy(settings?.experienceCopy);
 	const experienceSections = resolveExperienceSections(settings?.experienceSections);
+	const experienceFields = resolveExperienceFields(settings?.experienceFields);
 
 	const streakDays = activityStats?.streakDays ?? 0;
 
@@ -238,17 +240,23 @@ export default async function ExperiencePage({
 					<section className="rounded-3xl border border-sage-100 bg-cream-50 p-6 shadow-card dark:border-white/10 dark:bg-[#13151A]">
 						<div className="flex flex-wrap items-center justify-between gap-4">
 							<div>
-								<p className="text-xs uppercase tracking-[0.5em] text-earth-500 dark:text-[#AFA79B]">
-									{experienceCopy.heroEyebrow}
-								</p>
-								<h1 className="mt-1 text-2xl font-serif font-semibold text-earth-900 dark:text-[#F4EFE6]">
-									{experienceCopy.heroTitle ||
-										(experience as { slug?: string }).slug ||
-										experience.name}
-								</h1>
-								<p className="mt-2 text-sm text-earth-600 dark:text-[#CFC7BB]">
-									{experienceCopy.heroTagline}
-								</p>
+								{experienceFields.heroEyebrow && (
+									<p className="text-xs uppercase tracking-[0.5em] text-earth-500 dark:text-[#AFA79B]">
+										{experienceCopy.heroEyebrow}
+									</p>
+								)}
+								{experienceFields.heroTitle && (
+									<h1 className="mt-1 text-2xl font-serif font-semibold text-earth-900 dark:text-[#F4EFE6]">
+										{experienceCopy.heroTitle ||
+											(experience as { slug?: string }).slug ||
+											experience.name}
+									</h1>
+								)}
+								{experienceFields.heroTagline && (
+									<p className="mt-2 text-sm text-earth-600 dark:text-[#CFC7BB]">
+										{experienceCopy.heroTagline}
+									</p>
+								)}
 							</div>
 							<div className="flex items-center gap-4 text-sm text-earth-600 dark:text-[#CFC7BB]">
 								<div className="rounded-2xl border border-sage-100 bg-cream-50 px-4 py-2 text-earth-700 dark:border-white/10 dark:bg-[#111318] dark:text-[#E2DBCF]">
@@ -280,6 +288,7 @@ export default async function ExperiencePage({
 					programProgress={programProgressRows || []}
 					experienceCopy={experienceCopy}
 					experienceSections={experienceSections}
+					experienceFields={experienceFields}
 				/>
 			</div>
 		</AppLayout>

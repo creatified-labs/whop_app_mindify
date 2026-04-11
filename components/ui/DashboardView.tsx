@@ -21,6 +21,7 @@ import {
 	interpolate,
 	splitOnVariable,
 	type ExperienceCopy,
+	type ExperienceFields,
 	type ExperienceSections,
 } from "@/lib/ui/experienceCopy";
 
@@ -112,6 +113,7 @@ export interface DashboardViewProps {
 	programProgress?: ProgramProgress[];
 	experienceCopy: ExperienceCopy;
 	experienceSections: ExperienceSections;
+	experienceFields: ExperienceFields;
 }
 
 const glassCard =
@@ -178,6 +180,7 @@ export function DashboardView({
 	programs,
 	experienceCopy,
 	experienceSections,
+	experienceFields,
 }: DashboardViewProps) {
 	const setUserProgress = useAppStore((state) => state.setUserProgress);
 	const storedProgress = useAppStore((state) => state.userProgress);
@@ -225,24 +228,32 @@ export function DashboardView({
 			<section className={`${glassCard} grid gap-6 lg:grid-cols-[1.1fr_0.9fr]`}>
 				<div className="space-y-6">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">
-							{welcomeEyebrow}
-						</p>
-						<h2 className="mt-2 text-4xl font-serif font-semibold text-[rgb(var(--earth-900))]">
-							{welcomeBeforeName}
-							<span className="text-[rgb(var(--sage-600))]">{userName}</span>
-							{welcomeAfterName}
-						</h2>
-						<p className="mt-2 max-w-2xl text-base leading-relaxed text-[rgb(var(--earth-600))]">
-							{experienceCopy.welcomeBody}
-						</p>
+						{experienceFields.welcomeEyebrowTemplate && (
+							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">
+								{welcomeEyebrow}
+							</p>
+						)}
+						{experienceFields.welcomeHeadingTemplate && (
+							<h2 className="mt-2 text-4xl font-serif font-semibold text-[rgb(var(--earth-900))]">
+								{welcomeBeforeName}
+								<span className="text-[rgb(var(--sage-600))]">{userName}</span>
+								{welcomeAfterName}
+							</h2>
+						)}
+						{experienceFields.welcomeBody && (
+							<p className="mt-2 max-w-2xl text-base leading-relaxed text-[rgb(var(--earth-600))]">
+								{experienceCopy.welcomeBody}
+							</p>
+						)}
 					</div>
 					{experienceSections.continueRitual && continueSession && (
 						<div className="rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 dark:border-white/10 dark:bg-[#111318]">
 							<div className="flex flex-wrap items-center justify-between gap-4 text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
-								<p className="uppercase tracking-[0.3em] text-[rgb(var(--earth-500))]">
-									{experienceCopy.continueRitualLabel}
-								</p>
+								{experienceFields.continueRitualLabel && (
+									<p className="uppercase tracking-[0.3em] text-[rgb(var(--earth-500))]">
+										{experienceCopy.continueRitualLabel}
+									</p>
+								)}
 								<p className="font-medium text-[rgb(var(--earth-700))] dark:text-[#E2DBCF]">
 									{continueSession.durationMinutes} mins • {continueSession.type}
 								</p>
@@ -271,17 +282,23 @@ export function DashboardView({
 				</div>
 				{experienceSections.dailyStreak && (
 					<div className="space-y-4 rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-6 dark:border-white/10 dark:bg-[#111318]">
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
-							{experienceCopy.dailyStreakEyebrow}
-						</p>
-						<p className="flex items-center gap-2 text-5xl font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]"><Flame className="h-6 w-6" /> {streakDays}</p>
-						<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
-							{experienceCopy.dailyStreakBody}
-						</p>
-						<div className="rounded-2xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-sm dark:border-white/10 dark:bg-[#151821]">
-							<p className="text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
-								{experienceCopy.dailyStreakMinutesLabel}
+						{experienceFields.dailyStreakEyebrow && (
+							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+								{experienceCopy.dailyStreakEyebrow}
 							</p>
+						)}
+						<p className="flex items-center gap-2 text-5xl font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]"><Flame className="h-6 w-6" /> {streakDays}</p>
+						{experienceFields.dailyStreakBody && (
+							<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
+								{experienceCopy.dailyStreakBody}
+							</p>
+						)}
+						<div className="rounded-2xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-sm dark:border-white/10 dark:bg-[#151821]">
+							{experienceFields.dailyStreakMinutesLabel && (
+								<p className="text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+									{experienceCopy.dailyStreakMinutesLabel}
+								</p>
+							)}
 							<p className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
 								{userProgress?.totalMinutesMeditated ?? 0}m
 							</p>
@@ -294,9 +311,11 @@ export function DashboardView({
 				{experienceSections.currentProgram &&
 					(currentProgram ? (
 						<div className={`${glassCard}`}>
-							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">
-								{experienceCopy.currentProgramLabel}
-							</p>
+							{experienceFields.currentProgramLabel && (
+								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">
+									{experienceCopy.currentProgramLabel}
+								</p>
+							)}
 							<h3 className="mt-2 text-3xl font-serif font-semibold text-[rgb(var(--earth-900))]">{currentProgram.title}</h3>
 							<div className="mt-4 h-2 w-full rounded-full bg-[rgb(var(--sage-100))]">
 								<div
@@ -315,12 +334,16 @@ export function DashboardView({
 						</div>
 					) : programs && programs.length > 0 ? (
 						<div className={`${glassCard}`}>
-							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
-								{experienceCopy.featuredProgramsLabel}
-							</p>
-							<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
-								{experienceCopy.featuredProgramsHeading}
-							</h3>
+							{experienceFields.featuredProgramsLabel && (
+								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+									{experienceCopy.featuredProgramsLabel}
+								</p>
+							)}
+							{experienceFields.featuredProgramsHeading && (
+								<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+									{experienceCopy.featuredProgramsHeading}
+								</h3>
+							)}
 							<div className="mt-4">
 								<HorizontalStrip>
 									{programs.slice(0, 4).map((program) => (
@@ -328,7 +351,11 @@ export function DashboardView({
 											key={program.id}
 											program={program}
 											companyId={companyId}
-											ctaLabel={experienceCopy.featuredProgramsCTA}
+											ctaLabel={
+												experienceFields.featuredProgramsCTA
+													? experienceCopy.featuredProgramsCTA
+													: ""
+											}
 										/>
 									))}
 								</HorizontalStrip>
@@ -342,9 +369,11 @@ export function DashboardView({
 
 				{experienceSections.recentActivity && (
 				<div className={`${glassCard}`}>
-					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
-						{experienceCopy.recentActivityLabel}
-					</p>
+					{experienceFields.recentActivityLabel && (
+						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
+							{experienceCopy.recentActivityLabel}
+						</p>
+					)}
 					{recentActivity.length > 0 ? (
 						<ul className="mt-4 space-y-4">
 							{recentActivity.map((item) => (
@@ -372,10 +401,14 @@ export function DashboardView({
 			<section className={`${glassCard}`}>
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">{experienceCopy.favoritesEyebrow}</p>
-						<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">{experienceCopy.favoritesHeading}</h3>
+						{experienceFields.favoritesEyebrow && (
+							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">{experienceCopy.favoritesEyebrow}</p>
+						)}
+						{experienceFields.favoritesHeading && (
+							<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">{experienceCopy.favoritesHeading}</h3>
+						)}
 					</div>
-					{favorites.length > 0 && (
+					{favorites.length > 0 && experienceFields.favoritesSubtitle && (
 						<p className="text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">{experienceCopy.favoritesSubtitle}</p>
 					)}
 				</div>
@@ -423,9 +456,11 @@ export function DashboardView({
 
 			{experienceSections.featuredMeditations && meditations && meditations.length > 0 && (
 				<section className={`${glassCard}`}>
-					<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
-						{experienceCopy.featuredMeditationsLabel}
-					</h3>
+					{experienceFields.featuredMeditationsLabel && (
+						<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+							{experienceCopy.featuredMeditationsLabel}
+						</h3>
+					)}
 					<div className="mt-4">
 						<HorizontalStrip>
 							{meditations.slice(0, 6).map((m) => (
@@ -450,9 +485,11 @@ export function DashboardView({
 
 			{experienceSections.featuredHypnosis && hypnosisSessions && hypnosisSessions.length > 0 && (
 				<section className={`${glassCard}`}>
-					<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
-						{experienceCopy.featuredHypnosisLabel}
-					</h3>
+					{experienceFields.featuredHypnosisLabel && (
+						<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+							{experienceCopy.featuredHypnosisLabel}
+						</h3>
+					)}
 					<div className="mt-4">
 						<HorizontalStrip>
 							{hypnosisSessions.slice(0, 6).map((h) => (
@@ -477,9 +514,11 @@ export function DashboardView({
 
 			{experienceSections.featuredQuickResets && quickResets && quickResets.length > 0 && (
 				<section className={`${glassCard}`}>
-					<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
-						{experienceCopy.featuredQuickResetsLabel}
-					</h3>
+					{experienceFields.featuredQuickResetsLabel && (
+						<h3 className="text-2xl font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
+							{experienceCopy.featuredQuickResetsLabel}
+						</h3>
+					)}
 					<div className="mt-4">
 						<HorizontalStrip>
 							{quickResets.slice(0, 6).map((r) => (
@@ -505,12 +544,18 @@ export function DashboardView({
 			<section className={`${glassCard}`}>
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">{experienceCopy.recommendedEyebrow}</p>
-						<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))]">
-							{interpolate(experienceCopy.recommendedHeadingTemplate, { timeOfDay: greeting.toLowerCase() })}
-						</h3>
+						{experienceFields.recommendedEyebrow && (
+							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">{experienceCopy.recommendedEyebrow}</p>
+						)}
+						{experienceFields.recommendedHeadingTemplate && (
+							<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))]">
+								{interpolate(experienceCopy.recommendedHeadingTemplate, { timeOfDay: greeting.toLowerCase() })}
+							</h3>
+						)}
 					</div>
-					<p className="text-sm text-[rgb(var(--earth-600))]">{experienceCopy.recommendedFooter}</p>
+					{experienceFields.recommendedFooter && (
+						<p className="text-sm text-[rgb(var(--earth-600))]">{experienceCopy.recommendedFooter}</p>
+					)}
 				</div>
 				<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 					{recommendedSessions.map((session) => {

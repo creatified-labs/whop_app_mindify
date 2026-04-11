@@ -10,6 +10,7 @@ import {
 	SECTION_KEYS,
 	SECTION_LABELS,
 	type ExperienceCopy,
+	type ExperienceFields,
 	type ExperienceSections,
 	type SectionKey,
 } from "@/lib/ui/experienceCopy";
@@ -52,6 +53,77 @@ function SectionCard({
 	);
 }
 
+/**
+ * Compact pill toggle for inline use next to a field label. Smaller than
+ * SettingsToggle (which is a row-level control with its own label).
+ */
+function MiniToggle({
+	checked,
+	onChange,
+	label,
+}: {
+	checked: boolean;
+	onChange: (checked: boolean) => void;
+	label: string;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={() => onChange(!checked)}
+			aria-label={label}
+			aria-pressed={checked}
+			className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[rgb(var(--sage-400))] focus:ring-offset-1 ${
+				checked
+					? "bg-[rgb(var(--sage-600))]"
+					: "bg-[rgb(var(--earth-200))] dark:bg-[#2A2F37]"
+			}`}
+		>
+			<span
+				className={`pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+					checked ? "translate-x-4" : "translate-x-0"
+				}`}
+			/>
+		</button>
+	);
+}
+
+function FieldHeader({
+	label,
+	visible,
+	onVisibleChange,
+}: {
+	label: string;
+	visible?: boolean;
+	onVisibleChange?: (v: boolean) => void;
+}) {
+	const isVisible = visible !== false;
+	return (
+		<div className="mb-1.5 flex items-center justify-between gap-3">
+			<label
+				className={`text-sm font-medium transition ${
+					isVisible
+						? "text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]"
+						: "text-[rgb(var(--earth-400))] line-through dark:text-[#7A7568]"
+				}`}
+			>
+				{label}
+			</label>
+			{onVisibleChange && (
+				<div className="flex items-center gap-2">
+					<span className="text-[10px] uppercase tracking-[0.2em] text-[rgb(var(--earth-500))] dark:text-[#B5AFA3]">
+						{isVisible ? "Shown" : "Hidden"}
+					</span>
+					<MiniToggle
+						checked={isVisible}
+						onChange={onVisibleChange}
+						label={`${isVisible ? "Hide" : "Show"} ${label}`}
+					/>
+				</div>
+			)}
+		</div>
+	);
+}
+
 function SettingsInput({
 	label,
 	value,
@@ -59,6 +131,8 @@ function SettingsInput({
 	type = "text",
 	placeholder,
 	helpText,
+	visible,
+	onVisibleChange,
 }: {
 	label: string;
 	value: string;
@@ -66,12 +140,13 @@ function SettingsInput({
 	type?: string;
 	placeholder?: string;
 	helpText?: string;
+	visible?: boolean;
+	onVisibleChange?: (v: boolean) => void;
 }) {
+	const isVisible = visible !== false;
 	return (
-		<div>
-			<label className="mb-1.5 block text-sm font-medium text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
-				{label}
-			</label>
+		<div className={isVisible ? "" : "opacity-60"}>
+			<FieldHeader label={label} visible={visible} onVisibleChange={onVisibleChange} />
 			<input
 				type={type}
 				value={value}
@@ -95,6 +170,8 @@ function SettingsTextarea({
 	placeholder,
 	helpText,
 	rows = 2,
+	visible,
+	onVisibleChange,
 }: {
 	label: string;
 	value: string;
@@ -102,12 +179,13 @@ function SettingsTextarea({
 	placeholder?: string;
 	helpText?: string;
 	rows?: number;
+	visible?: boolean;
+	onVisibleChange?: (v: boolean) => void;
 }) {
+	const isVisible = visible !== false;
 	return (
-		<div>
-			<label className="mb-1.5 block text-sm font-medium text-[rgb(var(--earth-700))] dark:text-[#D9D3C8]">
-				{label}
-			</label>
+		<div className={isVisible ? "" : "opacity-60"}>
+			<FieldHeader label={label} visible={visible} onVisibleChange={onVisibleChange} />
 			<textarea
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
@@ -198,6 +276,7 @@ export default function SettingsPage() {
 	// Experience View settings
 	const [experienceCopy, setExperienceCopy] = useState<Partial<ExperienceCopy>>({});
 	const [experienceSections, setExperienceSections] = useState<Partial<ExperienceSections>>({});
+	const [experienceFields, setExperienceFields] = useState<Partial<ExperienceFields>>({});
 
 	const updateCopyField = (key: keyof ExperienceCopy, value: string) => {
 		setExperienceCopy((prev) => ({ ...prev, [key]: value }));
@@ -205,8 +284,46 @@ export default function SettingsPage() {
 	const toggleSection = (key: SectionKey, checked: boolean) => {
 		setExperienceSections((prev) => ({ ...prev, [key]: checked }));
 	};
+	const toggleField = (key: keyof ExperienceCopy, checked: boolean) => {
+		setExperienceFields((prev) => ({ ...prev, [key]: checked }));
+	};
 	const copyValue = (key: keyof ExperienceCopy): string => experienceCopy[key] ?? "";
 	const sectionValue = (key: SectionKey): boolean => experienceSections[key] !== false;
+	const fieldVisible = (key: keyof ExperienceCopy): boolean => experienceFields[key] !== false;
+
+	// Render a customizable text field for the Experience View tab. Wires up
+	// value, onChange, and the per-field visibility toggle in one call.
+	const copyInputField = (
+		fieldKey: keyof ExperienceCopy,
+		label: string,
+		options: { placeholder?: string; helpText?: string } = {},
+	) => (
+		<SettingsInput
+			label={label}
+			value={copyValue(fieldKey)}
+			onChange={(v) => updateCopyField(fieldKey, v)}
+			visible={fieldVisible(fieldKey)}
+			onVisibleChange={(v) => toggleField(fieldKey, v)}
+			placeholder={options.placeholder ?? DEFAULT_EXPERIENCE_COPY[fieldKey]}
+			helpText={options.helpText ?? `Default: "${DEFAULT_EXPERIENCE_COPY[fieldKey]}"`}
+		/>
+	);
+	const copyTextareaField = (
+		fieldKey: keyof ExperienceCopy,
+		label: string,
+		options: { placeholder?: string; helpText?: string; rows?: number } = {},
+	) => (
+		<SettingsTextarea
+			label={label}
+			value={copyValue(fieldKey)}
+			onChange={(v) => updateCopyField(fieldKey, v)}
+			visible={fieldVisible(fieldKey)}
+			onVisibleChange={(v) => toggleField(fieldKey, v)}
+			placeholder={options.placeholder ?? DEFAULT_EXPERIENCE_COPY[fieldKey]}
+			helpText={options.helpText ?? `Default: "${DEFAULT_EXPERIENCE_COPY[fieldKey]}"`}
+			rows={options.rows}
+		/>
+	);
 
 	// Load settings from API on mount
 	useEffect(() => {
@@ -227,6 +344,7 @@ export default function SettingsPage() {
 				setDebugMode(data.debugMode);
 				setExperienceCopy(data.experienceCopy ?? {});
 				setExperienceSections(data.experienceSections ?? {});
+				setExperienceFields(data.experienceFields ?? {});
 			} catch (err) {
 				console.error("Failed to load settings:", err);
 			} finally {
@@ -256,6 +374,7 @@ export default function SettingsPage() {
 					debugMode,
 					experienceCopy,
 					experienceSections,
+					experienceFields,
 				}),
 			});
 			if (!res.ok) {
@@ -388,172 +507,54 @@ export default function SettingsPage() {
 							<>
 								<SectionCard
 									title="Hero & welcome"
-									description="Customize the top of the experience page and the welcome block. Leave any field blank to use the default shown below."
+									description="Customize the text at the top of the experience page. Leave a field blank to use the default. Use the toggle on each row to hide that piece of text completely."
 								>
-									<SettingsInput
-										label="Hero eyebrow"
-										value={copyValue("heroEyebrow")}
-										onChange={(v) => updateCopyField("heroEyebrow", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.heroEyebrow}
-										helpText={`Default: "${DEFAULT_EXPERIENCE_COPY.heroEyebrow}"`}
-									/>
-									<SettingsInput
-										label="Hero title"
-										value={copyValue("heroTitle")}
-										onChange={(v) => updateCopyField("heroTitle", v)}
-										placeholder="Leave blank to show the Whop experience name"
-										helpText="Blank = uses your Whop experience name automatically."
-									/>
-									<SettingsTextarea
-										label="Hero tagline"
-										value={copyValue("heroTagline")}
-										onChange={(v) => updateCopyField("heroTagline", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.heroTagline}
-										helpText={`Default: "${DEFAULT_EXPERIENCE_COPY.heroTagline}"`}
-									/>
-									<SettingsInput
-										label="Welcome eyebrow (small caps above heading)"
-										value={copyValue("welcomeEyebrowTemplate")}
-										onChange={(v) => updateCopyField("welcomeEyebrowTemplate", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.welcomeEyebrowTemplate}
-										helpText={`Use {timeOfDay} and {tier} placeholders. Default: "${DEFAULT_EXPERIENCE_COPY.welcomeEyebrowTemplate}"`}
-									/>
-									<SettingsInput
-										label="Welcome heading"
-										value={copyValue("welcomeHeadingTemplate")}
-										onChange={(v) => updateCopyField("welcomeHeadingTemplate", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.welcomeHeadingTemplate}
-										helpText={`Use {name} where the user's name should appear. Default: "${DEFAULT_EXPERIENCE_COPY.welcomeHeadingTemplate}"`}
-									/>
-									<SettingsTextarea
-										label="Welcome body"
-										value={copyValue("welcomeBody")}
-										onChange={(v) => updateCopyField("welcomeBody", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.welcomeBody}
-										helpText={`Default: "${DEFAULT_EXPERIENCE_COPY.welcomeBody}"`}
-										rows={3}
-									/>
+									{copyInputField("heroEyebrow", "Hero eyebrow")}
+									{copyInputField("heroTitle", "Hero title", {
+										placeholder: "Leave blank to show the Whop experience name",
+										helpText: "Blank = uses your Whop experience name automatically.",
+									})}
+									{copyTextareaField("heroTagline", "Hero tagline")}
+									{copyInputField("welcomeEyebrowTemplate", "Welcome eyebrow (small caps above heading)", {
+										helpText: `Use {timeOfDay} and {tier} placeholders. Default: "${DEFAULT_EXPERIENCE_COPY.welcomeEyebrowTemplate}"`,
+									})}
+									{copyInputField("welcomeHeadingTemplate", "Welcome heading", {
+										helpText: `Use {name} where the user's name should appear. Default: "${DEFAULT_EXPERIENCE_COPY.welcomeHeadingTemplate}"`,
+									})}
+									{copyTextareaField("welcomeBody", "Welcome body", { rows: 3 })}
 								</SectionCard>
 
 								<SectionCard
 									title="Section labels"
-									description="Rename the labels and descriptions shown above each home-page section."
+									description="Rename or hide the labels and descriptions shown above each home-page section."
 								>
-									<SettingsInput
-										label="Continue Ritual label"
-										value={copyValue("continueRitualLabel")}
-										onChange={(v) => updateCopyField("continueRitualLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.continueRitualLabel}
-									/>
-									<SettingsInput
-										label="Current Program label"
-										value={copyValue("currentProgramLabel")}
-										onChange={(v) => updateCopyField("currentProgramLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.currentProgramLabel}
-									/>
-									<SettingsInput
-										label="Featured Programs eyebrow"
-										value={copyValue("featuredProgramsLabel")}
-										onChange={(v) => updateCopyField("featuredProgramsLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.featuredProgramsLabel}
-										helpText="Shown above the programs carousel when the user is not enrolled."
-									/>
-									<SettingsInput
-										label="Featured Programs heading"
-										value={copyValue("featuredProgramsHeading")}
-										onChange={(v) => updateCopyField("featuredProgramsHeading", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.featuredProgramsHeading}
-									/>
-									<SettingsInput
-										label="Featured Programs CTA button"
-										value={copyValue("featuredProgramsCTA")}
-										onChange={(v) => updateCopyField("featuredProgramsCTA", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.featuredProgramsCTA}
-									/>
-									<SettingsInput
-										label="Recent Activity label"
-										value={copyValue("recentActivityLabel")}
-										onChange={(v) => updateCopyField("recentActivityLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.recentActivityLabel}
-									/>
-									<SettingsInput
-										label="Favorites eyebrow"
-										value={copyValue("favoritesEyebrow")}
-										onChange={(v) => updateCopyField("favoritesEyebrow", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.favoritesEyebrow}
-									/>
-									<SettingsInput
-										label="Favorites heading"
-										value={copyValue("favoritesHeading")}
-										onChange={(v) => updateCopyField("favoritesHeading", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.favoritesHeading}
-									/>
-									<SettingsInput
-										label="Favorites subtitle"
-										value={copyValue("favoritesSubtitle")}
-										onChange={(v) => updateCopyField("favoritesSubtitle", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.favoritesSubtitle}
-									/>
-									<SettingsInput
-										label="Recommended eyebrow"
-										value={copyValue("recommendedEyebrow")}
-										onChange={(v) => updateCopyField("recommendedEyebrow", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.recommendedEyebrow}
-									/>
-									<SettingsInput
-										label="Recommended heading"
-										value={copyValue("recommendedHeadingTemplate")}
-										onChange={(v) => updateCopyField("recommendedHeadingTemplate", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.recommendedHeadingTemplate}
-										helpText="Use {timeOfDay} placeholder (e.g. 'morning')."
-									/>
-									<SettingsInput
-										label="Recommended footer"
-										value={copyValue("recommendedFooter")}
-										onChange={(v) => updateCopyField("recommendedFooter", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.recommendedFooter}
-									/>
-									<SettingsInput
-										label="Daily Streak eyebrow"
-										value={copyValue("dailyStreakEyebrow")}
-										onChange={(v) => updateCopyField("dailyStreakEyebrow", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.dailyStreakEyebrow}
-									/>
-									<SettingsTextarea
-										label="Daily Streak body"
-										value={copyValue("dailyStreakBody")}
-										onChange={(v) => updateCopyField("dailyStreakBody", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.dailyStreakBody}
-									/>
-									<SettingsInput
-										label="Total minutes label"
-										value={copyValue("dailyStreakMinutesLabel")}
-										onChange={(v) => updateCopyField("dailyStreakMinutesLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.dailyStreakMinutesLabel}
-									/>
-									<SettingsInput
-										label="Featured Meditations label"
-										value={copyValue("featuredMeditationsLabel")}
-										onChange={(v) => updateCopyField("featuredMeditationsLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.featuredMeditationsLabel}
-									/>
-									<SettingsInput
-										label="Featured Hypnosis label"
-										value={copyValue("featuredHypnosisLabel")}
-										onChange={(v) => updateCopyField("featuredHypnosisLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.featuredHypnosisLabel}
-									/>
-									<SettingsInput
-										label="Featured Quick Resets label"
-										value={copyValue("featuredQuickResetsLabel")}
-										onChange={(v) => updateCopyField("featuredQuickResetsLabel", v)}
-										placeholder={DEFAULT_EXPERIENCE_COPY.featuredQuickResetsLabel}
-									/>
+									{copyInputField("continueRitualLabel", "Continue Ritual label")}
+									{copyInputField("currentProgramLabel", "Current Program label")}
+									{copyInputField("featuredProgramsLabel", "Featured Programs eyebrow", {
+										helpText: "Shown above the programs carousel when the user is not enrolled.",
+									})}
+									{copyInputField("featuredProgramsHeading", "Featured Programs heading")}
+									{copyInputField("featuredProgramsCTA", "Featured Programs CTA button")}
+									{copyInputField("recentActivityLabel", "Recent Activity label")}
+									{copyInputField("favoritesEyebrow", "Favorites eyebrow")}
+									{copyInputField("favoritesHeading", "Favorites heading")}
+									{copyInputField("favoritesSubtitle", "Favorites subtitle")}
+									{copyInputField("recommendedEyebrow", "Recommended eyebrow")}
+									{copyInputField("recommendedHeadingTemplate", "Recommended heading", {
+										helpText: "Use {timeOfDay} placeholder (e.g. 'morning').",
+									})}
+									{copyInputField("recommendedFooter", "Recommended footer")}
+									{copyInputField("dailyStreakEyebrow", "Daily Streak eyebrow")}
+									{copyTextareaField("dailyStreakBody", "Daily Streak body")}
+									{copyInputField("dailyStreakMinutesLabel", "Total minutes label")}
+									{copyInputField("featuredMeditationsLabel", "Featured Meditations label")}
+									{copyInputField("featuredHypnosisLabel", "Featured Hypnosis label")}
+									{copyInputField("featuredQuickResetsLabel", "Featured Quick Resets label")}
 								</SectionCard>
 
 								<SectionCard
 									title="Visible sections"
-									description="Hide any section you don't want to show on the experience home page."
+									description="Hide an entire section of the home page. (For finer control, use the toggles on individual fields above.)"
 								>
 									{SECTION_KEYS.map((key) => (
 										<SettingsToggle

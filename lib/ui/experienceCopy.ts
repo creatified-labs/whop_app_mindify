@@ -120,6 +120,16 @@ export interface ExperienceCopy {
 	featuredQuickResetsLabel: string;
 }
 
+/**
+ * Per-field visibility map. Missing keys default to true (visible).
+ * Independent of `ExperienceSections` (which controls whole sections).
+ *
+ * Use case: a creator wants to keep the Recommended section but hide its
+ * "Auto-personalized by Mindify AI" footer, or wants the Hero banner shown
+ * but with no eyebrow text above the title.
+ */
+export type ExperienceFields = Record<keyof ExperienceCopy, boolean>;
+
 export const DEFAULT_EXPERIENCE_COPY: ExperienceCopy = {
 	heroEyebrow: "Mindify Studio",
 	heroTitle: "",
@@ -204,6 +214,31 @@ export function isSectionVisible(
 	key: SectionKey,
 ): boolean {
 	return sections[key] !== false;
+}
+
+/**
+ * Build the field visibility map. All keys default to `true`; persisted
+ * `false` values override.
+ */
+export function resolveExperienceFields(
+	partial?: Partial<ExperienceFields> | null,
+): ExperienceFields {
+	const result = {} as ExperienceFields;
+	for (const key of Object.keys(DEFAULT_EXPERIENCE_COPY) as Array<
+		keyof ExperienceCopy
+	>) {
+		const value = partial?.[key];
+		result[key] = value === false ? false : true;
+	}
+	return result;
+}
+
+export function isFieldVisible(
+	fields: ExperienceFields | undefined | null,
+	key: keyof ExperienceCopy,
+): boolean {
+	if (!fields) return true;
+	return fields[key] !== false;
 }
 
 // =============================================================================

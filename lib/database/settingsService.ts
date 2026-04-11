@@ -5,7 +5,12 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
-import { pruneEmpty, type ExperienceCopy, type ExperienceSections } from '@/lib/ui/experienceCopy';
+import {
+  pruneEmpty,
+  type ExperienceCopy,
+  type ExperienceFields,
+  type ExperienceSections,
+} from '@/lib/ui/experienceCopy';
 
 export interface AppSettings {
   id: string;
@@ -27,6 +32,7 @@ export interface AppSettings {
   debugMode: boolean;
   experienceCopy: Partial<ExperienceCopy>;
   experienceSections: Partial<ExperienceSections>;
+  experienceFields: Partial<ExperienceFields>;
   updatedAt: string;
 }
 
@@ -57,6 +63,7 @@ function buildDefaultSettings(): AppSettings {
     debugMode: false,
     experienceCopy: {},
     experienceSections: {},
+    experienceFields: {},
     updatedAt: new Date().toISOString(),
   };
 }
@@ -82,6 +89,7 @@ function rowToSettings(row: Record<string, unknown>): AppSettings {
     debugMode: row.debug_mode as boolean,
     experienceCopy: (row.experience_copy as Partial<ExperienceCopy> | null) ?? {},
     experienceSections: (row.experience_sections as Partial<ExperienceSections> | null) ?? {},
+    experienceFields: (row.experience_fields as Partial<ExperienceFields> | null) ?? {},
     updatedAt: row.updated_at as string,
   };
 }
@@ -135,6 +143,9 @@ export async function updateSettings(
     }
     if (updates.experienceSections !== undefined) {
       dbUpdates.experience_sections = updates.experienceSections;
+    }
+    if (updates.experienceFields !== undefined) {
+      dbUpdates.experience_fields = updates.experienceFields;
     }
 
     // Try to find existing settings row for this company

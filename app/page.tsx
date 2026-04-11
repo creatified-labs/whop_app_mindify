@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/DashboardView";
 import {
 	resolveExperienceCopy,
+	resolveExperienceFields,
 	resolveExperienceSections,
 } from "@/lib/ui/experienceCopy";
 import type { UserProgress } from "@/lib/types";
@@ -116,6 +117,7 @@ export default async function HomePage() {
 					companyId="demo"
 					experienceCopy={resolveExperienceCopy()}
 					experienceSections={resolveExperienceSections()}
+					experienceFields={resolveExperienceFields()}
 				/>
 
 				<ProgramGallery />
