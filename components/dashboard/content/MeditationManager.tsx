@@ -32,6 +32,7 @@ const emptyMeditation = {
 	isNew: false,
 	isPremium: false,
 	tags: [] as string[],
+	externalUrl: "",
 };
 
 const columns: ContentColumn<Meditation>[] = [
@@ -105,6 +106,7 @@ export function MeditationManager({ companyId }: { companyId: string }) {
 			isNew: item.isNew ?? false,
 			isPremium: item.isPremium ?? false,
 			tags: item.tags ?? [],
+			externalUrl: item.externalUrl ?? "",
 		});
 		setIsModalOpen(true);
 	};
@@ -203,6 +205,7 @@ export function MeditationManager({ companyId }: { companyId: string }) {
 					<FormCheckbox label="Premium" checked={form.isPremium} onChange={(v) => setForm({ ...form, isPremium: v })} />
 					<FormCheckbox label="New" checked={form.isNew} onChange={(v) => setForm({ ...form, isNew: v })} />
 				</div>
+				<FormInput label="External URL" value={form.externalUrl} onChange={(v) => setForm({ ...form, externalUrl: v })} placeholder="https://whop.com/..." />
 			</ContentFormModal>
 		</>
 	);

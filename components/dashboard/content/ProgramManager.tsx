@@ -37,6 +37,7 @@ const emptyProgram = {
 	recommendedFor: [] as string[],
 	days: [] as ProgramDay[],
 	isPremium: false,
+	externalUrl: "",
 };
 
 const columns: ContentColumn<Program>[] = [
@@ -115,6 +116,7 @@ export function ProgramManager({ companyId }: { companyId: string }) {
 			recommendedFor: item.recommendedFor,
 			days: item.days,
 			isPremium: item.isPremium ?? false,
+			externalUrl: item.externalUrl ?? "",
 		});
 		setIsModalOpen(true);
 	};
@@ -194,6 +196,7 @@ export function ProgramManager({ companyId }: { companyId: string }) {
 				<FormCheckbox label="Premium" checked={form.isPremium} onChange={(v) => setForm({ ...form, isPremium: v })} />
 
 				<ProgramDayEditor companyId={companyId} days={form.days} onChange={(days) => setForm({ ...form, days })} />
+				<FormInput label="External URL" value={form.externalUrl} onChange={(v) => setForm({ ...form, externalUrl: v })} placeholder="https://whop.com/..." />
 			</ContentFormModal>
 		</>
 	);

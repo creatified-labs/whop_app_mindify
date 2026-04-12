@@ -30,6 +30,7 @@ export interface AppSettings {
   maintenanceMode: boolean;
   analyticsTracking: boolean;
   debugMode: boolean;
+  premiumPlanId: string;
   experienceCopy: Partial<ExperienceCopy>;
   experienceSections: Partial<ExperienceSections>;
   experienceFields: Partial<ExperienceFields>;
@@ -61,6 +62,7 @@ function buildDefaultSettings(): AppSettings {
     maintenanceMode: false,
     analyticsTracking: true,
     debugMode: false,
+    premiumPlanId: "",
     experienceCopy: {},
     experienceSections: {},
     experienceFields: {},
@@ -87,6 +89,7 @@ function rowToSettings(row: Record<string, unknown>): AppSettings {
     maintenanceMode: row.maintenance_mode as boolean,
     analyticsTracking: row.analytics_tracking as boolean,
     debugMode: row.debug_mode as boolean,
+    premiumPlanId: (row.premium_plan_id as string) ?? "",
     experienceCopy: (row.experience_copy as Partial<ExperienceCopy> | null) ?? {},
     experienceSections: (row.experience_sections as Partial<ExperienceSections> | null) ?? {},
     experienceFields: (row.experience_fields as Partial<ExperienceFields> | null) ?? {},
@@ -138,6 +141,7 @@ export async function updateSettings(
     if (updates.maintenanceMode !== undefined) dbUpdates.maintenance_mode = updates.maintenanceMode;
     if (updates.analyticsTracking !== undefined) dbUpdates.analytics_tracking = updates.analyticsTracking;
     if (updates.debugMode !== undefined) dbUpdates.debug_mode = updates.debugMode;
+    if (updates.premiumPlanId !== undefined) dbUpdates.premium_plan_id = updates.premiumPlanId;
     if (updates.experienceCopy !== undefined) {
       dbUpdates.experience_copy = pruneEmpty(updates.experienceCopy as Record<string, unknown>);
     }

@@ -83,6 +83,9 @@ export function GlobalAudioPlayer() {
 
 	if (!isVisible || !currentTrack) return null;
 
+	// When duration is unknown (0), use progress as a reasonable fallback max
+	// so the bar doesn't pin to 100% or show nonsense values.
+	const effectiveDuration = duration > 0 ? duration : progress > 0 ? progress * 2 : 1;
 	const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
 
 	return (
@@ -94,7 +97,7 @@ export function GlobalAudioPlayer() {
 					animate={{ y: 0, opacity: 1 }}
 					exit={{ y: 120, opacity: 0 }}
 					transition={{ duration: 0.3 }}
-					className="fixed bottom-4 left-1/2 z-50 hidden w-[min(100%,900px)] -translate-x-1/2 px-4 md:block"
+					className="fixed bottom-4 left-1/2 z-50 hidden w-[min(100%,900px)] -translate-x-1/2 px-4 lg:block"
 				>
 					<div className="rounded-[28px] border border-white/10 bg-gradient-to-br from-[#080A1F] via-[#0D122E] to-[#05060C] p-4 text-white shadow-[0_25px_80px_rgba(3,5,20,0.65)] backdrop-blur-xl">
 						<div className="flex items-center justify-between gap-4">
@@ -150,13 +153,13 @@ export function GlobalAudioPlayer() {
 									<input
 										type="range"
 										min={0}
-										max={duration || 1}
-										value={progress}
+										max={effectiveDuration}
+										value={Math.min(progress, effectiveDuration)}
 										step={0.5}
 										onChange={handleSeek}
 										className="h-1 flex-1 accent-white"
 									/>
-									<span>{formatTime(duration)}</span>
+									<span>{duration > 0 ? formatTime(duration) : "--:--"}</span>
 								</div>
 							</div>
 
@@ -251,7 +254,7 @@ export function GlobalAudioPlayer() {
 						animate={{ y: 0, opacity: 1 }}
 						exit={{ y: 80, opacity: 0 }}
 						transition={{ duration: 0.25 }}
-						className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] left-0 right-0 z-50 block px-3 md:hidden"
+						className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 block px-3 lg:hidden"
 					>
 						<div
 							className="flex items-center gap-3 rounded-2xl border border-white/10 bg-gradient-to-br from-[#080A1F] via-[#0D122E] to-[#05060C] px-3 py-2 text-white shadow-[0_15px_50px_rgba(3,5,20,0.6)] backdrop-blur-xl"
@@ -382,15 +385,15 @@ export function GlobalAudioPlayer() {
 								<input
 									type="range"
 									min={0}
-									max={duration || 1}
-									value={progress}
+									max={effectiveDuration}
+									value={Math.min(progress, effectiveDuration)}
 									step={0.5}
 									onChange={handleSeek}
 									className="h-1 w-full accent-white"
 								/>
 								<div className="mt-1 flex justify-between text-xs text-white/50">
 									<span>{formatTime(progress)}</span>
-									<span>{formatTime(duration)}</span>
+									<span>{duration > 0 ? formatTime(duration) : "--:--"}</span>
 								</div>
 							</div>
 

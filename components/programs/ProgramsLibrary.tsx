@@ -25,7 +25,6 @@ export function ProgramsLibrary({
 	const [programs, setPrograms] = useState<Program[]>([]);
 	const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
 	const [enrolling, setEnrolling] = useState(false);
-	const [enrollSuccess, setEnrollSuccess] = useState(false);
 
 	useEffect(() => {
 		fetch(`/api/programs/content?company_id=${encodeURIComponent(companyId)}`)
@@ -34,8 +33,15 @@ export function ProgramsLibrary({
 			.catch(() => {});
 	}, [companyId]);
 
+	const [localProgress, setLocalProgress] = useState<ProgramProgress[]>(programProgress);
+
+	// Keep local state in sync when the server prop updates
+	useEffect(() => {
+		setLocalProgress(programProgress);
+	}, [programProgress]);
+
 	const progressByProgramId = new Map<string, ProgramProgress>();
-	for (const p of programProgress) progressByProgramId.set(p.programId, p);
+	for (const p of localProgress) progressByProgramId.set(p.programId, p);
 	const selectedProgress = selectedProgram ? progressByProgramId.get(selectedProgram.id) : null;
 
 	const handleStart = async (program: Program) => {
@@ -47,12 +53,13 @@ export function ProgramsLibrary({
 				body: JSON.stringify({ programId: program.id, action: "enroll" }),
 			});
 			if (res.ok) {
-				setEnrollSuccess(true);
+				const enrolled: ProgramProgress = await res.json();
+				// Update local progress immediately so the UI reflects enrollment
+				setLocalProgress((prev) => {
+					const exists = prev.some((p) => p.programId === enrolled.programId);
+					return exists ? prev : [...prev, enrolled];
+				});
 				router.refresh();
-				setTimeout(() => {
-					setEnrollSuccess(false);
-					setSelectedProgram(null);
-				}, 1500);
 			}
 		} catch {
 			// silently fail
@@ -77,7 +84,6 @@ export function ProgramsLibrary({
 					progress={selectedProgress}
 					onStart={() => handleStart(selectedProgram)}
 					isEnrolling={enrolling}
-					enrollSuccess={enrollSuccess}
 				/>
 			</section>
 		);

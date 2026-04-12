@@ -26,6 +26,7 @@ export interface Meditation {
 	isNew?: boolean;
 	isPremium?: boolean;
 	tags?: string[];
+	externalUrl?: string;
 }
 
 export type HypnosisTheme =
@@ -48,6 +49,7 @@ export interface HypnosisSession {
 	daytimeVersion?: string; // URL for daytime audio
 	nighttimeVersion?: string; // URL for nighttime audio
 	isPremium?: boolean;
+	externalUrl?: string;
 }
 
 export type ProgramCategory =
@@ -92,6 +94,7 @@ export interface Program {
 	recommendedFor: string[];
 	days: ProgramDay[];
 	isPremium?: boolean;
+	externalUrl?: string;
 }
 
 export interface ProgramProgress {
@@ -126,6 +129,7 @@ export interface QuickReset {
 	type: QuickResetType;
 	audioUrl: string;
 	instructions: string;
+	externalUrl?: string;
 }
 
 export type AudioTrackContext = "meditation" | "hypnosis" | "reset" | "program";
@@ -198,6 +202,7 @@ export interface KnowledgeArticle {
 	recommendedSessions: { id: string; type: "meditation" | "hypnosis"; title: string }[];
 	references: string[];
 	attachments?: KnowledgeAttachment[];
+	externalUrl?: string;
 }
 
 export type MoodFilter = "all" | Mood;

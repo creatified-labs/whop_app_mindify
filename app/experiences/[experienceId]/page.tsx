@@ -212,9 +212,9 @@ export default async function ExperiencePage({
 	// --- Build recommendedSessions (content not yet completed) ---
 	const completedIds = new Set((allActivity || []).map((a) => a.content_id));
 	const allContent = [
-		...(meditations || []).map((m) => ({ id: m.id, title: m.title, type: "meditation" as const, duration: m.duration, isPremium: m.isPremium, audioUrl: m.audioUrl })),
-		...(hypnosisSessions || []).map((h) => ({ id: h.id, title: h.title, type: "hypnosis" as const, duration: h.duration, isPremium: h.isPremium, audioUrl: h.audioUrl })),
-		...(quickResets || []).map((r) => ({ id: r.id, title: r.title, type: "reset" as const, duration: r.duration, isPremium: false, audioUrl: r.audioUrl })),
+		...(meditations || []).map((m) => ({ id: m.id, title: m.title, type: "meditation" as const, duration: m.duration, isPremium: m.isPremium, audioUrl: m.audioUrl, externalUrl: m.externalUrl })),
+		...(hypnosisSessions || []).map((h) => ({ id: h.id, title: h.title, type: "hypnosis" as const, duration: h.duration, isPremium: h.isPremium, audioUrl: h.audioUrl, externalUrl: h.externalUrl })),
+		...(quickResets || []).map((r) => ({ id: r.id, title: r.title, type: "reset" as const, duration: r.duration, isPremium: false, audioUrl: r.audioUrl, externalUrl: r.externalUrl })),
 	];
 	const notCompleted = allContent.filter((c) => !completedIds.has(c.id));
 	const recommendedSessions: RecommendedSession[] = notCompleted.slice(0, 3).map((c) => ({
@@ -225,6 +225,7 @@ export default async function ExperiencePage({
 		timeOfDay: "anytime",
 		audioUrl: c.audioUrl,
 		isPremium: c.isPremium && membershipTier === "free" ? true : undefined,
+		externalUrl: c.externalUrl,
 	}));
 
 	return (
@@ -233,6 +234,7 @@ export default async function ExperiencePage({
 			userInitial={userInitial}
 			streakDays={streakDays}
 			membershipTier={membershipTier}
+			companyId={companyId}
 			className="bg-gradient-zen"
 		>
 			<div className="space-y-8">

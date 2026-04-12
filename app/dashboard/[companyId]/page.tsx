@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import AdminStats from "@/components/dashboard/AdminStats";
 import UserManagementTable from "@/components/dashboard/UserManagementTable";
 import { AdminContentManager } from "@/components/dashboard/content/AdminContentManager";
-import { Settings, BarChart3 } from "lucide-react";
+import { Settings } from "lucide-react";
 
 export default async function AdminDashboardPage({
 	params,
@@ -110,10 +110,6 @@ export default async function AdminDashboardPage({
 						</div>
 
 						<div className="flex items-center gap-3">
-							<button className="flex items-center gap-2 rounded-xl border-2 border-[rgb(var(--sage-300))] px-4 py-2.5 font-medium text-[rgb(var(--sage-700))] transition-colors hover:bg-[rgb(var(--sage-50))]">
-								<BarChart3 className="h-4 w-4" />
-								Analytics
-							</button>
 							<a
 								href={`/dashboard/${companyId}/settings`}
 								className="flex items-center gap-2 rounded-xl bg-[rgb(var(--sage-600))] px-4 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-[rgb(var(--sage-700))]"

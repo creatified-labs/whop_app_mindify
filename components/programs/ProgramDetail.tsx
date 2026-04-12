@@ -9,7 +9,6 @@ type ProgramDetailProps = {
 	progress?: ProgramProgress | null;
 	onStart?: () => void;
 	isEnrolling?: boolean;
-	enrollSuccess?: boolean;
 };
 
 const gradients: Record<string, string> = {
@@ -20,16 +19,17 @@ const gradients: Record<string, string> = {
 	clarity: "from-[#0F1A2C]/90 via-[#17293B]/80 to-[#04070F]/90",
 };
 
-export function ProgramDetail({ program, progress, onStart, isEnrolling, enrollSuccess }: ProgramDetailProps) {
+export function ProgramDetail({ program, progress, onStart, isEnrolling }: ProgramDetailProps) {
 	const completionPct =
 		progress && program.duration > 0 ? (progress.completedDays.length / program.duration) * 100 : 0;
 
-	const buttonLabel = enrollSuccess
-		? "Enrolled!"
-		: isEnrolling
-			? "Enrolling…"
+	const hasStarted = progress && progress.completedDays.length > 0;
+	const buttonLabel = isEnrolling
+		? "Enrolling…"
+		: hasStarted
+			? "Continue"
 			: progress
-				? "Continue"
+				? "Enrolled!"
 				: "Start program";
 
 	return (
@@ -110,7 +110,7 @@ export function ProgramDetail({ program, progress, onStart, isEnrolling, enrollS
 							<button
 								type="button"
 								onClick={onStart}
-								disabled={isEnrolling || enrollSuccess}
+								disabled={isEnrolling || (!!progress && !hasStarted)}
 								className="rounded-full bg-[rgb(var(--sage-600))] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[rgb(var(--sage-700))] disabled:opacity-60 dark:bg-white/90 dark:text-black dark:hover:bg-white"
 							>
 								{buttonLabel}
@@ -182,10 +182,10 @@ export function ProgramDetail({ program, progress, onStart, isEnrolling, enrollS
 							<button
 								type="button"
 								onClick={onStart}
-								disabled={isEnrolling || enrollSuccess}
+								disabled={isEnrolling || (!!progress && !hasStarted)}
 								className="rounded-full bg-[rgb(var(--sage-600))] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[rgb(var(--sage-700))] disabled:opacity-60 dark:bg-white/90 dark:text-black dark:hover:bg-white"
 							>
-								{enrollSuccess ? "Enrolled!" : isEnrolling ? "Enrolling…" : progress ? "Resume Journey" : "Start Program"}
+								{isEnrolling ? "Enrolling…" : hasStarted ? "Resume Journey" : progress ? "Enrolled!" : "Start Program"}
 							</button>
 						</div>
 					</div>

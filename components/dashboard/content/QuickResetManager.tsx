@@ -20,6 +20,7 @@ const emptyReset = {
 	type: "breath" as QuickResetType,
 	audioUrl: "",
 	instructions: "",
+	externalUrl: "",
 };
 
 const columns: ContentColumn<QuickReset>[] = [
@@ -80,6 +81,7 @@ export function QuickResetManager({ companyId }: { companyId: string }) {
 			type: item.type,
 			audioUrl: item.audioUrl,
 			instructions: item.instructions,
+			externalUrl: item.externalUrl ?? "",
 		});
 		setIsModalOpen(true);
 	};
@@ -142,6 +144,7 @@ export function QuickResetManager({ companyId }: { companyId: string }) {
 				<FormInput label="Audio URL" value={form.audioUrl} onChange={(v) => setForm({ ...form, audioUrl: v })} placeholder="/audio/quick-resets/..." />
 				<AudioUploadButton companyId={companyId} contentType="quick-resets" onUploadComplete={(url) => setForm((prev) => ({ ...prev, audioUrl: url }))} />
 				<FormTextarea label="Instructions" value={form.instructions} onChange={(v) => setForm({ ...form, instructions: v })} rows={3} />
+				<FormInput label="External URL" value={form.externalUrl} onChange={(v) => setForm({ ...form, externalUrl: v })} placeholder="https://whop.com/..." />
 			</ContentFormModal>
 		</>
 	);

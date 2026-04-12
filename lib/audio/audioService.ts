@@ -149,6 +149,13 @@ class AudioService {
 	private handleTimeUpdate = () => {
 		if (!this.audio) return;
 		this.callbacks?.onProgress(this.audio.currentTime);
+		// Some browsers (especially with VBR/streaming MP3s) only resolve a
+		// finite duration after buffering progresses. Re-check on every
+		// timeupdate so the UI eventually gets an accurate value.
+		const d = this.audio.duration;
+		if (Number.isFinite(d) && d > 0) {
+			this.callbacks?.onDuration(d);
+		}
 	};
 
 	private handleLoadedMetadata = () => {

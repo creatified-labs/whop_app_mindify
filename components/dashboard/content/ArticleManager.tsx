@@ -24,6 +24,7 @@ const emptyArticle = {
 	content: "",
 	keyTakeaways: [] as string[],
 	actionSteps: [] as string[],
+	externalUrl: "",
 };
 
 const columns: ContentColumn<KnowledgeArticle>[] = [
@@ -84,6 +85,7 @@ export function ArticleManager({ companyId }: { companyId: string }) {
 			content: item.content,
 			keyTakeaways: item.keyTakeaways,
 			actionSteps: item.actionSteps,
+			externalUrl: item.externalUrl ?? "",
 		});
 		setIsModalOpen(true);
 	};
@@ -150,6 +152,7 @@ export function ArticleManager({ companyId }: { companyId: string }) {
 				<FormTextarea label="Content (Markdown)" value={form.content} onChange={(v) => setForm({ ...form, content: v })} rows={12} placeholder="# Article Title..." />
 				<ArrayFieldEditor label="Key Takeaways" values={form.keyTakeaways} onChange={(v) => setForm({ ...form, keyTakeaways: v })} />
 				<ArrayFieldEditor label="Action Steps" values={form.actionSteps} onChange={(v) => setForm({ ...form, actionSteps: v })} />
+				<FormInput label="External URL" value={form.externalUrl} onChange={(v) => setForm({ ...form, externalUrl: v })} placeholder="https://whop.com/..." />
 			</ContentFormModal>
 		</>
 	);

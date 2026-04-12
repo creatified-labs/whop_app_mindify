@@ -8,6 +8,7 @@ import { MindifyLogo } from "@/components/branding/MindifyLogo";
 import { Navigation } from "@/components/ui/Navigation";
 import { GlobalAudioPlayer } from "@/components/ui/GlobalAudioPlayer";
 import { useAppStore } from "@/lib/stores/appStore";
+import { useUpgrade } from "@/lib/hooks/useUpgrade";
 
 type AppLayoutProps = {
 	children: ReactNode;
@@ -15,6 +16,7 @@ type AppLayoutProps = {
 	userInitial?: string;
 	streakDays?: number;
 	membershipTier?: "free" | "premium";
+	companyId?: string;
 	className?: string;
 };
 
@@ -24,9 +26,11 @@ export function AppLayout({
 	userInitial,
 	streakDays = 0,
 	membershipTier = "free",
+	companyId = "",
 	className,
 }: AppLayoutProps) {
 	const initial = userInitial ?? userName.charAt(0).toUpperCase();
+	const { triggerUpgrade, isLoading: isUpgrading } = useUpgrade(companyId);
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 	const navSelection = useAppStore((state) => state.navSelection);
 	const goBack = useAppStore((state) => state.goBack);
@@ -78,8 +82,12 @@ export function AppLayout({
 									<span>Premium</span>
 								</div>
 								<p className="text-sm text-white/90">Unlock all meditations & programs.</p>
-								<button className="mt-4 w-full rounded-xl bg-white py-2 text-sm font-semibold text-[rgb(var(--earth-900))] shadow-soft hover:bg-[rgb(var(--cream-100))] hover:shadow-hover dark:bg-[#111318] dark:text-[#F4EFE6] dark:hover:bg-[#1C2029]">
-									Upgrade Now
+								<button
+									onClick={triggerUpgrade}
+									disabled={isUpgrading}
+									className="mt-4 w-full rounded-xl bg-white py-2 text-sm font-semibold text-[rgb(var(--earth-900))] shadow-soft hover:bg-[rgb(var(--cream-100))] hover:shadow-hover disabled:opacity-60 dark:bg-[#111318] dark:text-[#F4EFE6] dark:hover:bg-[#1C2029]"
+								>
+									{isUpgrading ? "Processing…" : "Upgrade Now"}
 								</button>
 							</div>
 						</motion.div>

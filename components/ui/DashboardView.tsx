@@ -17,6 +17,8 @@ import { FeaturedProgramCard } from "@/components/ui/FeaturedProgramCard";
 import { FeaturedContentCard } from "@/components/ui/FeaturedContentCard";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { useFavoritesStore } from "@/lib/stores/favoritesStore";
+import { useUpgrade } from "@/lib/hooks/useUpgrade";
+import { useExternalUrl } from "@/lib/hooks/useExternalUrl";
 import {
 	interpolate,
 	splitOnVariable,
@@ -93,6 +95,7 @@ export interface RecommendedSession {
 	timeOfDay: string;
 	audioUrl?: string;
 	isPremium?: boolean;
+	externalUrl?: string;
 }
 
 export interface DashboardViewProps {
@@ -185,6 +188,8 @@ export function DashboardView({
 	const setUserProgress = useAppStore((state) => state.setUserProgress);
 	const storedProgress = useAppStore((state) => state.userProgress);
 	const playTrack = useAudioStore((state) => state.playTrack);
+	const { triggerUpgrade } = useUpgrade(companyId);
+	const { openUrl } = useExternalUrl();
 
 	useEffect(() => {
 		if (!userProgress) return;
@@ -574,15 +579,20 @@ export function DashboardView({
 								<p className="text-sm text-[rgb(var(--earth-600))]">{session.durationMinutes} mins</p>
 								<button
 									type="button"
-									disabled={locked}
-									onClick={() => handlePlay(session.id, session.title, session.audioUrl, session.type)}
+									onClick={() =>
+										locked
+											? triggerUpgrade()
+											: session.externalUrl
+												? openUrl(session.externalUrl)
+												: handlePlay(session.id, session.title, session.audioUrl, session.type)
+									}
 									className={`mt-4 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.3em] ${
 										locked
-											? "border-[rgb(var(--sage-100))] text-[rgb(var(--earth-500))]"
+											? "border-[rgb(var(--sage-100))] text-[rgb(var(--earth-500))] hover:bg-[rgb(var(--sage-50))] cursor-pointer"
 											: "border-[rgb(var(--sage-200))] text-[rgb(var(--sage-700))] hover:bg-[rgb(var(--sage-50))]"
 									}`}
 								>
-									{locked ? "Upgrade to unlock" : "Start"}
+									{locked ? "Upgrade to unlock" : session.externalUrl ? "Open Course" : "Start"}
 								</button>
 								{locked && (
 									<span className="absolute right-4 top-4 rounded-full border border-[rgb(var(--gold-200))] bg-[rgb(var(--gold-50))] px-3 py-1 text-xs uppercase tracking-[0.3em] text-[rgb(var(--gold-700))]">

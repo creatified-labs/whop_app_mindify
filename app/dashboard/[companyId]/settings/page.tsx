@@ -268,6 +268,9 @@ export default function SettingsPage() {
 	const [weeklyDigest, setWeeklyDigest] = useState(false);
 	const [newContentAlerts, setNewContentAlerts] = useState(true);
 
+	// Premium / billing
+	const [premiumPlanId, setPremiumPlanId] = useState("");
+
 	// Advanced settings
 	const [maintenanceMode, setMaintenanceMode] = useState(false);
 	const [analyticsTracking, setAnalyticsTracking] = useState(true);
@@ -339,6 +342,7 @@ export default function SettingsPage() {
 				setStreakReminders(data.streakReminders);
 				setWeeklyDigest(data.weeklyDigest);
 				setNewContentAlerts(data.newContentAlerts);
+				setPremiumPlanId(data.premiumPlanId ?? "");
 				setMaintenanceMode(data.maintenanceMode);
 				setAnalyticsTracking(data.analyticsTracking);
 				setDebugMode(data.debugMode);
@@ -369,6 +373,7 @@ export default function SettingsPage() {
 					streakReminders,
 					weeklyDigest,
 					newContentAlerts,
+					premiumPlanId,
 					maintenanceMode,
 					analyticsTracking,
 					debugMode,
@@ -498,6 +503,18 @@ export default function SettingsPage() {
 										type="email"
 										placeholder="support@example.com"
 										helpText="Users will see this for support inquiries"
+									/>
+								</SectionCard>
+								<SectionCard
+									title="Premium & Billing"
+									description="Connect your Whop plan to enable in-app upgrades"
+								>
+									<SettingsInput
+										label="Premium Plan ID"
+										value={premiumPlanId}
+										onChange={setPremiumPlanId}
+										placeholder="plan_XXXXX"
+										helpText="Your Whop plan ID for premium access. Find this in your Whop dashboard under Plans."
 									/>
 								</SectionCard>
 							</>

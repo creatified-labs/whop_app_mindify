@@ -26,6 +26,7 @@ const emptySession = {
 	daytimeVersion: "",
 	nighttimeVersion: "",
 	isPremium: false,
+	externalUrl: "",
 };
 
 const columns: ContentColumn<HypnosisSession>[] = [
@@ -107,6 +108,7 @@ export function HypnosisManager({ companyId }: { companyId: string }) {
 			daytimeVersion: item.daytimeVersion ?? "",
 			nighttimeVersion: item.nighttimeVersion ?? "",
 			isPremium: item.isPremium ?? false,
+			externalUrl: item.externalUrl ?? "",
 		});
 		setIsModalOpen(true);
 	};
@@ -177,6 +179,7 @@ export function HypnosisManager({ companyId }: { companyId: string }) {
 					<FormCheckbox label="Has Binaural Beats" checked={form.hasBinaural} onChange={(v) => setForm({ ...form, hasBinaural: v })} />
 					<FormCheckbox label="Premium" checked={form.isPremium} onChange={(v) => setForm({ ...form, isPremium: v })} />
 				</div>
+				<FormInput label="External URL" value={form.externalUrl} onChange={(v) => setForm({ ...form, externalUrl: v })} placeholder="https://whop.com/..." />
 			</ContentFormModal>
 		</>
 	);

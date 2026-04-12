@@ -43,6 +43,7 @@ export async function getMeditations(companyId: string): Promise<{ data: Meditat
       isNew: row.is_new,
       isPremium: row.is_premium,
       tags: row.tags || [],
+      externalUrl: row.external_url || undefined,
     }));
 
     return { data: meditations, error: null };
@@ -79,6 +80,7 @@ export async function getMeditationById(companyId: string, id: string): Promise<
         isNew: data.is_new,
         isPremium: data.is_premium,
         tags: data.tags || [],
+        externalUrl: data.external_url || undefined,
       },
       error: null,
     };
@@ -105,6 +107,7 @@ export async function createMeditation(companyId: string, meditation: Omit<Medit
         is_new: meditation.isNew ?? false,
         is_premium: meditation.isPremium ?? false,
         tags: meditation.tags ?? [],
+        external_url: meditation.externalUrl ?? '',
       })
       .select()
       .single();
@@ -117,6 +120,7 @@ export async function createMeditation(companyId: string, meditation: Omit<Medit
         duration: data.duration, category: data.category, audioUrl: data.audio_url,
         imageUrl: data.image_url, mood: data.mood || [], isNew: data.is_new,
         isPremium: data.is_premium, tags: data.tags || [],
+        externalUrl: data.external_url || undefined,
       },
       error: null,
     };
@@ -138,6 +142,7 @@ export async function updateMeditation(companyId: string, id: string, updates: P
     if (updates.isNew !== undefined) dbUpdates.is_new = updates.isNew;
     if (updates.isPremium !== undefined) dbUpdates.is_premium = updates.isPremium;
     if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+    if (updates.externalUrl !== undefined) dbUpdates.external_url = updates.externalUrl;
 
     const { data, error } = await supabaseAdmin
       .from('meditations')
@@ -155,6 +160,7 @@ export async function updateMeditation(companyId: string, id: string, updates: P
         duration: data.duration, category: data.category, audioUrl: data.audio_url,
         imageUrl: data.image_url, mood: data.mood || [], isNew: data.is_new,
         isPremium: data.is_premium, tags: data.tags || [],
+        externalUrl: data.external_url || undefined,
       },
       error: null,
     };
@@ -189,6 +195,7 @@ function rowToHypnosis(row: Record<string, unknown>): HypnosisSession {
     daytimeVersion: row.daytime_version as string | undefined,
     nighttimeVersion: row.nighttime_version as string | undefined,
     isPremium: row.is_premium as boolean | undefined,
+    externalUrl: (row.external_url as string) || undefined,
   };
 }
 
@@ -243,6 +250,7 @@ export async function createHypnosisSession(companyId: string, session: Omit<Hyp
         daytime_version: session.daytimeVersion,
         nighttime_version: session.nighttimeVersion,
         is_premium: session.isPremium ?? false,
+        external_url: session.externalUrl ?? '',
       })
       .select()
       .single();
@@ -266,6 +274,7 @@ export async function updateHypnosisSession(companyId: string, id: string, updat
     if (updates.daytimeVersion !== undefined) dbUpdates.daytime_version = updates.daytimeVersion;
     if (updates.nighttimeVersion !== undefined) dbUpdates.nighttime_version = updates.nighttimeVersion;
     if (updates.isPremium !== undefined) dbUpdates.is_premium = updates.isPremium;
+    if (updates.externalUrl !== undefined) dbUpdates.external_url = updates.externalUrl;
 
     const { data, error } = await supabaseAdmin
       .from('hypnosis_sessions')
@@ -314,6 +323,7 @@ function rowToProgram(row: Record<string, unknown>): Program {
     recommendedFor: (row.recommended_for as string[]) || [],
     days: (row.days as ProgramDay[]) || [],
     isPremium: row.is_premium as boolean | undefined,
+    externalUrl: (row.external_url as string) || undefined,
   };
 }
 
@@ -373,6 +383,7 @@ export async function createProgram(companyId: string, program: Omit<Program, 'i
         recommended_for: program.recommendedFor,
         days: program.days as unknown as Record<string, unknown>[],
         is_premium: program.isPremium ?? false,
+        external_url: program.externalUrl ?? '',
       })
       .select()
       .single();
@@ -401,6 +412,7 @@ export async function updateProgram(companyId: string, id: string, updates: Part
     if (updates.recommendedFor !== undefined) dbUpdates.recommended_for = updates.recommendedFor;
     if (updates.days !== undefined) dbUpdates.days = updates.days;
     if (updates.isPremium !== undefined) dbUpdates.is_premium = updates.isPremium;
+    if (updates.externalUrl !== undefined) dbUpdates.external_url = updates.externalUrl;
 
     const { data, error } = await supabaseAdmin
       .from('programs')
@@ -439,6 +451,7 @@ function rowToQuickReset(row: Record<string, unknown>): QuickReset {
     type: row.type as QuickReset['type'],
     audioUrl: row.audio_url as string,
     instructions: row.instructions as string,
+    externalUrl: (row.external_url as string) || undefined,
   };
 }
 
@@ -489,6 +502,7 @@ export async function createQuickReset(companyId: string, reset: Omit<QuickReset
         type: reset.type,
         audio_url: reset.audioUrl,
         instructions: reset.instructions,
+        external_url: reset.externalUrl ?? '',
       })
       .select()
       .single();
@@ -508,6 +522,7 @@ export async function updateQuickReset(companyId: string, id: string, updates: P
     if (updates.type !== undefined) dbUpdates.type = updates.type;
     if (updates.audioUrl !== undefined) dbUpdates.audio_url = updates.audioUrl;
     if (updates.instructions !== undefined) dbUpdates.instructions = updates.instructions;
+    if (updates.externalUrl !== undefined) dbUpdates.external_url = updates.externalUrl;
 
     const { data, error } = await supabaseAdmin
       .from('quick_resets')
@@ -553,6 +568,7 @@ function rowToArticle(row: Record<string, unknown>): KnowledgeArticle {
     recommendedSessions: (row.recommended_sessions as KnowledgeArticle['recommendedSessions']) || [],
     references: (row.references as string[]) || [],
     attachments: (row.attachments as KnowledgeArticle['attachments']) || [],
+    externalUrl: (row.external_url as string) || undefined,
   };
 }
 
@@ -609,6 +625,7 @@ export async function createArticle(companyId: string, article: Omit<KnowledgeAr
         recommended_sessions: article.recommendedSessions as unknown as Record<string, unknown>[],
         references: article.references,
         attachments: (article.attachments || []) as unknown as Record<string, unknown>[],
+        external_url: article.externalUrl ?? '',
       })
       .select()
       .single();
@@ -634,6 +651,7 @@ export async function updateArticle(companyId: string, slug: string, updates: Pa
     if (updates.recommendedSessions !== undefined) dbUpdates.recommended_sessions = updates.recommendedSessions;
     if (updates.references !== undefined) dbUpdates.references = updates.references;
     if (updates.attachments !== undefined) dbUpdates.attachments = updates.attachments;
+    if (updates.externalUrl !== undefined) dbUpdates.external_url = updates.externalUrl;
 
     const { data, error } = await supabaseAdmin
       .from('knowledge_articles')
