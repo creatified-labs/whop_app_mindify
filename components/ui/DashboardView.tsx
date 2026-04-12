@@ -144,11 +144,11 @@ export function ExperienceContent(props: DashboardViewProps) {
 		return <DashboardView {...props} />;
 	}
 
-	if (navSelection === "meditations") return <SectionErrorBoundary><MeditationGrid meditations={props.meditations} /></SectionErrorBoundary>;
-	if (navSelection === "hypnosis") return <SectionErrorBoundary><HypnosisStack hypnosisSessions={props.hypnosisSessions} /></SectionErrorBoundary>;
-	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary companyId={props.companyId} programProgress={props.programProgress} /></SectionErrorBoundary>;
-	if (navSelection === "quick-resets") return <SectionErrorBoundary><QuickResetsList companyId={props.companyId} /></SectionErrorBoundary>;
-	if (navSelection === "knowledge-hub") return <SectionErrorBoundary><KnowledgeHub companyId={props.companyId} /></SectionErrorBoundary>;
+	if (navSelection === "meditations") return <SectionErrorBoundary><MeditationGrid meditations={props.meditations} experienceCopy={props.experienceCopy} /></SectionErrorBoundary>;
+	if (navSelection === "hypnosis") return <SectionErrorBoundary><HypnosisStack hypnosisSessions={props.hypnosisSessions} experienceCopy={props.experienceCopy} /></SectionErrorBoundary>;
+	if (navSelection === "programs") return <SectionErrorBoundary><ProgramsLibrary companyId={props.companyId} programProgress={props.programProgress} experienceCopy={props.experienceCopy} /></SectionErrorBoundary>;
+	if (navSelection === "quick-resets") return <SectionErrorBoundary><QuickResetsList companyId={props.companyId} experienceCopy={props.experienceCopy} /></SectionErrorBoundary>;
+	if (navSelection === "knowledge-hub") return <SectionErrorBoundary><KnowledgeHub companyId={props.companyId} experienceCopy={props.experienceCopy} /></SectionErrorBoundary>;
 
 	return (
 		<div className={`${glassCard} min-h-[420px]`}>

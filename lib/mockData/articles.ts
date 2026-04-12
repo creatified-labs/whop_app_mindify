@@ -1,12 +1,6 @@
 import type { AudioTrack } from "@/lib/types";
 
-export type KnowledgeCategory =
-	| "neuroscience"
-	| "psychology"
-	| "breathwork"
-	| "sleep"
-	| "focus"
-	| "productivity";
+export type KnowledgeCategory = string;
 
 export interface KnowledgeArticle {
 	slug: string;

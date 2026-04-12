@@ -118,6 +118,42 @@ export interface ExperienceCopy {
 	featuredMeditationsLabel: string;
 	featuredHypnosisLabel: string;
 	featuredQuickResetsLabel: string;
+
+	// Knowledge Hub section page
+	knowledgeEyebrow: string;
+	knowledgeHeading: string;
+	knowledgeDescription: string;
+	knowledgeSearchPlaceholder: string;
+	knowledgeEmptyState: string;
+
+	// Meditations section page
+	meditationsEmptyTitle: string;
+	meditationsEmptyDescription: string;
+	meditationsPreviewDescription: string;
+
+	// Hypnosis section page
+	hypnosisEyebrow: string;
+	hypnosisHeading: string;
+	hypnosisDescription: string;
+	hypnosisEmptyTitle: string;
+	hypnosisEmptyDescription: string;
+
+	// Quick Resets section page
+	quickResetsEyebrow: string;
+	quickResetsHeading: string;
+	quickResetsInstruction: string;
+	quickResetsEmptyState: string;
+
+	// Programs section page
+	programsEyebrow: string;
+	programsHeading: string;
+	programsDescription: string;
+	programsEmptyState: string;
+
+	// Sidebar / premium
+	premiumCardHeading: string;
+	premiumCardBody: string;
+	premiumCardCTA: string;
 }
 
 /**
@@ -166,6 +202,36 @@ export const DEFAULT_EXPERIENCE_COPY: ExperienceCopy = {
 	featuredMeditationsLabel: "Featured Meditations",
 	featuredHypnosisLabel: "Featured Hypnosis",
 	featuredQuickResetsLabel: "Featured Quick Resets",
+
+	knowledgeEyebrow: "Knowledge Hub",
+	knowledgeHeading: "Guides and resources",
+	knowledgeDescription: "Browse articles, guides, and resources curated for you.",
+	knowledgeSearchPlaceholder: "Search articles",
+	knowledgeEmptyState: "No articles available yet.",
+
+	meditationsEmptyTitle: "No meditations yet",
+	meditationsEmptyDescription: "Check back soon for new meditation sessions.",
+	meditationsPreviewDescription: "Choose a session to preview its audio and begin your practice.",
+
+	hypnosisEyebrow: "Hypnosis",
+	hypnosisHeading: "Guided journeys",
+	hypnosisDescription: "Deep guided sessions designed to support lasting change.",
+	hypnosisEmptyTitle: "No hypnosis sessions yet",
+	hypnosisEmptyDescription: "Check back soon for new hypnosis sessions.",
+
+	quickResetsEyebrow: "Quick Resets",
+	quickResetsHeading: "Rapid Tools",
+	quickResetsInstruction: "Tap a session to play instantly.",
+	quickResetsEmptyState: "No quick resets available yet.",
+
+	programsEyebrow: "Programs",
+	programsHeading: "Choose your program",
+	programsDescription: "Multi-day journeys blending meditations, tasks, and journaling.",
+	programsEmptyState: "No programs available yet.",
+
+	premiumCardHeading: "Premium",
+	premiumCardBody: "Unlock all content and features.",
+	premiumCardCTA: "Upgrade Now",
 };
 
 // =============================================================================

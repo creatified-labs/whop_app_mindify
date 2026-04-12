@@ -1,23 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { KnowledgeArticle, KnowledgeCategory } from "@/lib/types";
+import type { KnowledgeArticle } from "@/lib/types";
 import { ContentTable, type ContentColumn } from "./ContentTable";
-import { ContentFormModal, FormInput, FormSelect, FormTextarea } from "./ContentFormModal";
+import { ContentFormModal, FormInput, FormTextarea } from "./ContentFormModal";
 import { ArrayFieldEditor } from "./ArrayFieldEditor";
-
-const categoryOptions: { value: KnowledgeCategory; label: string }[] = [
-	{ value: "neuroscience", label: "Neuroscience" },
-	{ value: "psychology", label: "Psychology" },
-	{ value: "breathwork", label: "Breathwork" },
-	{ value: "sleep", label: "Sleep" },
-	{ value: "focus", label: "Focus" },
-	{ value: "productivity", label: "Productivity" },
-];
 
 const emptyArticle = {
 	title: "",
-	category: "neuroscience" as KnowledgeCategory,
+	category: "",
 	author: "",
 	readTimeMinutes: 5,
 	thumbnail: "",
@@ -142,7 +133,7 @@ export function ArticleManager({ companyId }: { companyId: string }) {
 			>
 				<FormInput label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} required />
 				<div className="grid grid-cols-2 gap-4">
-					<FormSelect label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v as KnowledgeCategory })} options={categoryOptions} />
+					<FormInput label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v })} placeholder="e.g. Breathwork, Mindset" required />
 					<FormInput label="Author" value={form.author} onChange={(v) => setForm({ ...form, author: v })} />
 				</div>
 				<div className="grid grid-cols-2 gap-4">

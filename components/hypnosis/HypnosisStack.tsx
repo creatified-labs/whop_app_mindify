@@ -8,12 +8,14 @@ import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { Brain, Play } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import type { HypnosisSession } from "@/lib/types";
+import type { ExperienceCopy } from "@/lib/ui/experienceCopy";
 
 interface HypnosisStackProps {
 	hypnosisSessions?: HypnosisSession[];
+	experienceCopy?: ExperienceCopy;
 }
 
-export function HypnosisStack({ hypnosisSessions = [] }: HypnosisStackProps) {
+export function HypnosisStack({ hypnosisSessions = [], experienceCopy }: HypnosisStackProps) {
 	const playTrack = useAudioStore((state) => state.playTrack);
 	const currentTrack = useAudioStore((state) => state.currentTrack);
 
@@ -37,8 +39,8 @@ export function HypnosisStack({ hypnosisSessions = [] }: HypnosisStackProps) {
 				/>
 				<EmptyState
 					icon={<Brain className="h-10 w-10 text-[rgb(var(--sage-600))]" />}
-					title="No hypnosis sessions yet"
-					description="The creator hasn't added any hypnosis sessions yet. Check back soon!"
+					title={experienceCopy?.hypnosisEmptyTitle ?? "No hypnosis sessions yet"}
+					description={experienceCopy?.hypnosisEmptyDescription ?? "Check back soon for new hypnosis sessions."}
 				/>
 			</section>
 		);
@@ -47,9 +49,9 @@ export function HypnosisStack({ hypnosisSessions = [] }: HypnosisStackProps) {
 	return (
 		<section className="space-y-8">
 			<SectionHeading
-				eyebrow="Hypnosis Lab"
-				title="Scripted neural journeys"
-				description="Clinical hypnotists craft each ritual with somatic cues, layered storytelling, and precise breath patterning."
+				eyebrow={experienceCopy?.hypnosisEyebrow ?? "Hypnosis"}
+				title={experienceCopy?.hypnosisHeading ?? "Guided journeys"}
+				description={experienceCopy?.hypnosisDescription ?? "Deep guided sessions designed to support lasting change."}
 			/>
 			<div className="grid gap-6 lg:grid-cols-3">
 				{hypnosisSessions.map((session, index) => {

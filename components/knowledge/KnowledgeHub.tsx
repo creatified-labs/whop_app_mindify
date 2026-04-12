@@ -2,25 +2,25 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchIcon, ClockIcon } from "lucide-react";
-import type { KnowledgeArticle, KnowledgeCategory } from "@/lib/types";
+import type { KnowledgeArticle } from "@/lib/types";
+import type { ExperienceCopy } from "@/lib/ui/experienceCopy";
 import { ArticleView } from "@/components/knowledge/ArticleView";
 
-const categories: Array<{ label: string; value: "all" | KnowledgeCategory }> = [
-	{ label: "All", value: "all" },
-	{ label: "Neuroscience", value: "neuroscience" },
-	{ label: "Psychology", value: "psychology" },
-	{ label: "Breathwork", value: "breathwork" },
-	{ label: "Sleep", value: "sleep" },
-	{ label: "Focus", value: "focus" },
-	{ label: "Productivity", value: "productivity" },
-];
-
-export function KnowledgeHub({ companyId }: { companyId: string }) {
+export function KnowledgeHub({ companyId, experienceCopy }: { companyId: string; experienceCopy?: ExperienceCopy }) {
 	const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
 	const [query, setQuery] = useState("");
-	const [category, setCategory] = useState<(typeof categories)[number]["value"]>("all");
+	const [category, setCategory] = useState("all");
 	const [activeArticle, setActiveArticle] = useState<KnowledgeArticle | null>(null);
 	const [bookmarkedSlugs, setBookmarkedSlugs] = useState<Set<string>>(new Set());
+
+	// Derive categories dynamically from the articles that exist
+	const categories = useMemo(() => {
+		const unique = [...new Set(articles.map((a) => a.category).filter(Boolean))].sort();
+		return [
+			{ label: "All", value: "all" },
+			...unique.map((c) => ({ label: c.charAt(0).toUpperCase() + c.slice(1), value: c })),
+		];
+	}, [articles]);
 
 	// Fetch articles from API
 	useEffect(() => {
@@ -91,10 +91,10 @@ export function KnowledgeHub({ companyId }: { companyId: string }) {
 		<section className="space-y-6">
 			<header className="flex flex-wrap items-center justify-between gap-3">
 				<div>
-					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Knowledge Hub</p>
-					<h2 className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Labs, guides, and nervous system intel</h2>
+					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">{experienceCopy?.knowledgeEyebrow ?? "Knowledge Hub"}</p>
+					<h2 className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{experienceCopy?.knowledgeHeading ?? "Guides and resources"}</h2>
 					<p className="text-sm text-[rgb(var(--earth-600))] dark:text-white/70">
-						Search rituals, neuroscience breakdowns, and Somatic sprint blueprints from Mindify faculty.
+						{experienceCopy?.knowledgeDescription ?? "Browse articles, guides, and resources curated for you."}
 					</p>
 				</div>
 				<div className="relative w-full max-w-sm">
@@ -103,7 +103,7 @@ export function KnowledgeHub({ companyId }: { companyId: string }) {
 						type="text"
 						value={query}
 						onChange={(event) => setQuery(event.target.value)}
-						placeholder="Search articles"
+						placeholder={experienceCopy?.knowledgeSearchPlaceholder ?? "Search articles"}
 						className="w-full rounded-3xl border border-[rgb(var(--sage-200))] bg-[rgb(var(--cream-50))] px-10 py-2 text-sm text-[rgb(var(--earth-900))] placeholder:text-[rgb(var(--earth-400))] focus:border-[rgb(var(--sage-400))] focus:outline-none dark:border-white/15 dark:bg-white/5 dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/40"
 					/>
 				</div>
@@ -138,7 +138,7 @@ export function KnowledgeHub({ companyId }: { companyId: string }) {
 							<div className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/50">{String(article.category)}</div>
 							<h3 className="mt-3 text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{String(article.title)}</h3>
 							<p className="mt-2 text-sm text-[rgb(var(--earth-600))] line-clamp-3 dark:text-white/70">
-								{String((article.keyTakeaways || [])[0] ?? "Applied nervous system science for modern operators.")}
+								{String((article.keyTakeaways || [])[0] ?? "")}
 							</p>
 							<div className="mt-4 flex items-center gap-3 text-xs text-[rgb(var(--earth-500))] dark:text-white/50">
 								<span className="inline-flex items-center gap-1">
@@ -162,7 +162,7 @@ export function KnowledgeHub({ companyId }: { companyId: string }) {
 				</div>
 			) : (
 				<div className="py-8 text-center text-sm text-[rgb(var(--earth-500))] dark:text-white/60">
-					{articles.length === 0 ? "No articles available yet." : `No articles found for "${query}"`}
+					{articles.length === 0 ? (experienceCopy?.knowledgeEmptyState ?? "No articles available yet.") : `No articles found for "${query}"`}
 				</div>
 			)}
 

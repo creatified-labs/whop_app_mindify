@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import type { Program, ProgramCategory, ProgramProgress } from "@/lib/types";
+import type { ExperienceCopy } from "@/lib/ui/experienceCopy";
 import { ProgramDetail } from "@/components/programs/ProgramDetail";
 
 const categoryGradients: Record<ProgramCategory, string> = {
@@ -17,9 +18,11 @@ const categoryGradients: Record<ProgramCategory, string> = {
 export function ProgramsLibrary({
 	companyId,
 	programProgress = [],
+	experienceCopy,
 }: {
 	companyId: string;
 	programProgress?: ProgramProgress[];
+	experienceCopy?: ExperienceCopy;
 }) {
 	const router = useRouter();
 	const [programs, setPrograms] = useState<Program[]>([]);
@@ -96,7 +99,7 @@ export function ProgramsLibrary({
 					<p className="text-xs uppercase tracking-[0.5em] text-[rgb(var(--earth-500))] dark:text-white/60">Transformation Programs</p>
 					<h2 className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Choose your current protocol</h2>
 				</header>
-				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">No programs available yet.</p>
+				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">{experienceCopy?.programsEmptyState ?? "No programs available yet."}</p>
 			</section>
 		);
 	}
@@ -104,11 +107,10 @@ export function ProgramsLibrary({
 	return (
 		<section className="space-y-8">
 			<header className="space-y-2">
-				<p className="text-xs uppercase tracking-[0.5em] text-[rgb(var(--earth-500))] dark:text-white/60">Transformation Programs</p>
-				<h2 className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Choose your current protocol</h2>
+				<p className="text-xs uppercase tracking-[0.5em] text-[rgb(var(--earth-500))] dark:text-white/60">{experienceCopy?.programsEyebrow ?? "Programs"}</p>
+				<h2 className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{experienceCopy?.programsHeading ?? "Choose your program"}</h2>
 				<p className="text-base text-[rgb(var(--earth-600))] dark:text-white/70">
-					Multi-day journeys blending meditations, hypnosis, tasks, and journaling. Commit to a track, then let
-					Mindify steer your nervous system and execution rituals.
+					{experienceCopy?.programsDescription ?? "Multi-day journeys blending meditations, tasks, and journaling."}
 				</p>
 			</header>
 			<div className="grid gap-6 lg:grid-cols-2">

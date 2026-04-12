@@ -8,12 +8,14 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { Music, Play } from "lucide-react";
 import type { Meditation, MeditationCategory } from "@/lib/types";
+import type { ExperienceCopy } from "@/lib/ui/experienceCopy";
 
 interface MeditationGridProps {
 	meditations?: Meditation[];
+	experienceCopy?: ExperienceCopy;
 }
 
-export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
+export function MeditationGrid({ meditations = [], experienceCopy }: MeditationGridProps) {
 	const { currentSession, selectSession } = useSoundscapeStore();
 	const playTrack = useAudioStore((state) => state.playTrack);
 
@@ -31,8 +33,8 @@ export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 		return (
 			<EmptyState
 				icon={<Music className="h-10 w-10 text-[rgb(var(--sage-600))]" />}
-				title="No meditations yet"
-				description="The creator hasn't added any meditation sessions yet. Check back soon!"
+				title={experienceCopy?.meditationsEmptyTitle ?? "No meditations yet"}
+				description={experienceCopy?.meditationsEmptyDescription ?? "Check back soon for new meditation sessions."}
 			/>
 		);
 	}
@@ -164,9 +166,7 @@ export function MeditationGrid({ meditations = [] }: MeditationGridProps) {
 						}
 					>
 						<p className="text-lg text-earth-600 dark:text-[#CFC7BB]">
-							Mindify soundscapes layer medical-grade binaural engineering,
-							neuroscientist-guided prompts, and somatic cues. Choose a ritual to
-							preview its tone and let the studio adapt to your nervous system.
+							{experienceCopy?.meditationsPreviewDescription ?? "Choose a session to preview its audio and begin your practice."}
 						</p>
 					</MindifyPanel>
 				)}

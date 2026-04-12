@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import type { QuickReset } from "@/lib/types";
+import type { ExperienceCopy } from "@/lib/ui/experienceCopy";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 
-export function QuickResetsList({ companyId }: { companyId: string }) {
+export function QuickResetsList({ companyId, experienceCopy }: { companyId: string; experienceCopy?: ExperienceCopy }) {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const [resets, setResets] = useState<QuickReset[]>([]);
 	const playTrack = useAudioStore((state) => state.playTrack);
@@ -38,7 +39,7 @@ export function QuickResetsList({ companyId }: { companyId: string }) {
 						<h2 className="text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Rapid Nervous System Tools</h2>
 					</div>
 				</header>
-				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">No quick resets available yet.</p>
+				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">{experienceCopy?.quickResetsEmptyState ?? "No quick resets available yet."}</p>
 			</section>
 		);
 	}
@@ -47,10 +48,10 @@ export function QuickResetsList({ companyId }: { companyId: string }) {
 		<section className="space-y-6">
 			<header className="flex flex-wrap items-center justify-between gap-3">
 				<div>
-					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">Quick Resets</p>
-					<h2 className="text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">Rapid Nervous System Tools</h2>
+					<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">{experienceCopy?.quickResetsEyebrow ?? "Quick Resets"}</p>
+					<h2 className="text-2xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{experienceCopy?.quickResetsHeading ?? "Rapid Tools"}</h2>
 				</div>
-				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">Tap a protocol to play instantly.</p>
+				<p className="text-sm text-[rgb(var(--earth-500))] dark:text-white/60">{experienceCopy?.quickResetsInstruction ?? "Tap a session to play instantly."}</p>
 			</header>
 			<div className="grid gap-4 lg:grid-cols-2">
 				{resets.map((reset) => (

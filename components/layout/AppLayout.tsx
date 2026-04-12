@@ -9,6 +9,7 @@ import { Navigation } from "@/components/ui/Navigation";
 import { GlobalAudioPlayer } from "@/components/ui/GlobalAudioPlayer";
 import { useAppStore } from "@/lib/stores/appStore";
 import { useUpgrade } from "@/lib/hooks/useUpgrade";
+import type { ExperienceCopy } from "@/lib/ui/experienceCopy";
 
 type AppLayoutProps = {
 	children: ReactNode;
@@ -17,6 +18,7 @@ type AppLayoutProps = {
 	streakDays?: number;
 	membershipTier?: "free" | "premium";
 	companyId?: string;
+	experienceCopy?: ExperienceCopy;
 	className?: string;
 };
 
@@ -27,6 +29,7 @@ export function AppLayout({
 	streakDays = 0,
 	membershipTier = "free",
 	companyId = "",
+	experienceCopy,
 	className,
 }: AppLayoutProps) {
 	const initial = userInitial ?? userName.charAt(0).toUpperCase();
@@ -79,15 +82,15 @@ export function AppLayout({
 							<div className="rounded-2xl bg-gradient-sage p-5 text-white shadow-soft">
 								<div className="mb-2 flex items-center gap-2 text-sm font-semibold">
 									<Sparkles className="h-4 w-4" />
-									<span>Premium</span>
+									<span>{experienceCopy?.premiumCardHeading ?? "Premium"}</span>
 								</div>
-								<p className="text-sm text-white/90">Unlock all meditations & programs.</p>
+								<p className="text-sm text-white/90">{experienceCopy?.premiumCardBody ?? "Unlock all content and features."}</p>
 								<button
 									onClick={triggerUpgrade}
 									disabled={isUpgrading}
 									className="mt-4 w-full rounded-xl bg-white py-2 text-sm font-semibold text-[rgb(var(--earth-900))] shadow-soft hover:bg-[rgb(var(--cream-100))] hover:shadow-hover disabled:opacity-60 dark:bg-[#111318] dark:text-[#F4EFE6] dark:hover:bg-[#1C2029]"
 								>
-									{isUpgrading ? "Processing…" : "Upgrade Now"}
+									{isUpgrading ? "Processing…" : (experienceCopy?.premiumCardCTA ?? "Upgrade Now")}
 								</button>
 							</div>
 						</motion.div>

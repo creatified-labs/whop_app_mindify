@@ -235,6 +235,7 @@ export default async function ExperiencePage({
 			streakDays={streakDays}
 			membershipTier={membershipTier}
 			companyId={companyId}
+			experienceCopy={experienceCopy}
 			className="bg-gradient-zen"
 		>
 			<div className="space-y-8">

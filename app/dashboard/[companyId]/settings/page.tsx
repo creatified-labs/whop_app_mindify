@@ -570,6 +570,47 @@ export default function SettingsPage() {
 								</SectionCard>
 
 								<SectionCard
+									title="Section pages"
+									description="Customize headings and descriptions shown when users navigate to each section."
+								>
+									<p className="text-xs font-semibold uppercase tracking-widest text-[rgb(var(--earth-400))]">Knowledge Hub</p>
+									{copyInputField("knowledgeEyebrow", "Eyebrow")}
+									{copyInputField("knowledgeHeading", "Heading")}
+									{copyTextareaField("knowledgeDescription", "Description")}
+									{copyInputField("knowledgeSearchPlaceholder", "Search placeholder")}
+									{copyInputField("knowledgeEmptyState", "Empty state text")}
+
+									<p className="mt-4 text-xs font-semibold uppercase tracking-widest text-[rgb(var(--earth-400))]">Meditations</p>
+									{copyInputField("meditationsEmptyTitle", "Empty state title")}
+									{copyInputField("meditationsEmptyDescription", "Empty state description")}
+									{copyTextareaField("meditationsPreviewDescription", "Preview panel description")}
+
+									<p className="mt-4 text-xs font-semibold uppercase tracking-widest text-[rgb(var(--earth-400))]">Hypnosis</p>
+									{copyInputField("hypnosisEyebrow", "Eyebrow")}
+									{copyInputField("hypnosisHeading", "Heading")}
+									{copyTextareaField("hypnosisDescription", "Description")}
+									{copyInputField("hypnosisEmptyTitle", "Empty state title")}
+									{copyInputField("hypnosisEmptyDescription", "Empty state description")}
+
+									<p className="mt-4 text-xs font-semibold uppercase tracking-widest text-[rgb(var(--earth-400))]">Quick Resets</p>
+									{copyInputField("quickResetsEyebrow", "Eyebrow")}
+									{copyInputField("quickResetsHeading", "Heading")}
+									{copyInputField("quickResetsInstruction", "Instruction text")}
+									{copyInputField("quickResetsEmptyState", "Empty state text")}
+
+									<p className="mt-4 text-xs font-semibold uppercase tracking-widest text-[rgb(var(--earth-400))]">Programs</p>
+									{copyInputField("programsEyebrow", "Eyebrow")}
+									{copyInputField("programsHeading", "Heading")}
+									{copyTextareaField("programsDescription", "Description")}
+									{copyInputField("programsEmptyState", "Empty state text")}
+
+									<p className="mt-4 text-xs font-semibold uppercase tracking-widest text-[rgb(var(--earth-400))]">Sidebar Premium Card</p>
+									{copyInputField("premiumCardHeading", "Card heading")}
+									{copyInputField("premiumCardBody", "Card body")}
+									{copyInputField("premiumCardCTA", "Button text")}
+								</SectionCard>
+
+								<SectionCard
 									title="Visible sections"
 									description="Hide an entire section of the home page. (For finer control, use the toggles on individual fields above.)"
 								>

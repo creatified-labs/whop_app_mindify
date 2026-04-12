@@ -173,13 +173,7 @@ export interface MediaLibraryItem {
 	updatedAt: string;
 }
 
-export type KnowledgeCategory =
-	| "neuroscience"
-	| "psychology"
-	| "breathwork"
-	| "sleep"
-	| "focus"
-	| "productivity";
+export type KnowledgeCategory = string;
 
 export interface KnowledgeAttachment {
 	url: string;
