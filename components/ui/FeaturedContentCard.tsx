@@ -58,13 +58,6 @@ export function FeaturedContentCard({
 			tabIndex={locked ? -1 : 0}
 			aria-disabled={locked}
 		>
-			<FavoriteButton
-				contentType={item.type}
-				contentId={item.id}
-				size="sm"
-				variant="solid"
-				className="absolute right-3 top-3 z-10"
-			/>
 			<div className="flex items-center justify-between">
 				<p className="text-[10px] uppercase tracking-[0.3em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">
 					{item.type}
@@ -76,10 +69,19 @@ export function FeaturedContentCard({
 			<h4 className="text-base font-serif font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">
 				{item.title}
 			</h4>
-			<p className="text-xs text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
-				{item.duration} min
-				{item.subtitle ? ` • ${item.subtitle}` : ""}
-			</p>
+			<div className="mt-auto flex items-end justify-between gap-2">
+				<p className="text-xs text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
+					{item.duration} min
+					{item.subtitle ? ` • ${item.subtitle}` : ""}
+				</p>
+				<FavoriteButton
+					contentType={item.type}
+					contentId={item.id}
+					size="sm"
+					variant="solid"
+					className="z-10"
+				/>
+			</div>
 			{locked && (
 				<span className="inline-flex self-start rounded-full border border-[rgb(var(--gold-200))] bg-[rgb(var(--gold-50))] px-2.5 py-0.5 text-[10px] uppercase tracking-[0.25em] text-[rgb(var(--gold-700))]">
 					Premium
