@@ -26,7 +26,6 @@ export type SectionKey =
 	| "featuredQuickResets"
 	| "recentActivity"
 	| "favoriteSoundscapes"
-	| "recommended"
 	| "dailyStreak";
 
 export type ExperienceSections = Record<SectionKey, boolean>;
@@ -41,7 +40,6 @@ export const SECTION_KEYS: readonly SectionKey[] = [
 	"featuredQuickResets",
 	"recentActivity",
 	"favoriteSoundscapes",
-	"recommended",
 	"dailyStreak",
 ] as const;
 
@@ -55,7 +53,6 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
 	featuredQuickResets: "Featured Quick Resets",
 	recentActivity: "Recent Activity",
 	favoriteSoundscapes: "Favorite Soundscapes",
-	recommended: "Recommended",
 	dailyStreak: "Daily Streak",
 };
 
@@ -68,7 +65,6 @@ export const DEFAULT_EXPERIENCE_SECTIONS: ExperienceSections = {
 	featuredQuickResets: true,
 	recentActivity: true,
 	favoriteSoundscapes: true,
-	recommended: true,
 	dailyStreak: true,
 };
 
@@ -103,11 +99,6 @@ export interface ExperienceCopy {
 	favoritesEyebrow: string;
 	favoritesHeading: string;
 	favoritesSubtitle: string;
-
-	// Recommended
-	recommendedEyebrow: string;
-	recommendedHeadingTemplate: string; // supports {timeOfDay}
-	recommendedFooter: string;
 
 	// Daily Streak card
 	dailyStreakEyebrow: string;
@@ -189,10 +180,6 @@ export const DEFAULT_EXPERIENCE_COPY: ExperienceCopy = {
 	favoritesEyebrow: "Quick access",
 	favoritesHeading: "Favorite soundscapes",
 	favoritesSubtitle: "Tap a tile to jump right in.",
-
-	recommendedEyebrow: "Recommended",
-	recommendedHeadingTemplate: "Based on this {timeOfDay}",
-	recommendedFooter: "Auto-personalized by Mindify AI.",
 
 	dailyStreakEyebrow: "Daily streak",
 	dailyStreakBody:

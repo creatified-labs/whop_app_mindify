@@ -36,7 +36,8 @@ export type HypnosisTheme =
 	| "productivity"
 	| "smoking"
 	| "nervous-system"
-	| "performance";
+	| "performance"
+	| "habits";
 
 export interface HypnosisSession {
 	id: string;
@@ -91,7 +92,7 @@ export interface Program {
 	requirements: string[];
 	benefits: string[];
 	timeCommitment: string;
-	recommendedFor: string[];
+	tags: string[];
 	days: ProgramDay[];
 	isPremium?: boolean;
 	externalUrl?: string;
@@ -184,6 +185,8 @@ export interface KnowledgeAttachment {
 export interface KnowledgeArticle {
 	slug: string;
 	title: string;
+	subheading: string;
+	tags: string[];
 	category: KnowledgeCategory;
 	readTimeMinutes: number;
 	thumbnail: string;

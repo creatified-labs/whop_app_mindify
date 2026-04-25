@@ -14,6 +14,7 @@ const themeOptions: { value: HypnosisTheme; label: string }[] = [
 	{ value: "smoking", label: "Smoking" },
 	{ value: "nervous-system", label: "Nervous System" },
 	{ value: "performance", label: "Performance" },
+	{ value: "habits", label: "Habits" },
 ];
 
 const emptySession = {

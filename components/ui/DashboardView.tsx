@@ -17,8 +17,6 @@ import { FeaturedProgramCard } from "@/components/ui/FeaturedProgramCard";
 import { FeaturedContentCard } from "@/components/ui/FeaturedContentCard";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { useFavoritesStore } from "@/lib/stores/favoritesStore";
-import { useUpgrade } from "@/lib/hooks/useUpgrade";
-import { useExternalUrl } from "@/lib/hooks/useExternalUrl";
 import {
 	interpolate,
 	splitOnVariable,
@@ -87,17 +85,6 @@ export interface ActivityItem {
 	type: SessionType;
 }
 
-export interface RecommendedSession {
-	id: string;
-	title: string;
-	type: SessionType;
-	durationMinutes: number;
-	timeOfDay: string;
-	audioUrl?: string;
-	isPremium?: boolean;
-	externalUrl?: string;
-}
-
 export interface DashboardViewProps {
 	userName: string;
 	membershipTier: "premium" | "free";
@@ -105,7 +92,6 @@ export interface DashboardViewProps {
 	currentProgram: ProgramSnapshot | null;
 	favorites: FavoriteSession[];
 	recentActivity: ActivityItem[];
-	recommendedSessions: RecommendedSession[];
 	streakDays: number;
 	userProgress: UserProgress | null;
 	companyId: string;
@@ -173,7 +159,6 @@ export function DashboardView({
 	currentProgram,
 	favorites,
 	recentActivity,
-	recommendedSessions,
 	streakDays,
 	userProgress,
 	companyId,
@@ -188,8 +173,6 @@ export function DashboardView({
 	const setUserProgress = useAppStore((state) => state.setUserProgress);
 	const storedProgress = useAppStore((state) => state.userProgress);
 	const playTrack = useAudioStore((state) => state.playTrack);
-	const { triggerUpgrade } = useUpgrade(companyId);
-	const { openUrl } = useExternalUrl();
 
 	useEffect(() => {
 		if (!userProgress) return;
@@ -331,11 +314,6 @@ export function DashboardView({
 							<p className="mt-3 text-sm text-[rgb(var(--earth-600))]">
 								Next milestone: {currentProgram.nextMilestone}
 							</p>
-							{!currentProgram.isPremium && membershipTier === "free" && (
-								<p className="mt-3 inline-flex rounded-full border border-[rgb(var(--gold-200))] bg-[rgb(var(--gold-50))] px-4 py-1 text-xs uppercase tracking-[0.3em] text-[rgb(var(--gold-700))]">
-									Premium Preview
-								</p>
-							)}
 						</div>
 					) : programs && programs.length > 0 ? (
 						<div className={`${glassCard}`}>
@@ -545,66 +523,6 @@ export function DashboardView({
 				</section>
 			)}
 
-			{experienceSections.recommended && (
-			<section className={`${glassCard}`}>
-				<div className="flex flex-wrap items-center justify-between gap-3">
-					<div>
-						{experienceFields.recommendedEyebrow && (
-							<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))]">{experienceCopy.recommendedEyebrow}</p>
-						)}
-						{experienceFields.recommendedHeadingTemplate && (
-							<h3 className="mt-2 text-2xl font-serif font-semibold text-[rgb(var(--earth-900))]">
-								{interpolate(experienceCopy.recommendedHeadingTemplate, { timeOfDay: greeting.toLowerCase() })}
-							</h3>
-						)}
-					</div>
-					{experienceFields.recommendedFooter && (
-						<p className="text-sm text-[rgb(var(--earth-600))]">{experienceCopy.recommendedFooter}</p>
-					)}
-				</div>
-				<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-					{recommendedSessions.map((session) => {
-						const locked = session.isPremium && membershipTier === "free";
-						return (
-							<div
-								key={session.id}
-								className={`relative overflow-hidden rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-5 shadow-card transition dark:border-white/10 dark:bg-[#13151A] ${
-									locked ? "opacity-70" : "hover:-translate-y-1 hover:shadow-hover"
-								}`}
-							>
-								<p className="text-xs uppercase tracking-[0.3em] text-[rgb(var(--earth-500))]">
-									{session.type} • {session.timeOfDay}
-								</p>
-								<h4 className="mt-3 text-xl font-serif font-semibold text-[rgb(var(--earth-900))]">{session.title}</h4>
-								<p className="text-sm text-[rgb(var(--earth-600))]">{session.durationMinutes} mins</p>
-								<button
-									type="button"
-									onClick={() =>
-										locked
-											? triggerUpgrade()
-											: session.externalUrl
-												? openUrl(session.externalUrl)
-												: handlePlay(session.id, session.title, session.audioUrl, session.type)
-									}
-									className={`mt-4 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.3em] ${
-										locked
-											? "border-[rgb(var(--sage-100))] text-[rgb(var(--earth-500))] hover:bg-[rgb(var(--sage-50))] cursor-pointer"
-											: "border-[rgb(var(--sage-200))] text-[rgb(var(--sage-700))] hover:bg-[rgb(var(--sage-50))]"
-									}`}
-								>
-									{locked ? "Upgrade to unlock" : session.externalUrl ? "Open Course" : "Start"}
-								</button>
-								{locked && (
-									<span className="absolute right-4 top-4 rounded-full border border-[rgb(var(--gold-200))] bg-[rgb(var(--gold-50))] px-3 py-1 text-xs uppercase tracking-[0.3em] text-[rgb(var(--gold-700))]">
-										Premium
-									</span>
-								)}
-							</div>
-						);
-					})}
-				</div>
-			</section>
-			)}
 		</div>
 	);
 }

@@ -158,13 +158,15 @@ export function ProgramsLibrary({
 												Day {cardProgress.currentDay} of {program.duration}
 											</p>
 										)}
-										<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.3em] text-[rgb(var(--earth-500))] dark:text-white/60">
-											{program.recommendedFor.slice(0, 3).map((item) => (
-												<span key={String(item)} className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 text-[11px] dark:border-white/15">
-													{String(item)}
-												</span>
-											))}
-										</div>
+										{program.tags && program.tags.length > 0 && (
+											<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.3em] text-[rgb(var(--earth-500))] dark:text-white/60">
+												{program.tags.slice(0, 3).map((item) => (
+													<span key={String(item)} className="rounded-full border border-[rgb(var(--sage-200))] px-3 py-1 text-[11px] dark:border-white/15">
+														{String(item)}
+													</span>
+												))}
+											</div>
+										)}
 										<div className="rounded-3xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-4 text-sm text-[rgb(var(--earth-700))] dark:border-white/10 dark:bg-[#13151A] dark:text-white/80">
 											<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/50">What&apos;s included</p>
 											<ul className="mt-2 grid grid-cols-3 gap-3 text-center text-sm">

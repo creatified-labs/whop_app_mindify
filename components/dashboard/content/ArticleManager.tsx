@@ -8,6 +8,8 @@ import { ArrayFieldEditor } from "./ArrayFieldEditor";
 
 const emptyArticle = {
 	title: "",
+	subheading: "",
+	tags: [] as string[],
 	category: "",
 	author: "",
 	readTimeMinutes: 5,
@@ -69,6 +71,8 @@ export function ArticleManager({ companyId }: { companyId: string }) {
 		setEditingItem(item);
 		setForm({
 			title: item.title,
+			subheading: item.subheading ?? "",
+			tags: item.tags ?? [],
 			category: item.category,
 			author: item.author,
 			readTimeMinutes: item.readTimeMinutes,
@@ -90,18 +94,21 @@ export function ArticleManager({ companyId }: { companyId: string }) {
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		try {
-			if (editingItem) {
-				await fetch(`/api/admin/articles/${editingItem.slug}?company_id=${encodeURIComponent(companyId)}`, {
+			const res = editingItem
+				? await fetch(`/api/admin/articles/${editingItem.slug}?company_id=${encodeURIComponent(companyId)}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
-				});
-			} else {
-				await fetch(`/api/admin/articles?company_id=${encodeURIComponent(companyId)}`, {
+				})
+				: await fetch(`/api/admin/articles?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
 				});
+			if (!res.ok) {
+				const message = await res.json().catch(() => ({ error: res.statusText }));
+				alert(`Failed to save article: ${message.error || res.statusText}`);
+				return;
 			}
 			setIsModalOpen(false);
 			fetchItems();
@@ -132,6 +139,7 @@ export function ArticleManager({ companyId }: { companyId: string }) {
 				isSubmitting={isSubmitting}
 			>
 				<FormInput label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} required />
+				<FormInput label="Subheading" value={form.subheading} onChange={(v) => setForm({ ...form, subheading: v })} placeholder="Short tagline shown under the title" />
 				<div className="grid grid-cols-2 gap-4">
 					<FormInput label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v })} placeholder="e.g. Breathwork, Mindset" required />
 					<FormInput label="Author" value={form.author} onChange={(v) => setForm({ ...form, author: v })} />
@@ -140,6 +148,7 @@ export function ArticleManager({ companyId }: { companyId: string }) {
 					<FormInput label="Read Time (minutes)" type="number" value={form.readTimeMinutes} onChange={(v) => setForm({ ...form, readTimeMinutes: parseInt(v) || 0 })} />
 					<FormInput label="Thumbnail URL" value={form.thumbnail} onChange={(v) => setForm({ ...form, thumbnail: v })} placeholder="/images/knowledge/..." />
 				</div>
+				<ArrayFieldEditor label="Tags" values={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
 				<FormTextarea label="Content (Markdown)" value={form.content} onChange={(v) => setForm({ ...form, content: v })} rows={12} placeholder="# Article Title..." />
 				<ArrayFieldEditor label="Key Takeaways" values={form.keyTakeaways} onChange={(v) => setForm({ ...form, keyTakeaways: v })} />
 				<ArrayFieldEditor label="Action Steps" values={form.actionSteps} onChange={(v) => setForm({ ...form, actionSteps: v })} />

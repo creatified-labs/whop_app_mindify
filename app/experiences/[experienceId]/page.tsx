@@ -5,7 +5,6 @@ import {
 	type ContinueSession,
 	type FavoriteSession,
 	type ProgramSnapshot,
-	type RecommendedSession,
 	ExperienceContent,
 } from "@/components/ui/DashboardView";
 import { Flame } from "lucide-react";
@@ -209,25 +208,6 @@ export default async function ExperiencePage({
 		};
 	});
 
-	// --- Build recommendedSessions (content not yet completed) ---
-	const completedIds = new Set((allActivity || []).map((a) => a.content_id));
-	const allContent = [
-		...(meditations || []).map((m) => ({ id: m.id, title: m.title, type: "meditation" as const, duration: m.duration, isPremium: m.isPremium, audioUrl: m.audioUrl, externalUrl: m.externalUrl })),
-		...(hypnosisSessions || []).map((h) => ({ id: h.id, title: h.title, type: "hypnosis" as const, duration: h.duration, isPremium: h.isPremium, audioUrl: h.audioUrl, externalUrl: h.externalUrl })),
-		...(quickResets || []).map((r) => ({ id: r.id, title: r.title, type: "reset" as const, duration: r.duration, isPremium: false, audioUrl: r.audioUrl, externalUrl: r.externalUrl })),
-	];
-	const notCompleted = allContent.filter((c) => !completedIds.has(c.id));
-	const recommendedSessions: RecommendedSession[] = notCompleted.slice(0, 3).map((c) => ({
-		id: c.id,
-		title: c.title,
-		type: c.type,
-		durationMinutes: c.duration || 10,
-		timeOfDay: "anytime",
-		audioUrl: c.audioUrl,
-		isPremium: c.isPremium && membershipTier === "free" ? true : undefined,
-		externalUrl: c.externalUrl,
-	}));
-
 	return (
 		<AppLayout
 			userName={displayName}
@@ -280,7 +260,6 @@ export default async function ExperiencePage({
 					currentProgram={currentProgram}
 					favorites={favorites}
 					recentActivity={recentActivity}
-					recommendedSessions={recommendedSessions}
 					streakDays={streakDays}
 					userProgress={userProgress}
 					companyId={companyId}

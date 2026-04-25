@@ -556,11 +556,6 @@ export default function SettingsPage() {
 									{copyInputField("favoritesEyebrow", "Favorites eyebrow")}
 									{copyInputField("favoritesHeading", "Favorites heading")}
 									{copyInputField("favoritesSubtitle", "Favorites subtitle")}
-									{copyInputField("recommendedEyebrow", "Recommended eyebrow")}
-									{copyInputField("recommendedHeadingTemplate", "Recommended heading", {
-										helpText: "Use {timeOfDay} placeholder (e.g. 'morning').",
-									})}
-									{copyInputField("recommendedFooter", "Recommended footer")}
 									{copyInputField("dailyStreakEyebrow", "Daily Streak eyebrow")}
 									{copyTextareaField("dailyStreakBody", "Daily Streak body")}
 									{copyInputField("dailyStreakMinutesLabel", "Total minutes label")}

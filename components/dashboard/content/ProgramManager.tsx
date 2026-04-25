@@ -34,7 +34,7 @@ const emptyProgram = {
 	requirements: [] as string[],
 	benefits: [] as string[],
 	timeCommitment: "",
-	recommendedFor: [] as string[],
+	tags: [] as string[],
 	days: [] as ProgramDay[],
 	isPremium: false,
 	externalUrl: "",
@@ -113,7 +113,7 @@ export function ProgramManager({ companyId }: { companyId: string }) {
 			requirements: item.requirements,
 			benefits: item.benefits,
 			timeCommitment: item.timeCommitment,
-			recommendedFor: item.recommendedFor,
+			tags: item.tags ?? [],
 			days: item.days,
 			isPremium: item.isPremium ?? false,
 			externalUrl: item.externalUrl ?? "",
@@ -130,18 +130,21 @@ export function ProgramManager({ companyId }: { companyId: string }) {
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		try {
-			if (editingItem) {
-				await fetch(`/api/admin/programs/${editingItem.id}?company_id=${encodeURIComponent(companyId)}`, {
+			const res = editingItem
+				? await fetch(`/api/admin/programs/${editingItem.id}?company_id=${encodeURIComponent(companyId)}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
-				});
-			} else {
-				await fetch(`/api/admin/programs?company_id=${encodeURIComponent(companyId)}`, {
+				})
+				: await fetch(`/api/admin/programs?company_id=${encodeURIComponent(companyId)}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(form),
 				});
+			if (!res.ok) {
+				const message = await res.json().catch(() => ({ error: res.statusText }));
+				alert(`Failed to save program: ${message.error || res.statusText}`);
+				return;
 			}
 			setIsModalOpen(false);
 			fetchItems();
@@ -191,7 +194,7 @@ export function ProgramManager({ companyId }: { companyId: string }) {
 
 				<ArrayFieldEditor label="Requirements" values={form.requirements} onChange={(v) => setForm({ ...form, requirements: v })} />
 				<ArrayFieldEditor label="Benefits" values={form.benefits} onChange={(v) => setForm({ ...form, benefits: v })} />
-				<ArrayFieldEditor label="Recommended For" values={form.recommendedFor} onChange={(v) => setForm({ ...form, recommendedFor: v })} />
+				<ArrayFieldEditor label="Tags" values={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
 
 				<FormCheckbox label="Premium" checked={form.isPremium} onChange={(v) => setForm({ ...form, isPremium: v })} />
 

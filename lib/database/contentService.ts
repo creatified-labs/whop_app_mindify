@@ -320,7 +320,7 @@ function rowToProgram(row: Record<string, unknown>): Program {
     requirements: (row.requirements as string[]) || [],
     benefits: (row.benefits as string[]) || [],
     timeCommitment: row.time_commitment as string,
-    recommendedFor: (row.recommended_for as string[]) || [],
+    tags: (row.tags as string[]) || [],
     days: (row.days as ProgramDay[]) || [],
     isPremium: row.is_premium as boolean | undefined,
     externalUrl: (row.external_url as string) || undefined,
@@ -380,7 +380,7 @@ export async function createProgram(companyId: string, program: Omit<Program, 'i
         requirements: program.requirements,
         benefits: program.benefits,
         time_commitment: program.timeCommitment,
-        recommended_for: program.recommendedFor,
+        tags: program.tags,
         days: program.days as unknown as Record<string, unknown>[],
         is_premium: program.isPremium ?? false,
         external_url: program.externalUrl ?? '',
@@ -409,7 +409,7 @@ export async function updateProgram(companyId: string, id: string, updates: Part
     if (updates.requirements !== undefined) dbUpdates.requirements = updates.requirements;
     if (updates.benefits !== undefined) dbUpdates.benefits = updates.benefits;
     if (updates.timeCommitment !== undefined) dbUpdates.time_commitment = updates.timeCommitment;
-    if (updates.recommendedFor !== undefined) dbUpdates.recommended_for = updates.recommendedFor;
+    if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
     if (updates.days !== undefined) dbUpdates.days = updates.days;
     if (updates.isPremium !== undefined) dbUpdates.is_premium = updates.isPremium;
     if (updates.externalUrl !== undefined) dbUpdates.external_url = updates.externalUrl;
@@ -557,6 +557,8 @@ function rowToArticle(row: Record<string, unknown>): KnowledgeArticle {
   return {
     slug: row.slug as string,
     title: row.title as string,
+    subheading: (row.subheading as string) || '',
+    tags: (row.tags as string[]) || [],
     category: row.category as KnowledgeArticle['category'],
     author: row.author as string,
     readTimeMinutes: row.read_time_minutes as number,
@@ -615,6 +617,8 @@ export async function createArticle(companyId: string, article: Omit<KnowledgeAr
         slug,
         company_id: companyId,
         title: article.title,
+        subheading: article.subheading ?? '',
+        tags: article.tags ?? [],
         category: article.category,
         author: article.author,
         read_time_minutes: article.readTimeMinutes,
@@ -641,6 +645,8 @@ export async function updateArticle(companyId: string, slug: string, updates: Pa
   try {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.subheading !== undefined) dbUpdates.subheading = updates.subheading;
+    if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.author !== undefined) dbUpdates.author = updates.author;
     if (updates.readTimeMinutes !== undefined) dbUpdates.read_time_minutes = updates.readTimeMinutes;

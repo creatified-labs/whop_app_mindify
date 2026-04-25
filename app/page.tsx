@@ -13,7 +13,6 @@ import {
 	type ProgramSnapshot,
 	type FavoriteSession,
 	type ActivityItem,
-	type RecommendedSession,
 } from "@/components/ui/DashboardView";
 import {
 	resolveExperienceCopy,
@@ -49,10 +48,6 @@ const favorites: FavoriteSession[] = [
 
 const recentActivity: ActivityItem[] = [
 	{ id: "activity-1", label: "Completed Chronos Soften meditation", timestamp: new Date().toISOString(), type: "meditation" },
-];
-
-const recommendedSessions: RecommendedSession[] = [
-	{ id: "aurora-briefing", title: "Aurora Briefing", type: "hypnosis", durationMinutes: 16, timeOfDay: "afternoon" },
 ];
 
 const userProgress: UserProgress = {
@@ -111,7 +106,6 @@ export default async function HomePage() {
 					currentProgram={currentProgram}
 					favorites={favorites}
 					recentActivity={recentActivity}
-					recommendedSessions={recommendedSessions}
 					streakDays={streakDays}
 					userProgress={userProgress}
 					companyId="demo"

@@ -71,6 +71,18 @@ export function ProgramDetail({ program, progress, onStart, isEnrolling }: Progr
 									</span>
 								)}
 							</div>
+							{program.tags && program.tags.length > 0 && (
+								<div className="mt-4 flex flex-wrap gap-2">
+									{program.tags.map((tag) => (
+										<span
+											key={tag}
+											className="rounded-full border border-white/25 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.25em] text-white/80"
+										>
+											{tag}
+										</span>
+									))}
+								</div>
+							)}
 						</div>
 					</div>
 
@@ -188,26 +200,6 @@ export function ProgramDetail({ program, progress, onStart, isEnrolling }: Progr
 								{isEnrolling ? "Enrolling…" : hasStarted ? "Resume Journey" : progress ? "Enrolled!" : "Start Program"}
 							</button>
 						</div>
-					</div>
-					<div className="rounded-4xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-6 dark:border-white/10 dark:bg-[#111318]">
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">Recommended For</p>
-						<ul className="mt-4 space-y-2 text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
-							{program.recommendedFor.map((item) => (
-								<li key={item} className="flex items-center gap-3">
-									<span className="h-1.5 w-1.5 rounded-full bg-mindify-lagoon" />
-									{item}
-								</li>
-							))}
-						</ul>
-					</div>
-					<div className="rounded-4xl border border-[rgb(var(--sage-100))] bg-[rgb(var(--cream-50))] p-6 dark:border-white/10 dark:bg-[#111318]">
-						<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-[#AFA79B]">Series recommendation</p>
-						<p className="mt-3 text-sm text-[rgb(var(--earth-600))] dark:text-[#CFC7BB]">
-							Pair this program with{" "}
-							<span className="font-semibold text-[rgb(var(--earth-900))] dark:text-[#F4EFE6]">21-Day Productivity Challenge</span> for layered
-							results.
-						</p>
-						<button className="mt-4 text-sm font-medium text-mindify-lagoon underline">View program</button>
 					</div>
 				</aside>
 			</div>

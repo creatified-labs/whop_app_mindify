@@ -89,12 +89,27 @@ export function ArticleView({ article, onClose, onNavigate, relatedArticles = []
 					<div className="flex h-full flex-col overflow-hidden">
 						<div className={`relative h-64 w-full bg-gradient-to-br ${gradient}`}>
 							<div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#05060C]" />
-							<div className="absolute bottom-6 left-6 space-y-2">
+							<div className="absolute bottom-6 left-6 right-6 space-y-2">
 								<p className="text-xs uppercase tracking-[0.4em] text-[rgb(var(--earth-500))] dark:text-white/60">{article.category}</p>
 								<h1 className="text-3xl font-semibold text-[rgb(var(--earth-900))] dark:text-white">{article.title}</h1>
+								{article.subheading && (
+									<p className="text-base text-[rgb(var(--earth-700))] dark:text-white/80">{article.subheading}</p>
+								)}
 								<p className="text-sm text-[rgb(var(--earth-600))] dark:text-white/70">
 									By {article.author} • Updated {article.updatedAt} • {article.readTimeMinutes}-min read
 								</p>
+								{article.tags && article.tags.length > 0 && (
+									<div className="flex flex-wrap gap-2 pt-1">
+										{article.tags.map((tag) => (
+											<span
+												key={tag}
+												className="rounded-full border border-[rgb(var(--sage-200))] bg-white/70 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-[rgb(var(--earth-600))] dark:border-white/15 dark:bg-white/5 dark:text-white/70"
+											>
+												{tag}
+											</span>
+										))}
+									</div>
+								)}
 							</div>
 						</div>
 						<div className="flex flex-1 flex-col overflow-hidden px-8 py-6">
